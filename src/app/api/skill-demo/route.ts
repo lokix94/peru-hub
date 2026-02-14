@@ -242,6 +242,257 @@ async function runTranslatorDemo() {
   };
 }
 
+/* ── Auto-Backup Manager Demo ── */
+async function runAutoBackupDemo() {
+  return {
+    skill: "auto-backup",
+    title: "💾 Auto-Backup Manager — Demo de Backup",
+    timestamp: new Date().toISOString(),
+    data: {
+      workspaceSize: "247 MB",
+      lastBackup: new Date(Date.now() - 3600000).toISOString(),
+      backupType: "Incremental",
+      changedFiles: 23,
+      totalSnapshots: 42,
+      destinations: [
+        { name: "GitHub", status: "✅ Sincronizado", repo: "agent-workspace-backup" },
+        { name: "S3", status: "✅ Sincronizado", bucket: "agent-backups-pe" },
+      ],
+      restorePoints: [
+        { id: "snap-042", date: "2026-02-14T17:26:00Z", size: "3.2 MB", label: "Auto (hourly)" },
+        { id: "snap-041", date: "2026-02-14T16:26:00Z", size: "1.8 MB", label: "Auto (hourly)" },
+        { id: "snap-040", date: "2026-02-14T12:00:00Z", size: "12.4 MB", label: "Manual snapshot" },
+      ],
+      insight: "Workspace protegido. 42 snapshots disponibles. Último backup hace 1 hora (23 archivos cambiados, 3.2 MB incremental).",
+    },
+  };
+}
+
+/* ── Sentiment Analyzer Demo ── */
+async function runSentimentDemo() {
+  return {
+    skill: "sentiment-analyzer",
+    title: "🎭 Sentiment Analyzer — Demo de Análisis",
+    timestamp: new Date().toISOString(),
+    data: {
+      inputText: "I absolutely love this product! Though the shipping was a bit slow, the quality more than makes up for it.",
+      overall: {
+        sentiment: "Positive",
+        confidence: 0.87,
+        score: 0.72,
+      },
+      emotions: [
+        { emotion: "Joy", score: 0.82, icon: "😊" },
+        { emotion: "Trust", score: 0.65, icon: "🤝" },
+        { emotion: "Anticipation", score: 0.41, icon: "🔮" },
+        { emotion: "Surprise", score: 0.12, icon: "😲" },
+        { emotion: "Anger", score: 0.03, icon: "😠" },
+        { emotion: "Sadness", score: 0.05, icon: "😢" },
+      ],
+      toneAnalysis: {
+        formality: "Casual",
+        urgency: "Low",
+        sarcasm: false,
+      },
+      sentences: [
+        { text: "I absolutely love this product!", sentiment: "Very Positive", score: 0.95 },
+        { text: "Though the shipping was a bit slow", sentiment: "Slightly Negative", score: -0.3 },
+        { text: "the quality more than makes up for it", sentiment: "Positive", score: 0.78 },
+      ],
+      insight: "Texto predominantemente positivo (87% confianza). Emoción principal: Joy. Se detectó una queja menor sobre envío, pero el sentimiento general es muy favorable.",
+    },
+  };
+}
+
+/* ── API Connector Hub Demo ── */
+async function runApiConnectorDemo() {
+  return {
+    skill: "api-connector",
+    title: "🔌 API Connector Hub — Estado de Conexiones",
+    timestamp: new Date().toISOString(),
+    data: {
+      totalConnectors: 52,
+      activeConnections: 5,
+      connections: [
+        { service: "GitHub", status: "✅ Connected", icon: "🐙", lastSync: "2 min ago", calls24h: 147 },
+        { service: "Notion", status: "✅ Connected", icon: "📝", lastSync: "5 min ago", calls24h: 23 },
+        { service: "Slack", status: "✅ Connected", icon: "💬", lastSync: "1 min ago", calls24h: 89 },
+        { service: "Discord", status: "⚠️ Token expires in 2h", icon: "🎮", lastSync: "3 min ago", calls24h: 56 },
+        { service: "Google Calendar", status: "✅ Connected", icon: "📅", lastSync: "10 min ago", calls24h: 12 },
+      ],
+      availableConnectors: ["Trello", "Jira", "Stripe", "SendGrid", "Twilio", "AWS", "Dropbox", "Airtable"],
+      rateLimits: {
+        github: { used: 147, limit: 5000, reset: "58 min" },
+        slack: { used: 89, limit: 1000, reset: "42 min" },
+      },
+      webhooksActive: 3,
+      insight: "5 servicios conectados activamente. 327 llamadas API en las últimas 24h. Nota: Token de Discord expira pronto — renovación automática programada.",
+    },
+  };
+}
+
+/* ── Data Visualizer Demo ── */
+async function runDataVisualizerDemo() {
+  return {
+    skill: "data-visualizer",
+    title: "📈 Data Visualizer — Demo de Visualización",
+    timestamp: new Date().toISOString(),
+    data: {
+      chartGenerated: "bar",
+      title: "Ventas Mensuales Q4 2025",
+      dataPoints: [
+        { label: "Octubre", value: 12400 },
+        { label: "Noviembre", value: 15800 },
+        { label: "Diciembre", value: 23100 },
+      ],
+      exportFormats: ["SVG", "PNG", "PDF"],
+      autoDetected: {
+        recommendedChart: "Bar Chart",
+        reason: "Categorical data with single metric — bar chart provides clearest comparison",
+        alternatives: ["Line Chart", "Area Chart"],
+      },
+      dashboardPanels: [
+        { type: "KPI", title: "Total Q4", value: "$51,300" },
+        { type: "KPI", title: "Crecimiento", value: "+86%" },
+        { type: "Bar", title: "Ventas por Mes", dataPoints: 3 },
+        { type: "Pie", title: "Distribución %", segments: 3 },
+      ],
+      insight: "Datos analizados: 3 puntos. Tipo recomendado: Bar Chart. Se generó dashboard con 4 paneles. Exportado como SVG (vector, escalable).",
+    },
+  };
+}
+
+/* ── Security Auditor Demo ── */
+async function runSecurityAuditorDemo() {
+  return {
+    skill: "security-auditor",
+    title: "🛡️ Security Auditor — Informe de Seguridad",
+    timestamp: new Date().toISOString(),
+    data: {
+      scanDuration: "4.2 seconds",
+      filesScanned: 342,
+      overallScore: 78,
+      scoreLabel: "Bueno",
+      findings: [
+        { severity: "🔴 Critical", type: "Exposed API Key", file: ".env.local", line: 12, description: "AWS_SECRET_KEY exposed in plaintext" },
+        { severity: "🟡 Medium", type: "Vulnerable Dependency", package: "lodash@4.17.20", cve: "CVE-2025-1234", fix: "Upgrade to 4.17.22" },
+        { severity: "🟡 Medium", type: "Weak Config", file: "next.config.js", description: "CORS allows all origins (*)" },
+        { severity: "🟢 Low", type: "File Permissions", file: "deploy.sh", description: "World-readable script with sensitive paths" },
+      ],
+      summary: {
+        critical: 1,
+        medium: 2,
+        low: 1,
+        passed: 338,
+      },
+      recommendations: [
+        "Move AWS_SECRET_KEY to a secrets manager (1Password, Vault)",
+        "Run 'npm audit fix' to patch lodash vulnerability",
+        "Restrict CORS to specific domains",
+      ],
+      insight: "Score: 78/100 (Bueno). 1 hallazgo crítico requiere atención inmediata: clave AWS expuesta. 2 hallazgos medios. 338 verificaciones pasaron correctamente.",
+    },
+  };
+}
+
+/* ── Task Scheduler Pro Demo ── */
+async function runTaskSchedulerDemo() {
+  return {
+    skill: "task-scheduler",
+    title: "⏰ Task Scheduler Pro — Panel de Control",
+    timestamp: new Date().toISOString(),
+    data: {
+      activeTasks: 7,
+      completedToday: 12,
+      upcomingTasks: [
+        { name: "Backup workspace", schedule: "Every hour", nextRun: "18:30 UTC", priority: "High", icon: "💾" },
+        { name: "Check emails", schedule: "Every 4 hours", nextRun: "20:00 UTC", priority: "Medium", icon: "📧" },
+        { name: "Generate weekly report", schedule: "Mon 09:00", nextRun: "2026-02-16 09:00 UTC", priority: "High", icon: "📊" },
+        { name: "Social media post", schedule: "Daily 14:00", nextRun: "2026-02-15 14:00 UTC", priority: "Medium", icon: "📱" },
+        { name: "Dependency audit", schedule: "Weekly Fri", nextRun: "2026-02-20 10:00 UTC", priority: "Low", icon: "🔒" },
+      ],
+      deadlines: [
+        { name: "Project proposal", due: "2026-02-17 23:59 UTC", daysLeft: 3, status: "🟡 En progreso" },
+        { name: "Client deliverable", due: "2026-02-21 18:00 UTC", daysLeft: 7, status: "🟢 On track" },
+      ],
+      taskChain: {
+        name: "Deploy Pipeline",
+        steps: ["Run tests → Build → Security scan → Deploy → Notify team"],
+        status: "Ready",
+      },
+      insight: "7 tareas activas, 12 completadas hoy. Próxima ejecución: Backup workspace en 4 minutos. 2 deadlines en los próximos 7 días.",
+    },
+  };
+}
+
+/* ── Knowledge Base Builder Demo ── */
+async function runKnowledgeBaseDemo() {
+  return {
+    skill: "knowledge-base",
+    title: "📚 Knowledge Base Builder — Estado de la Base",
+    timestamp: new Date().toISOString(),
+    data: {
+      totalDocuments: 156,
+      totalChunks: 2847,
+      categories: [
+        { name: "Technical Docs", docs: 67, icon: "💻" },
+        { name: "Research Papers", docs: 42, icon: "📄" },
+        { name: "Meeting Notes", docs: 31, icon: "📝" },
+        { name: "Policies", docs: 16, icon: "📋" },
+      ],
+      searchDemo: {
+        query: "How does the authentication flow work?",
+        results: [
+          { title: "Auth System Architecture", relevance: 0.94, source: "tech-docs/auth.md", snippet: "The authentication flow uses OAuth2 with PKCE..." },
+          { title: "API Security Guide", relevance: 0.87, source: "tech-docs/security.pdf", snippet: "Token refresh is handled automatically by the middleware..." },
+          { title: "User Onboarding Flow", relevance: 0.72, source: "product/onboarding.md", snippet: "New users authenticate via magic link or social login..." },
+        ],
+      },
+      recentIngestions: [
+        { file: "Q4-report.pdf", pages: 24, chunks: 89, date: "2026-02-14" },
+        { file: "https://docs.example.com/api", pages: 12, chunks: 45, date: "2026-02-13" },
+      ],
+      insight: "156 documentos indexados en 2,847 chunks. Búsqueda semántica activa. Última ingesta: Q4-report.pdf (24 páginas → 89 chunks).",
+    },
+  };
+}
+
+/* ── Social Media Manager Demo ── */
+async function runSocialMediaDemo() {
+  const posts = await fetchMoltbookPosts(5);
+  const moltbookData = posts ? posts.slice(0, 3).map((p: any) => ({
+    title: p.title || "(sin título)",
+    upvotes: p.upvotes || 0,
+    submolt: p.submolt?.name || p.submolt || "general",
+  })) : [];
+
+  return {
+    skill: "social-media-manager",
+    title: "📱 Social Media Manager — Dashboard",
+    timestamp: new Date().toISOString(),
+    data: {
+      platforms: [
+        { name: "Moltbook", status: "✅ Connected", followers: 234, postsThisWeek: 5, engagement: "12.3%" },
+        { name: "Twitter/X", status: "✅ Connected", followers: 1892, postsThisWeek: 8, engagement: "4.7%" },
+        { name: "Discord", status: "✅ Connected", members: 456, messagesThisWeek: 23, engagement: "8.1%" },
+      ],
+      contentCalendar: [
+        { date: "2026-02-14 18:00", platform: "Moltbook", content: "Valentine's Day special post 💕", status: "📤 Scheduled" },
+        { date: "2026-02-15 10:00", platform: "Twitter/X", content: "Weekly AI roundup thread 🧵", status: "📝 Draft" },
+        { date: "2026-02-15 14:00", platform: "All", content: "New skill launch announcement 🚀", status: "📤 Scheduled" },
+      ],
+      recentMoltbookActivity: moltbookData,
+      topPerformingPost: {
+        platform: "Moltbook",
+        title: "AI agents are changing everything",
+        engagement: "18.5%",
+        reach: 1247,
+      },
+      insight: "3 plataformas conectadas. 36 publicaciones esta semana. Mejor rendimiento: Moltbook (12.3% engagement). 3 posts programados para las próximas 48h.",
+    },
+  };
+}
+
 /* ── Route Handler ── */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -270,6 +521,30 @@ export async function GET(request: NextRequest) {
       break;
     case "translator-pro":
       result = await runTranslatorDemo();
+      break;
+    case "auto-backup":
+      result = await runAutoBackupDemo();
+      break;
+    case "sentiment-analyzer":
+      result = await runSentimentDemo();
+      break;
+    case "api-connector":
+      result = await runApiConnectorDemo();
+      break;
+    case "data-visualizer":
+      result = await runDataVisualizerDemo();
+      break;
+    case "security-auditor":
+      result = await runSecurityAuditorDemo();
+      break;
+    case "task-scheduler":
+      result = await runTaskSchedulerDemo();
+      break;
+    case "knowledge-base":
+      result = await runKnowledgeBaseDemo();
+      break;
+    case "social-media-manager":
+      result = await runSocialMediaDemo();
       break;
     default:
       result = {
