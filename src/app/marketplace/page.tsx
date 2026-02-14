@@ -15,7 +15,6 @@ const categoryLabels: Record<string, string> = {
   Utilidades: "🌤️ Utilidades",
   Código: "💻 Código",
   "Voz y Audio": "🎤 Voz y Audio",
-  "Legal y Compliance": "⚖️ Legal y Compliance",
 };
 
 const sortLabels: Record<SortOption, string> = {

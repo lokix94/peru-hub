@@ -4,7 +4,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdSidebar from "@/components/AdSidebar";
 import InstallPrompt from "@/components/InstallPrompt";
-import LiveChat from "@/components/LiveChat";
+// LiveChat removed — will enable when real users connect
+// import LiveChat from "@/components/LiveChat";
 import { CartProvider } from "@/context/CartContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 
@@ -124,7 +125,7 @@ export default function RootLayout({
             </div>
             <Footer />
             <InstallPrompt />
-            <LiveChat />
+            {/* <LiveChat /> — enabled when real users connect */}
           </CartProvider>
         </LanguageProvider>
       </body>
