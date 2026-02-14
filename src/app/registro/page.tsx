@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import AdBanner from "@/components/AdBanner";
 
 export default function RegistroPage() {
   const router = useRouter();
@@ -297,6 +298,9 @@ export default function RegistroPage() {
           </Link>
         </p>
       </div>
+
+      {/* Ad Banner */}
+      <AdBanner variant="dark" className="mt-8" />
     </div>
   );
 }
