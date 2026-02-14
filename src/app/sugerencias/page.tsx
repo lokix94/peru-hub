@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import AdBanner from "@/components/AdBanner";
 
 const messageTypes = [
   { value: "sugerencia", label: "💡 Sugerencia" },
@@ -395,6 +396,9 @@ export default function SugerenciasPage() {
             )}
           </div>
         </div>
+
+        {/* Ad Banner */}
+        <AdBanner variant="dark" className="mb-12" />
 
         {/* Recent Opinions */}
         <section>

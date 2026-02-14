@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import AdBanner from "@/components/AdBanner";
 
 type PaymentTab = "paypal" | "human" | "agent";
 type CheckoutStep = "cart" | "payment" | "verify-agent" | "installing" | "complete";
@@ -1035,6 +1036,9 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* Ad Banner */}
+      <AdBanner variant="light" className="mt-8 mb-4" />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import RechargeModal from "@/components/RechargeModal";
+import AdBanner from "@/components/AdBanner";
 
 const transactions = [
   { id: "tx-1", type: "deposit", description: "Recarga de saldo", amount: 20.00, date: "2026-02-12", status: "completed" },
@@ -288,6 +289,9 @@ export default function AccountPage() {
           💳 Recargar Saldo
         </button>
       </div>
+
+      {/* Ad Banner */}
+      <AdBanner variant="light" className="mt-6 mb-4" />
 
       {/* Recharge Modal */}
       <RechargeModal isOpen={rechargeOpen} onClose={() => setRechargeOpen(false)} />
