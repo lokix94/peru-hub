@@ -46,6 +46,7 @@ export default function HomePage() {
   const [activeBanner, setActiveBanner] = useState(0);
   const { lang, t } = useLanguage();
   const featured = getFeaturedSkills();
+  const newSkills = getNewSkills();
   const popular = [...skills].sort((a, b) => b.installCount - a.installCount);
   const free = skills.filter(s => s.price === 0);
 
@@ -136,6 +137,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ===== NEW SKILLS ===== */}
+      {newSkills.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary">🆕 {lang === "es" ? "Recién llegados" : "Just Arrived"}</h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-600 uppercase">New</span>
+            </div>
+            <Link href="/marketplace" className="text-sm text-primary hover:text-primary-hover font-medium">
+              {t("see.all.excited")} →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {newSkills.slice(0, 4).map((skill) => (
+              <SkillCard key={skill.id} skill={skill} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ===== POPULAR — MOST INSTALLED ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
@@ -193,8 +214,8 @@ export default function HomePage() {
             {t("see.all.excited")} →
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-          {featured.map((skill, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {featured.slice(0, 4).map((skill) => (
             <SkillCard key={skill.id} skill={skill} />
           ))}
         </div>

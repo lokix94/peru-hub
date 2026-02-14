@@ -88,6 +88,7 @@ const translations: Record<string, Record<Language, string>> = {
   "cat.productivity": { es: "Productividad", en: "Productivity" },
   "cat.agent.core": { es: "Core del Agente", en: "Agent Core" },
   "cat.utilities": { es: "Utilidades", en: "Utilities" },
+  "cat.moltbook": { es: "Moltbook Tools", en: "Moltbook Tools" },
   "cat.all": { es: "Ver todo", en: "See all" },
 
   // ── Marketplace / Cards ──
