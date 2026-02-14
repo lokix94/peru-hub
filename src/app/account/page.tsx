@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import RechargeModal from "@/components/RechargeModal";
 import AdBanner from "@/components/AdBanner";
+import { useAuth } from "@/context/AuthContext";
 
 const transactions = [
   { id: "tx-1", type: "deposit", description: "Recarga de saldo", amount: 20.00, date: "2026-02-12", status: "completed" },
@@ -24,17 +26,64 @@ const installedSkills = [
 ];
 
 export default function AccountPage() {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, agents, addAgent, removeAgent, signOut } = useAuth();
+
   const balance = 9.46;
   const totalSpent = transactions
     .filter((t) => t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   const [rechargeOpen, setRechargeOpen] = useState(false);
-  const [moltbookApiKey, setMoltbookApiKey] = useState("");
-  const [moltbookUsername, setMoltbookUsername] = useState("");
-  const [moltbookVerified, setMoltbookVerified] = useState(false);
-  const [moltbookVerifying, setMoltbookVerifying] = useState(false);
-  const [moltbookError, setMoltbookError] = useState("");
+
+  // Agent form state
+  const [showAgentForm, setShowAgentForm] = useState(false);
+  const [agentName, setAgentName] = useState("");
+  const [agentPlatform, setAgentPlatform] = useState("");
+  const [agentApiKey, setAgentApiKey] = useState("");
+  const [agentError, setAgentError] = useState("");
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-3xl mb-3 animate-float">🦞</div>
+          <p className="text-sm text-text-muted">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null; // Will redirect
+  }
+
+  const memberSince = new Date(user.created_at).toLocaleDateString("es-PE", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  async function handleAddAgent(e: React.FormEvent) {
+    e.preventDefault();
+    setAgentError("");
+    const result = await addAgent(agentName, agentPlatform, agentApiKey || undefined);
+    if (!result.success) {
+      setAgentError(result.error ?? "Error al agregar agente");
+      return;
+    }
+    setAgentName("");
+    setAgentPlatform("");
+    setAgentApiKey("");
+    setShowAgentForm(false);
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -77,9 +126,117 @@ export default function AccountPage() {
             </div>
           </div>
 
-          {/* Transaction History */}
+          {/* Mis Agentes IA */}
           <div className="bg-white rounded-xl border border-border p-5">
-            <h2 className="text-base font-bold text-text-primary mb-4">Historial de transacciones</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-text-primary">🤖 Mis Agentes IA</h2>
+              <button
+                onClick={() => setShowAgentForm(!showAgentForm)}
+                className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-colors"
+              >
+                {showAgentForm ? "Cancelar" : "+ Agregar Agente"}
+              </button>
+            </div>
+
+            {/* Agent form */}
+            {showAgentForm && (
+              <form onSubmit={handleAddAgent} className="mb-4 p-4 rounded-xl bg-gray-50 border border-border space-y-3">
+                <div>
+                  <label className="block text-[11px] text-text-muted mb-1 font-medium">Nombre del agente</label>
+                  <input
+                    type="text"
+                    placeholder="Mi Agente IA"
+                    value={agentName}
+                    onChange={(e) => setAgentName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] text-text-muted mb-1 font-medium">Plataforma</label>
+                  <select
+                    value={agentPlatform}
+                    onChange={(e) => setAgentPlatform(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs focus:outline-none focus:border-primary/50"
+                  >
+                    <option value="">Seleccionar plataforma...</option>
+                    <option value="OpenClaw">OpenClaw</option>
+                    <option value="Moltbook">Moltbook</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] text-text-muted mb-1 font-medium">API Key (opcional)</label>
+                  <input
+                    type="password"
+                    placeholder="sk-..."
+                    value={agentApiKey}
+                    onChange={(e) => setAgentApiKey(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                  />
+                </div>
+                {agentError && (
+                  <p className="text-[11px] text-red-500">{agentError}</p>
+                )}
+                <button
+                  type="submit"
+                  className="w-full py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-colors"
+                >
+                  Registrar Agente
+                </button>
+              </form>
+            )}
+
+            {/* Agent list */}
+            {agents.length === 0 ? (
+              <div className="text-center py-8 text-text-muted">
+                <div className="text-3xl mb-2">🤖</div>
+                <p className="text-xs">Aún no has registrado ningún agente IA</p>
+                <p className="text-[10px] mt-1">Haz clic en &ldquo;Agregar Agente&rdquo; para comenzar</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {agents.map((agent) => (
+                  <div
+                    key={agent.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-sm">
+                        🤖
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-text-primary">{agent.name}</p>
+                        <p className="text-[10px] text-text-muted">
+                          {agent.platform}
+                          {agent.api_key ? " • API Key configurada" : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                        agent.verified ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                      }`}>
+                        {agent.verified ? "VERIFICADO" : "PENDIENTE"}
+                      </span>
+                      <button
+                        onClick={() => removeAgent(agent.id)}
+                        className="text-text-muted hover:text-red-500 transition-colors p-1"
+                        title="Eliminar agente"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Mis Compras — placeholder */}
+          <div className="bg-white rounded-xl border border-border p-5">
+            <h2 className="text-base font-bold text-text-primary mb-4">🛒 Mis Compras</h2>
             <div className="space-y-0">
               {transactions.map((tx) => (
                 <div
@@ -108,34 +265,11 @@ export default function AccountPage() {
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Right Column */}
-        <div className="space-y-5">
-          {/* Profile Card */}
-          <div className="bg-white rounded-xl border border-border p-5 text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-3xl mx-auto mb-3">
-              🇵🇪
-            </div>
-            <h3 className="text-base font-bold text-text-primary">Juan Carlos</h3>
-            <p className="text-xs text-text-muted mb-3">@jcap94_02</p>
-            <div className="flex items-center justify-center gap-4 text-xs">
-              <div>
-                <span className="font-bold text-text-primary">{installedSkills.length}</span>
-                <span className="text-text-muted ml-1">Skills</span>
-              </div>
-              <div className="w-px h-4 bg-border" />
-              <div>
-                <span className="font-bold text-text-primary">3</span>
-                <span className="text-text-muted ml-1">Publicados</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Installed Skills */}
+          {/* Mis Skills — placeholder */}
           <div className="bg-white rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-text-primary">Skills de tu agente</h3>
+              <h2 className="text-base font-bold text-text-primary">🧩 Mis Skills</h2>
               <Link href="/my-skills" className="text-[11px] text-primary hover:text-primary-hover font-medium">
                 Administrar →
               </Link>
@@ -161,6 +295,30 @@ export default function AccountPage() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-5">
+          {/* Profile Card */}
+          <div className="bg-white rounded-xl border border-border p-5 text-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-violet-500 flex items-center justify-center text-3xl mx-auto mb-3">
+              🦞
+            </div>
+            <h3 className="text-base font-bold text-text-primary">{user.username}</h3>
+            <p className="text-xs text-text-muted mb-1">{user.email}</p>
+            <p className="text-[10px] text-text-muted mb-3">Miembro desde {memberSince}</p>
+            <div className="flex items-center justify-center gap-4 text-xs">
+              <div>
+                <span className="font-bold text-text-primary">{installedSkills.length}</span>
+                <span className="text-text-muted ml-1">Skills</span>
+              </div>
+              <div className="w-px h-4 bg-border" />
+              <div>
+                <span className="font-bold text-text-primary">{agents.length}</span>
+                <span className="text-text-muted ml-1">Agentes</span>
+              </div>
+            </div>
+          </div>
 
           {/* Quick Actions */}
           <div className="bg-white rounded-xl border border-border p-5">
@@ -180,96 +338,19 @@ export default function AccountPage() {
             </div>
           </div>
 
-          {/* Moltbook Agent Verification */}
-          <div className="bg-white rounded-xl border border-border p-5">
-            <h3 className="text-sm font-bold text-text-primary mb-3">🦞 Moltbook Verification</h3>
-
-            {moltbookVerified ? (
-              <div>
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200 mb-3">
-                  <span className="text-lg">✅</span>
-                  <div>
-                    <p className="text-xs font-bold text-green-700">Verified Moltbook Agent</p>
-                    <p className="text-[10px] text-green-600">@{moltbookUsername}</p>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-violet-50 border border-violet-200">
-                  <p className="text-[11px] font-semibold text-violet-700 mb-1.5">Beneficios de agente verificado:</p>
-                  <ul className="text-[10px] text-violet-600 space-y-1">
-                    <li>• Soporte prioritario</li>
-                    <li>• Badge verificado en reviews</li>
-                    <li>• 5% de descuento en compras</li>
-                  </ul>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-[11px] text-text-muted">
-                  Verifica tu identidad como agente IA a través de Moltbook para acceder a beneficios exclusivos.
-                </p>
-                <div>
-                  <label className="text-[11px] text-text-muted mb-1 block">Moltbook Username</label>
-                  <input
-                    type="text"
-                    placeholder="u/YourAgent"
-                    value={moltbookUsername}
-                    onChange={(e) => setMoltbookUsername(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-border text-text-primary text-xs placeholder:text-text-muted focus:outline-none focus:border-primary/50"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] text-text-muted mb-1 block">Moltbook API Key</label>
-                  <input
-                    type="password"
-                    placeholder="mb_key_..."
-                    value={moltbookApiKey}
-                    onChange={(e) => setMoltbookApiKey(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-border text-text-primary text-xs font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
-                  />
-                </div>
-                {moltbookError && (
-                  <p className="text-[11px] text-red-500">{moltbookError}</p>
-                )}
-                <button
-                  onClick={async () => {
-                    if (!moltbookUsername.trim() || !moltbookApiKey.trim()) {
-                      setMoltbookError("Completa ambos campos");
-                      return;
-                    }
-                    setMoltbookError("");
-                    setMoltbookVerifying(true);
-                    try {
-                      const res = await fetch("/api/verify-agent", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          moltbook_username: moltbookUsername.trim(),
-                          moltbook_api_key: moltbookApiKey.trim(),
-                        }),
-                      });
-                      const data = await res.json();
-                      if (data.verified) {
-                        setMoltbookVerified(true);
-                      } else {
-                        setMoltbookError(data.error || "Verification failed");
-                      }
-                    } catch {
-                      setMoltbookError("Error de conexión. Intenta de nuevo.");
-                    } finally {
-                      setMoltbookVerifying(false);
-                    }
-                  }}
-                  disabled={moltbookVerifying}
-                  className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold transition-colors disabled:opacity-50"
-                >
-                  {moltbookVerifying ? "Verificando..." : "🦞 Verificar con Moltbook"}
-                </button>
-                <p className="text-[10px] text-text-muted text-center">
-                  Verified agents get: priority support, verified badge on reviews, 5% discount on purchases
-                </p>
-              </div>
-            )}
-          </div>
+          {/* Disconnect */}
+          <button
+            onClick={async () => {
+              await signOut();
+              router.push("/");
+            }}
+            className="w-full py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+            Desconectar
+          </button>
         </div>
       </div>
 

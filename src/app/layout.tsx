@@ -7,6 +7,7 @@ import InstallPrompt from "@/components/InstallPrompt";
 import LiveChat from "@/components/LiveChat";
 import { CartProvider } from "@/context/CartContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
   title: {
@@ -114,18 +115,20 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col">
         <LanguageProvider>
-          <CartProvider>
-            <Header />
-            <div className="flex flex-1">
-              <AdSidebar />
-              <main className="flex-1 min-w-0">
-                {children}
-              </main>
-            </div>
-            <Footer />
-            <InstallPrompt />
-            <LiveChat />
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Header />
+              <div className="flex flex-1">
+                <AdSidebar />
+                <main className="flex-1 min-w-0">
+                  {children}
+                </main>
+              </div>
+              <Footer />
+              <InstallPrompt />
+              <LiveChat />
+            </CartProvider>
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

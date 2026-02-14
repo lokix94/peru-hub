@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import RechargeModal from "./RechargeModal";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -20,6 +21,7 @@ export default function Header() {
   const [rechargeOpen, setRechargeOpen] = useState(false);
   const { totalItems, totalPrice } = useCart();
   const { lang, setLang, t } = useLanguage();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
@@ -122,22 +124,50 @@ export default function Header() {
 
             {/* Right side — account & cart */}
             <div className="hidden md:flex items-center gap-1">
-              <Link
-                href="/account"
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  pathname === "/account"
-                    ? "bg-white/10 text-white"
-                    : "text-header-muted hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                </svg>
-                <div className="text-left leading-none">
-                  <span className="block text-[10px] text-header-muted">{t("account.label")}</span>
-                  <span className="block text-xs font-medium text-white">Juan Carlos</span>
+              {isAuthenticated ? (
+                <div className="flex items-center gap-1">
+                  <Link
+                    href="/account"
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      pathname === "/account"
+                        ? "bg-white/10 text-white"
+                        : "text-header-muted hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    <div className="text-left leading-none">
+                      <span className="block text-[10px] text-header-muted">{t("account.label")}</span>
+                      <span className="block text-xs font-medium text-white">{user?.username}</span>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="px-2 py-2 rounded-lg text-header-muted hover:text-red-400 hover:bg-white/5 transition-colors text-xs"
+                    title="Desconectar"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
+                  </button>
                 </div>
-              </Link>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <Link
+                    href="/registro"
+                    className="px-3 py-2 rounded-lg text-sm text-header-muted hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    Registrarse
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="px-3 py-2 rounded-lg text-sm bg-primary hover:bg-primary-hover text-white font-medium transition-colors"
+                  >
+                    Iniciar sesión
+                  </Link>
+                </div>
+              )}
 
               <Link
                 href="/admin"
@@ -255,7 +285,12 @@ export default function Header() {
               { href: "/", label: `🏠 ${t("nav.home")}` },
               { href: "/marketplace", label: `🛒 ${t("nav.all")}` },
               { href: "/my-skills", label: `📋 ${t("agent.label")}` },
-              { href: "/account", label: `👤 ${t("account.label")}` },
+              ...(isAuthenticated
+                ? [{ href: "/account", label: `👤 ${user?.username ?? t("account.label")}` }]
+                : [
+                    { href: "/login", label: "🔑 Iniciar sesión" },
+                    { href: "/registro", label: "✏️ Registrarse" },
+                  ]),
               { href: "/community", label: `👥 ${t("nav.community")}` },
               { href: "/developers", label: "🛠️ Developers" },
               { href: "/sugerencias", label: `📬 ${t("nav.suggestions")}` },
