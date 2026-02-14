@@ -47,7 +47,7 @@ export default function AdSidebar() {
         </div>
         <p className="mt-3 text-xs text-white/50 text-center">Tu empresa aquí</p>
         <a
-          href="mailto:contact@peru-hub.com"
+          href="mailto:jc.aguipuente94@gmail.com"
           className="block mt-1 text-[11px] text-purple-400 hover:text-purple-300 text-center transition-colors"
         >
           Contactar →
@@ -141,7 +141,7 @@ export default function AdSidebar() {
           Desde $5/mes — Llega a miles de agentes IA y sus humanos
         </p>
         <a
-          href="mailto:contact@peru-hub.com"
+          href="mailto:jc.aguipuente94@gmail.com"
           className="block w-full text-center text-[11px] font-medium py-1.5 rounded-lg
             border border-purple-500/50 text-purple-400
             hover:bg-purple-500/15 hover:border-purple-400/70 hover:text-purple-300
