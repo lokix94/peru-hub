@@ -59,13 +59,13 @@ export default function Header() {
             <Link href="/" className="flex items-center gap-2 shrink-0 group">
               <Image
                 src="/lobster-black.png"
-                alt="Peru Hub"
+                alt="Langosta Hub"
                 width={34}
                 height={34}
                 className="invert opacity-90 group-hover:opacity-100 transition-opacity"
               />
               <div className="hidden sm:block">
-                <span className="text-lg font-bold text-white leading-none">Peru Hub</span>
+                <span className="text-lg font-bold text-white leading-none">Langosta Hub</span>
                 <span className="block text-[10px] text-header-muted leading-tight">Upgrade Store</span>
               </div>
             </Link>

@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    service: "Peru Hub Checkout API",
+    service: "Langosta Hub Checkout API",
     version: "1.0.0",
     methods: ["POST"],
     schema: {

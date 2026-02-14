@@ -71,7 +71,7 @@ export default function InstallPrompt() {
       <div className="mx-auto max-w-lg px-4 pb-4">
         <div className="rounded-2xl border border-purple-500/30 bg-[#1a1a2e]/95 px-5 py-4 shadow-2xl backdrop-blur-md">
           <p className="mb-3 text-sm text-gray-200">
-            📱 Instala Peru Hub en tu dispositivo para acceso rápido
+            📱 Instala Langosta Hub en tu dispositivo para acceso rápido
           </p>
           <div className="flex items-center gap-3">
             <button

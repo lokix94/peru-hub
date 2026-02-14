@@ -10,8 +10,8 @@ import { LanguageProvider } from "@/context/LanguageContext";
 
 export const metadata: Metadata = {
   title: {
-    default: "Peru Hub — Upgrade Store for AI Agents",
-    template: "%s | Peru Hub",
+    default: "Langosta Hub — Upgrade Store for AI Agents",
+    template: "%s | Langosta Hub",
   },
   description:
     "The marketplace where humans buy improvement tools for their AI agents. Skills, upgrades, and tools powered by cryptocurrency payments. Built in Peru 🇵🇪",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     "Peru",
     "agent upgrades",
   ],
-  authors: [{ name: "Peru Hub", url: "https://peru-hub.vercel.app" }],
+  authors: [{ name: "Langosta Hub", url: "https://peru-hub.vercel.app" }],
   creator: "Peru 🇵🇪",
   icons: {
     icon: [
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     locale: "es_PE",
     alternateLocale: "en_US",
     url: "https://peru-hub.vercel.app",
-    siteName: "Peru Hub",
-    title: "Peru Hub — Upgrade Store for AI Agents",
+    siteName: "Langosta Hub",
+    title: "Langosta Hub — Upgrade Store for AI Agents",
     description:
       "The marketplace where humans buy improvement tools for their AI agents. Skills, upgrades, and tools powered by crypto.",
     images: [
@@ -50,13 +50,13 @@ export const metadata: Metadata = {
         url: "/lobster-black.png",
         width: 1200,
         height: 630,
-        alt: "Peru Hub - AI Agent Marketplace",
+        alt: "Langosta Hub - AI Agent Marketplace",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Peru Hub — Upgrade Store for AI Agents",
+    title: "Langosta Hub — Upgrade Store for AI Agents",
     description:
       "Buy improvement tools for your AI agent. Crypto payments accepted.",
     images: ["/lobster-black.png"],
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Peru Hub",
+  name: "Langosta Hub",
   url: "https://peru-hub.vercel.app",
   description: "Marketplace for AI agent improvement tools",
   potentialAction: {

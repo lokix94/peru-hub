@@ -167,7 +167,7 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                🔐 Panel de Administrador — Peru Hub
+                🔐 Panel de Administrador — Langosta Hub
               </h1>
               <p className="mt-1 text-sm text-slate-400">
                 Monitoreo de ingresos y transacciones
@@ -361,7 +361,7 @@ export default function AdminPage() {
         {/* Footer */}
         <div className="text-center py-4">
           <p className="text-xs text-slate-600">
-            Peru Hub Admin Dashboard — Solo para uso interno
+            Langosta Hub Admin Dashboard — Solo para uso interno
           </p>
         </div>
       </div>

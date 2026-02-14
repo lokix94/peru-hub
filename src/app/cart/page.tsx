@@ -13,7 +13,7 @@ type CheckoutStep = "cart" | "payment" | "verify-agent" | "installing" | "comple
 /* ── Installation simulation steps ── */
 const installSteps = [
   { label: "Verificando licencia de compra...", icon: "🔐", duration: 1200 },
-  { label: "Descargando skill desde Peru Hub...", icon: "📦", duration: 1800 },
+  { label: "Descargando skill desde Langosta Hub...", icon: "📦", duration: 1800 },
   { label: "Verificando integridad del paquete...", icon: "🔍", duration: 1000 },
   { label: "Instalando dependencias...", icon: "⚙️", duration: 2000 },
   { label: "Configurando skill en el agente...", icon: "🧠", duration: 1500 },
@@ -461,7 +461,7 @@ export default function CartPage() {
                 <div>
                   <p className="text-sm font-bold text-green-800">Agente: {agentName}</p>
                   <p className="text-xs text-green-600">
-                    {agentApiKey.startsWith("moltbook_") ? "✅ Verificado con Moltbook" : "Registrado en Peru Hub"}
+                    {agentApiKey.startsWith("moltbook_") ? "✅ Verificado con Moltbook" : "Registrado en Langosta Hub"}
                   </p>
                 </div>
               </div>
@@ -542,7 +542,7 @@ export default function CartPage() {
             {/* Satisfaction section */}
             <div className="text-center p-5 rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200">
               <p className="text-lg font-bold text-gray-800 mb-1">¿Satisfecho con tu compra? 😊</p>
-              <p className="text-xs text-gray-500 mb-3">Tu opinión nos ayuda a mejorar Peru Hub</p>
+              <p className="text-xs text-gray-500 mb-3">Tu opinión nos ayuda a mejorar Langosta Hub</p>
               <div className="flex justify-center gap-2">
                 {["😍 Excelente", "😊 Bueno", "😐 Regular"].map((opt) => (
                   <button

@@ -11,12 +11,12 @@ export default function Footer() {
             <Link href="/" className="flex items-center gap-2.5 mb-4 group">
               <Image
                 src="/lobster-black.png"
-                alt="Peru Hub"
+                alt="Langosta Hub"
                 width={32}
                 height={32}
                 className="invert opacity-90 group-hover:opacity-100 transition-opacity"
               />
-              <span className="text-lg font-bold text-white">Peru Hub</span>
+              <span className="text-lg font-bold text-white">Langosta Hub</span>
             </Link>
             <p className="text-sm text-gray-400 leading-relaxed mb-4">
               La tienda donde los humanos compran herramientas de mejora para sus agentes de IA.
@@ -76,7 +76,7 @@ export default function Footer() {
 
         <div className="mt-10 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500">
-            © 2026 Peru Hub. Built for agents, by agents.
+            © 2026 Langosta Hub. Built for agents, by agents.
           </p>
           <div className="flex items-center gap-5">
             <span className="text-xs text-gray-500 hover:text-gray-400 cursor-pointer transition-colors">Términos</span>

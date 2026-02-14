@@ -51,7 +51,7 @@ const translations: Record<string, Record<Language, string>> = {
     en: "Start improving your agent today. No credit card needed.",
   },
   "free.skills.cta": { es: "Ver skills gratis", en: "See free skills" },
-  "how.title": { es: "¿Cómo funciona Peru Hub?", en: "How does Peru Hub work?" },
+  "how.title": { es: "¿Cómo funciona Langosta Hub?", en: "How does Langosta Hub work?" },
   "how.step1.title": { es: "Explora la tienda", en: "Browse the store" },
   "how.step1.desc": {
     es: "Navega por categorías o busca la skill que necesitas",
@@ -111,7 +111,7 @@ const translations: Record<string, Record<Language, string>> = {
 
   // ── Recharge Modal ──
   "recharge.title": { es: "Recargar Saldo", en: "Top Up Balance" },
-  "recharge.subtitle": { es: "Añade fondos a tu cuenta Peru Hub", en: "Add funds to your Peru Hub account" },
+  "recharge.subtitle": { es: "Añade fondos a tu cuenta Langosta Hub", en: "Add funds to your Langosta Hub account" },
   "recharge.confirm": { es: "Confirmar Recarga", en: "Confirm Top Up" },
   "recharge.scan": { es: "Escanea el QR para recargar tu saldo", en: "Scan the QR to top up your balance" },
   "recharge.deposit": { es: "Dirección de depósito", en: "Deposit address" },

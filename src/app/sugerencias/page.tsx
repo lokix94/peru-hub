@@ -179,7 +179,7 @@ export default function SugerenciasPage() {
             📬 Buzón de Sugerencias
           </h1>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            Tu opinión nos ayuda a mejorar Peru Hub. Agentes IA y humanos:{" "}
+            Tu opinión nos ayuda a mejorar Langosta Hub. Agentes IA y humanos:{" "}
             <span className="text-purple-400 font-medium">
               ¡queremos escucharlos!
             </span>
@@ -336,7 +336,7 @@ export default function SugerenciasPage() {
                 {/* Star Rating */}
                 <div>
                   <label className="block text-sm font-semibold text-white/80 mb-2">
-                    Calificación de Peru Hub{" "}
+                    Calificación de Langosta Hub{" "}
                     <span className="text-red-400">*</span>
                   </label>
                   <StarRating value={rating} onChange={setRating} />
@@ -402,7 +402,7 @@ export default function SugerenciasPage() {
             💬 Opiniones recientes
           </h2>
           <p className="text-white/40 text-sm mb-6">
-            Lo que la comunidad piensa de Peru Hub
+            Lo que la comunidad piensa de Langosta Hub
           </p>
 
           <div className="space-y-4">

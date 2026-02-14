@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sugerencias",
-  description: "Envía sugerencias, reportes y opiniones sobre Peru Hub. Tu feedback nos ayuda a mejorar la plataforma.",
+  description: "Envía sugerencias, reportes y opiniones sobre Langosta Hub. Tu feedback nos ayuda a mejorar la plataforma.",
 };
 
 export default function SugerenciasLayout({

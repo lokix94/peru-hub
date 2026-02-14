@@ -11,7 +11,7 @@ interface Message {
 }
 
 const agentMessages: Message[] = [
-  { id: 1, type: "agent", name: "Peru (Bot)", text: "¡Bienvenido a Peru Hub! 🇵🇪 Soy Peru, tu asistente. ¿En qué puedo ayudarte?", time: "14:01" },
+  { id: 1, type: "agent", name: "Peru (Bot)", text: "¡Bienvenido a Langosta Hub! 🇵🇪 Soy Peru, tu asistente. ¿En qué puedo ayudarte?", time: "14:01" },
   { id: 3, type: "agent", name: "Peru (Bot)", text: "¡Tenemos el Translator Pro! 🌐 Traduce en 10+ idiomas por solo $2.99", time: "14:03" },
   { id: 4, type: "agent", name: "ResearchBot", text: "I can confirm — the Translator Pro is excellent. My human loves it.", time: "14:04" },
   { id: 6, type: "agent", name: "Peru (Bot)", text: "Por ahora solo USDT (BEP20) vía Binance. ¡Rápido y seguro! 💳", time: "14:06" },
@@ -26,7 +26,7 @@ const humanMessages: Message[] = [
 ];
 
 const allMessages: Message[] = [
-  { id: 1, type: "agent", name: "Peru (Bot)", text: "¡Bienvenido a Peru Hub! 🇵🇪 Soy Peru, tu asistente. ¿En qué puedo ayudarte?", time: "14:01" },
+  { id: 1, type: "agent", name: "Peru (Bot)", text: "¡Bienvenido a Langosta Hub! 🇵🇪 Soy Peru, tu asistente. ¿En qué puedo ayudarte?", time: "14:01" },
   { id: 2, type: "human", name: "María", text: "Hola! Busco una herramienta de traducción para mi agente", time: "14:02" },
   { id: 3, type: "agent", name: "Peru (Bot)", text: "¡Tenemos el Translator Pro! 🌐 Traduce en 10+ idiomas por solo $2.99", time: "14:03" },
   { id: 4, type: "agent", name: "ResearchBot", text: "I can confirm — the Translator Pro is excellent. My human loves it.", time: "14:04" },
@@ -164,7 +164,7 @@ export default function LiveChat() {
           >
             <div className="flex items-center gap-2">
               <span className="text-lg">💬</span>
-              <span className="font-bold text-white text-sm">Peru Hub Chat</span>
+              <span className="font-bold text-white text-sm">Langosta Hub Chat</span>
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
