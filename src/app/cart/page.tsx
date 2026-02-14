@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 
-type PaymentTab = "human" | "agent";
+type PaymentTab = "paypal" | "human" | "agent";
 type CheckoutStep = "cart" | "payment" | "verify-agent" | "installing" | "complete";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -27,9 +27,11 @@ export default function CartPage() {
   const [couponApplied, setCouponApplied] = useState(false);
   const [txId, setTxId] = useState("");
   const [copied, setCopied] = useState(false);
-  const [paymentTab, setPaymentTab] = useState<PaymentTab>("human");
+  const [paymentTab, setPaymentTab] = useState<PaymentTab>("paypal");
   const [agentWalletCopied, setAgentWalletCopied] = useState(false);
   const [apiSnippetCopied, setApiSnippetCopied] = useState(false);
+  const [paypalEmailCopied, setPaypalEmailCopied] = useState(false);
+  const [paypalTxId, setPaypalTxId] = useState("");
 
   /* ── Checkout flow state ── */
   const [step, setStep] = useState<CheckoutStep>("cart");
@@ -46,6 +48,7 @@ export default function CartPage() {
   const [demoExpanded, setDemoExpanded] = useState<string | null>(null);
 
   const walletAddress = "0xcbc14706f7f8167505de1690e1e8419399f9506d";
+  const paypalEmail = "jc.aguipuente94@gmail.com";
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const originalTotal = items.reduce(
@@ -765,31 +768,125 @@ export default function CartPage() {
 
           {/* Crypto Payment */}
           <div className="glass-card p-5">
-            <h3 className="text-sm font-semibold text-text-primary mb-4 text-center">💳 Pago con Criptomonedas</h3>
+            <h3 className="text-sm font-semibold text-text-primary mb-4 text-center">💳 Método de Pago</h3>
 
             {/* Payment Method Tabs */}
             <div className="flex rounded-lg bg-background border border-border p-1 mb-4">
               <button
+                onClick={() => setPaymentTab("paypal")}
+                className={`flex-1 py-2 px-2 rounded-md text-xs font-semibold transition-all ${
+                  paymentTab === "paypal"
+                    ? "bg-white text-text-primary shadow-sm border border-border"
+                    : "text-text-muted hover:text-text-secondary"
+                }`}
+              >
+                👤 PayPal
+              </button>
+              <button
                 onClick={() => setPaymentTab("human")}
-                className={`flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all ${
+                className={`flex-1 py-2 px-2 rounded-md text-xs font-semibold transition-all ${
                   paymentTab === "human"
                     ? "bg-white text-text-primary shadow-sm border border-border"
                     : "text-text-muted hover:text-text-secondary"
                 }`}
               >
-                👤 Humanos (QR)
+                🪙 Crypto
               </button>
               <button
                 onClick={() => setPaymentTab("agent")}
-                className={`flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all ${
+                className={`flex-1 py-2 px-2 rounded-md text-xs font-semibold transition-all ${
                   paymentTab === "agent"
                     ? "bg-white text-text-primary shadow-sm border border-border"
                     : "text-text-muted hover:text-text-secondary"
                 }`}
               >
-                🤖 Agentes IA
+                🤖 Agentes
               </button>
             </div>
+
+            {paymentTab === "paypal" && (
+              <>
+                {/* PayPal Header */}
+                <div className="flex justify-center mb-4">
+                  <span className="px-4 py-2 rounded-full text-sm font-bold border border-blue-200" style={{ background: "#f0f4ff", color: "#003087" }}>
+                    💳 Pay<span style={{ color: "#0070ba" }}>Pal</span>
+                  </span>
+                </div>
+
+                {/* Amount to pay */}
+                <div className="mb-4 p-3 rounded-lg bg-background border border-border text-center">
+                  <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Monto a pagar</p>
+                  <p className="text-2xl font-bold text-accent">${total.toFixed(2)} USD</p>
+                </div>
+
+                {/* Instructions */}
+                <p className="text-center text-sm font-semibold text-text-primary mb-2">Envía el monto total a:</p>
+
+                {/* PayPal Email */}
+                <div className="mb-4">
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 px-3 py-2.5 rounded-lg bg-background border border-border text-text-primary text-sm font-mono text-center font-semibold">
+                      {paypalEmail}
+                    </code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(paypalEmail);
+                        setPaypalEmailCopied(true);
+                        setTimeout(() => setPaypalEmailCopied(false), 2000);
+                      }}
+                      className="px-3 py-2.5 rounded-lg bg-surface border border-border text-text-muted hover:text-text-primary transition-colors text-xs whitespace-nowrap"
+                    >
+                      {paypalEmailCopied ? "✓ Copiado" : "📋 Copiar"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* PayPal.me link button */}
+                <a
+                  href={`https://paypal.me/jcaguipuente94/${total.toFixed(2)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-xl text-white font-bold text-sm text-center transition-all duration-200 shadow-lg flex items-center justify-center gap-2 mb-4"
+                  style={{ background: "linear-gradient(135deg, #003087, #0070ba)" }}
+                >
+                  Pagar con PayPal →
+                </a>
+
+                {/* Note about Friends & Family */}
+                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 mb-4">
+                  <p className="text-xs text-amber-700 font-medium text-center">
+                    ⚠️ Envía como &quot;Amigos y familiares&quot; para evitar comisiones
+                  </p>
+                </div>
+
+                {/* Transaction ID */}
+                <div className="mb-4">
+                  <label className="text-xs text-text-muted mb-1 block">ID de Transacción PayPal:</label>
+                  <input
+                    type="text"
+                    placeholder="Ej: 5TY12345AB678901C"
+                    value={paypalTxId}
+                    onChange={(e) => setPaypalTxId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-sm font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                  />
+                  <p className="text-[10px] text-text-muted mt-1">
+                    Lo encuentras en tu historial de PayPal después de enviar el pago
+                  </p>
+                </div>
+
+                {/* Confirm Button */}
+                <button
+                  onClick={handlePaymentConfirmed}
+                  className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-base transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl"
+                >
+                  CONFIRMAR PAGO →
+                </button>
+
+                <p className="text-center text-[10px] text-text-muted mt-3">
+                  Envía exactamente <strong>${total.toFixed(2)} USD</strong> al email indicado.
+                </p>
+              </>
+            )}
 
             {paymentTab === "human" && (
               <>
