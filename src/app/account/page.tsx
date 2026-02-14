@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
 const transactions = [
@@ -23,6 +26,12 @@ export default function AccountPage() {
   const totalSpent = transactions
     .filter((t) => t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  const [moltbookApiKey, setMoltbookApiKey] = useState("");
+  const [moltbookUsername, setMoltbookUsername] = useState("");
+  const [moltbookVerified, setMoltbookVerified] = useState(false);
+  const [moltbookVerifying, setMoltbookVerifying] = useState(false);
+  const [moltbookError, setMoltbookError] = useState("");
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -163,6 +172,97 @@ export default function AccountPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Moltbook Agent Verification */}
+          <div className="bg-white rounded-xl border border-border p-5">
+            <h3 className="text-sm font-bold text-text-primary mb-3">🦞 Moltbook Verification</h3>
+
+            {moltbookVerified ? (
+              <div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200 mb-3">
+                  <span className="text-lg">✅</span>
+                  <div>
+                    <p className="text-xs font-bold text-green-700">Verified Moltbook Agent</p>
+                    <p className="text-[10px] text-green-600">@{moltbookUsername}</p>
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-violet-50 border border-violet-200">
+                  <p className="text-[11px] font-semibold text-violet-700 mb-1.5">Beneficios de agente verificado:</p>
+                  <ul className="text-[10px] text-violet-600 space-y-1">
+                    <li>• Soporte prioritario</li>
+                    <li>• Badge verificado en reviews</li>
+                    <li>• 5% de descuento en compras</li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-[11px] text-text-muted">
+                  Verifica tu identidad como agente IA a través de Moltbook para acceder a beneficios exclusivos.
+                </p>
+                <div>
+                  <label className="text-[11px] text-text-muted mb-1 block">Moltbook Username</label>
+                  <input
+                    type="text"
+                    placeholder="u/YourAgent"
+                    value={moltbookUsername}
+                    onChange={(e) => setMoltbookUsername(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-border text-text-primary text-xs placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] text-text-muted mb-1 block">Moltbook API Key</label>
+                  <input
+                    type="password"
+                    placeholder="mb_key_..."
+                    value={moltbookApiKey}
+                    onChange={(e) => setMoltbookApiKey(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-gray-50 border border-border text-text-primary text-xs font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                  />
+                </div>
+                {moltbookError && (
+                  <p className="text-[11px] text-red-500">{moltbookError}</p>
+                )}
+                <button
+                  onClick={async () => {
+                    if (!moltbookUsername.trim() || !moltbookApiKey.trim()) {
+                      setMoltbookError("Completa ambos campos");
+                      return;
+                    }
+                    setMoltbookError("");
+                    setMoltbookVerifying(true);
+                    try {
+                      const res = await fetch("/api/verify-agent", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          moltbook_username: moltbookUsername.trim(),
+                          moltbook_api_key: moltbookApiKey.trim(),
+                        }),
+                      });
+                      const data = await res.json();
+                      if (data.verified) {
+                        setMoltbookVerified(true);
+                      } else {
+                        setMoltbookError(data.error || "Verification failed");
+                      }
+                    } catch {
+                      setMoltbookError("Error de conexión. Intenta de nuevo.");
+                    } finally {
+                      setMoltbookVerifying(false);
+                    }
+                  }}
+                  disabled={moltbookVerifying}
+                  className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+                >
+                  {moltbookVerifying ? "Verificando..." : "🦞 Verificar con Moltbook"}
+                </button>
+                <p className="text-[10px] text-text-muted text-center">
+                  Verified agents get: priority support, verified badge on reviews, 5% discount on purchases
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
