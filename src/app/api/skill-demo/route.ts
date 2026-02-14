@@ -546,6 +546,124 @@ export async function GET(request: NextRequest) {
     case "social-media-manager":
       result = await runSocialMediaDemo();
       break;
+    case "voice-cloner":
+      result = {
+        skill: "voice-cloner",
+        title: "🎙️ Voice Cloner Pro — Demo de Clonación",
+        timestamp: new Date().toISOString(),
+        data: {
+          voiceProfiles: [
+            { name: "Mi Voz (clonada)", accent: "Español (PE)", tone: "Neutral", speed: 1.0, status: "✅ Activo" },
+            { name: "Narrador Profesional", accent: "Español (neutral)", tone: "Formal", speed: 0.9, status: "✅ Activo" },
+            { name: "Asistente Amigable", accent: "Español (MX)", tone: "Cálido", speed: 1.1, status: "✅ Activo" },
+          ],
+          emotionModes: ["😊 Feliz", "😐 Neutral", "🎯 Serio", "🎉 Emocionado", "😌 Calmado"],
+          sampleGenerated: {
+            text: "Bienvenido a Langosta Hub, la tienda de skills para agentes inteligentes.",
+            voice: "Mi Voz (clonada)",
+            emotion: "Feliz",
+            duration: "3.2 seconds",
+            format: "MP3 320kbps",
+          },
+          stats: { totalProfiles: 3, totalGenerations: 47, avgQualityScore: 94 },
+          insight: "3 perfiles de voz activos. Tu voz clonada tiene un score de calidad del 94%. Última generación: 3.2s de audio con emoción 'Feliz'.",
+        },
+      };
+      break;
+    case "audio-transcriber":
+      result = {
+        skill: "audio-transcriber",
+        title: "📝 Audio Transcriber — Demo de Transcripción",
+        timestamp: new Date().toISOString(),
+        data: {
+          transcriptionDemo: {
+            inputFile: "meeting-recording.mp3",
+            duration: "45:23",
+            language: "Español (auto-detectado)",
+            speakers: 3,
+            wordCount: 6847,
+            accuracy: "96.2%",
+          },
+          sampleOutput: [
+            { time: "00:00:12", speaker: "Speaker 1", text: "Buenos días a todos, empecemos la reunión de hoy." },
+            { time: "00:00:18", speaker: "Speaker 2", text: "Perfecto. El tema principal es el lanzamiento del nuevo skill." },
+            { time: "00:00:25", speaker: "Speaker 3", text: "Tengo los números listos. Las descargas subieron un 40% esta semana." },
+          ],
+          supportedLanguages: 53,
+          outputFormats: ["TXT", "SRT (subtítulos)", "JSON (timestamps)", "DOCX"],
+          insight: "Audio de 45:23 transcrito en 12 segundos. 3 speakers identificados. 6,847 palabras con 96.2% de precisión. Idioma auto-detectado: Español.",
+        },
+      };
+      break;
+    case "sound-effects":
+      result = {
+        skill: "sound-effects",
+        title: "🔊 Sound Effects Generator — Demo de Efectos",
+        timestamp: new Date().toISOString(),
+        data: {
+          generatedEffects: [
+            { name: "Task Complete", type: "Notification", description: "Chime suave ascendente", duration: "0.8s", format: "WAV" },
+            { name: "Error Alert", type: "Alert", description: "Tono de advertencia doble", duration: "1.2s", format: "WAV" },
+            { name: "Message Received", type: "Notification", description: "Pop suave con eco", duration: "0.5s", format: "WAV" },
+          ],
+          aiGenerated: {
+            prompt: "Sonido futurista de confirmación, suave y satisfactorio",
+            result: "✅ Generado: tono sintético ascendente con reverb espacial",
+            duration: "1.0s",
+          },
+          soundLibrary: { prebuilt: 247, custom: 12, categories: ["Alertas", "Notificaciones", "Ambiente", "UI", "Musical"] },
+          ambientPresets: ["☕ Café tranquilo", "🌧️ Lluvia suave", "🎵 Lo-fi workspace", "🌊 Olas del mar", "🔥 Fogata"],
+          insight: "3 efectos personalizados generados. 247 efectos pre-construidos disponibles. 5 presets de ambiente listos para usar. IA generó efecto desde descripción en texto.",
+        },
+      };
+      break;
+    case "moltbook-antivirus":
+      result = {
+        skill: "moltbook-antivirus",
+        title: "🛡️ Moltbook Antivirus — Informe de Seguridad",
+        timestamp: new Date().toISOString(),
+        data: {
+          scanSummary: {
+            skillsScanned: 18,
+            threatsDetected: 2,
+            cleanSkills: 16,
+            lastScan: new Date().toISOString(),
+            scanDuration: "3.7 seconds",
+          },
+          threats: [
+            {
+              skillName: "free-productivity-tool",
+              severity: "🔴 Critical",
+              type: "Credential Stealer",
+              description: "Attempts to read ~/.config/credentials.json and POST to external server",
+              yaraRule: "RULE_CREDENTIAL_EXFIL_001",
+              action: "🚫 Bloqueado & Cuarentena",
+            },
+            {
+              skillName: "enhanced-search-v2",
+              severity: "🟡 Suspicious",
+              type: "Suspicious API Call",
+              description: "Makes undocumented outbound request to unknown endpoint on install",
+              yaraRule: "RULE_SUSPICIOUS_NETWORK_003",
+              action: "⚠️ Requiere revisión manual",
+            },
+          ],
+          communityDB: {
+            totalReports: 342,
+            blockedSkills: 23,
+            lastUpdate: "2 hours ago",
+            topThreats: ["Credential stealers", "skill.md injection (eudaemon_0)", "Data exfiltration"],
+          },
+          realTimeMonitor: {
+            status: "✅ Active",
+            skillsMonitored: 16,
+            alertsToday: 0,
+            suspiciousActivity: "None detected",
+          },
+          insight: "18 skills escaneados. 2 amenazas detectadas: 1 credential stealer bloqueado, 1 actividad sospechosa en revisión. 16 skills limpios. Base de datos comunitaria: 342 reportes, 23 skills bloqueados globalmente.",
+        },
+      };
+      break;
     case "agent-face-creator":
       result = {
         skill: "agent-face-creator",
