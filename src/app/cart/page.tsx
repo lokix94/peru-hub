@@ -3,50 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
-interface CartItem {
-  id: string;
-  name: string;
-  icon: string;
-  author: string;
-  price: number;
-  originalPrice?: number;
-  quantity: number;
-}
-
-const initialCartItems: CartItem[] = [
-  {
-    id: "web-research-pro",
-    name: "Web Research Pro",
-    icon: "🌐",
-    author: "SearchCraft",
-    price: 4.99,
-    originalPrice: 9.99,
-    quantity: 1,
-  },
-  {
-    id: "code-review-assistant",
-    name: "Code Review Assistant",
-    icon: "💻",
-    author: "DevTools Inc",
-    price: 9.99,
-    quantity: 1,
-  },
-  {
-    id: "email-composer",
-    name: "Email Composer Pro",
-    icon: "📧",
-    author: "WriteWell",
-    price: 3.99,
-    originalPrice: 5.99,
-    quantity: 1,
-  },
-];
+import { useCart } from "@/context/CartContext";
 
 type PaymentTab = "human" | "agent";
 
 export default function CartPage() {
-  const [items, setItems] = useState<CartItem[]>(initialCartItems);
+  const { items, removeItem, updateQuantity, clearCart, totalItems } = useCart();
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [txId, setTxId] = useState("");
@@ -57,20 +19,6 @@ export default function CartPage() {
   const [apiSnippetCopied, setApiSnippetCopied] = useState(false);
 
   const walletAddress = "0xcbc14706f7f8167505de1690e1e8419399f9506d";
-
-  const updateQuantity = (id: string, delta: number) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
-  };
-
-  const removeItem = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-  };
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const originalTotal = items.reduce(
@@ -115,15 +63,23 @@ export default function CartPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-text-primary">
-            🛒 Mi Carrito <span className="text-lg text-text-muted font-normal">({items.reduce((s, i) => s + i.quantity, 0)} items)</span>
+            🛒 Mi Carrito <span className="text-lg text-text-muted font-normal">({totalItems} items)</span>
           </h1>
         </div>
-        <Link
-          href="/marketplace"
-          className="text-sm text-primary hover:text-primary-hover transition-colors"
-        >
-          ← Seguir comprando
-        </Link>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={clearCart}
+            className="text-sm text-red-400 hover:text-red-500 transition-colors"
+          >
+            Vaciar carrito
+          </button>
+          <Link
+            href="/marketplace"
+            className="text-sm text-primary hover:text-primary-hover transition-colors"
+          >
+            ← Seguir comprando
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -164,7 +120,7 @@ export default function CartPage() {
                 {/* Quantity */}
                 <div className="md:col-span-2 flex items-center justify-center gap-2">
                   <button
-                    onClick={() => updateQuantity(item.id, -1)}
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
                     className="w-8 h-8 rounded-lg bg-surface border border-border text-text-primary hover:bg-surface-hover transition-colors text-sm font-bold"
                   >
                     −
@@ -173,7 +129,7 @@ export default function CartPage() {
                     {item.quantity}
                   </span>
                   <button
-                    onClick={() => updateQuantity(item.id, 1)}
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     className="w-8 h-8 rounded-lg bg-surface border border-border text-text-primary hover:bg-surface-hover transition-colors text-sm font-bold"
                   >
                     +
