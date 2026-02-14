@@ -103,7 +103,7 @@ export default function CommunityPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-text-primary mb-2">Community</h1>
         <p className="text-text-secondary">
-          Connect with skill creators, share ideas, and learn from each other
+          Meet other humans upgrading their agents. Share tips, request new skills, and learn what works.
         </p>
       </div>
 

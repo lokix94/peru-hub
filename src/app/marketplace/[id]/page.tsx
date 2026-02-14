@@ -23,7 +23,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-text-muted mb-8">
         <Link href="/marketplace" className="hover:text-text-primary transition-colors">
-          Marketplace
+          Upgrade Store
         </Link>
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -39,14 +39,18 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             <div className="flex items-start gap-4">
               <span className="text-5xl">{skill.icon}</span>
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-1">
                   <h1 className="text-2xl font-bold text-text-primary">{skill.name}</h1>
                   {skill.featured && (
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/20">
-                      FEATURED
+                      POPULAR
                     </span>
                   )}
                 </div>
+
+                {/* Tagline — the big value prop */}
+                <p className="text-base text-primary font-medium mb-3">{skill.tagline}</p>
+
                 <div className="flex items-center gap-4 mb-3">
                   <div className="flex items-center gap-1.5">
                     <span>{skill.authorAvatar}</span>
@@ -60,15 +64,15 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 <div className="flex items-center gap-4">
                   <StarRating rating={skill.rating} />
                   <span className="text-sm text-text-muted">{skill.reviews} reviews</span>
-                  <span className="text-sm text-text-muted">{skill.installs.toLocaleString()} installs</span>
+                  <span className="text-sm text-text-muted">{skill.installs.toLocaleString()} agents upgraded</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Description */}
+          {/* What Your Agent Gains */}
           <div className="glass-card p-6">
-            <h2 className="text-lg font-semibold text-text-primary mb-4">About This Skill</h2>
+            <h2 className="text-lg font-semibold text-text-primary mb-4">What Your Agent Gains</h2>
             <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
               {skill.longDescription}
             </div>
@@ -77,7 +81,8 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           {/* Voice Demo (for voice skills) */}
           {skill.category === "Voice" && (
             <div className="glass-card p-6">
-              <h2 className="text-lg font-semibold text-text-primary mb-4">🎙️ Voice Demo</h2>
+              <h2 className="text-lg font-semibold text-text-primary mb-2">🎙️ Hear It In Action</h2>
+              <p className="text-sm text-text-muted mb-4">Preview what your agent will sound like after installing this skill</p>
               <VoiceDemo />
             </div>
           )}
@@ -85,11 +90,11 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           {/* Demo Area (for skills with demos) */}
           {skill.demoAvailable && skill.category !== "Voice" && (
             <div className="glass-card p-6">
-              <h2 className="text-lg font-semibold text-text-primary mb-4">Try It Out</h2>
+              <h2 className="text-lg font-semibold text-text-primary mb-4">Try Before You Buy</h2>
               <div className="rounded-xl bg-background border border-border p-8 text-center">
                 <span className="text-4xl mb-3 block">🧪</span>
                 <p className="text-sm text-text-muted mb-4">
-                  Interactive demo coming soon. Install the skill to try it with your agent.
+                  Interactive preview coming soon. Install the skill now to start using it with your agent.
                 </p>
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border text-text-muted text-sm font-mono">
                   <span className="text-primary">$</span> clawhub install {skill.id}
@@ -102,7 +107,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           <div className="glass-card p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-text-primary">
-                Reviews ({reviews.length})
+                What Humans Are Saying ({reviews.length})
               </h2>
             </div>
             {reviews.length > 0 ? (
@@ -129,7 +134,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               </div>
             ) : (
               <p className="text-sm text-text-muted text-center py-8">
-                No reviews yet. Be the first to review this skill!
+                No reviews yet. Install this skill and be the first to share your experience!
               </p>
             )}
           </div>
@@ -144,15 +149,23 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 {skill.price === 0 ? "Free" : `$${skill.price.toFixed(2)}`}
               </span>
               {skill.price > 0 && (
-                <p className="text-xs text-text-muted mt-1">One-time purchase</p>
+                <p className="text-xs text-text-muted mt-1">One-time purchase · Yours forever</p>
+              )}
+              {skill.price === 0 && (
+                <p className="text-xs text-success/70 mt-1">No credit card needed</p>
               )}
             </div>
 
-            <button className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl mb-3">
-              {skill.price === 0 ? "Install Free" : "Buy & Install"}
+            <button className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl mb-3 text-base">
+              {skill.price === 0 ? "Install Free Upgrade" : "Buy & Upgrade Agent"}
             </button>
 
+            <p className="text-center text-xs text-text-muted mb-4">
+              {skill.installs.toLocaleString()} humans already upgraded their agents
+            </p>
+
             <div className="text-center">
+              <p className="text-[10px] text-text-muted mb-1">Or install via command line:</p>
               <span className="text-xs text-text-muted font-mono bg-background px-3 py-1.5 rounded-lg border border-border inline-block">
                 clawhub install {skill.id}
               </span>
@@ -164,7 +177,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 <span className="text-sm text-text-secondary">{skill.version}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Published</span>
+                <span className="text-sm text-text-muted">Released</span>
                 <span className="text-sm text-text-secondary">{skill.createdAt}</span>
               </div>
               <div className="flex items-center justify-between">
@@ -172,7 +185,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 <span className="text-sm text-text-secondary">{skill.category}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Installs</span>
+                <span className="text-sm text-text-muted">Agents upgraded</span>
                 <span className="text-sm text-text-secondary">{skill.installs.toLocaleString()}</span>
               </div>
             </div>
@@ -180,7 +193,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
           {/* Tags */}
           <div className="glass-card p-6">
-            <h3 className="text-sm font-semibold text-text-primary mb-3">Tags</h3>
+            <h3 className="text-sm font-semibold text-text-primary mb-3">Related Topics</h3>
             <div className="flex flex-wrap gap-2">
               {skill.tags.map((tag) => (
                 <Link
@@ -188,7 +201,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   href={`/marketplace?q=${tag}`}
                   className="px-3 py-1 rounded-lg text-xs font-medium bg-border/50 text-text-muted hover:text-text-secondary hover:bg-border transition-colors"
                 >
-                  #{tag}
+                  {tag}
                 </Link>
               ))}
             </div>
@@ -196,7 +209,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
           {/* Author */}
           <div className="glass-card p-6">
-            <h3 className="text-sm font-semibold text-text-primary mb-3">Author</h3>
+            <h3 className="text-sm font-semibold text-text-primary mb-3">Made by</h3>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
                 {skill.authorAvatar}

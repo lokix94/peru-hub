@@ -7,8 +7,8 @@ import { useState } from "react";
 
 const navItems = [
   { href: "/", label: "Home" },
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/my-skills", label: "My Skills" },
+  { href: "/marketplace", label: "Upgrade Store" },
+  { href: "/my-skills", label: "My Agent" },
   { href: "/account", label: "Account" },
   { href: "/community", label: "Community" },
 ];
@@ -63,8 +63,14 @@ export default function Header() {
               <span className="text-xs text-text-muted">Balance</span>
               <span className="text-sm font-semibold text-accent">$9.46</span>
             </div>
+            <Link href="/cart" className="relative p-2 rounded-lg hover:bg-surface-hover transition-colors group" title="Mi Carrito">
+              <span className="text-xl group-hover:scale-110 transition-transform inline-block">🛒</span>
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-lg shadow-primary/30">
+                3
+              </span>
+            </Link>
             <button className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors">
-              Publish Skill
+              Sell a Skill
             </button>
           </div>
 
@@ -113,8 +119,12 @@ export default function Header() {
                 <span className="text-xs text-text-muted">Balance</span>
                 <span className="text-sm font-semibold text-accent">$9.46</span>
               </div>
+              <Link href="/cart" onClick={() => setMobileOpen(false)} className="relative p-2 rounded-lg hover:bg-surface-hover transition-colors">
+                <span className="text-xl">🛒</span>
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">3</span>
+              </Link>
               <button className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors">
-                Publish
+                Sell
               </button>
             </div>
           </div>

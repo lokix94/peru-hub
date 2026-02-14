@@ -13,6 +13,7 @@ export default function MarketplacePage() {
     (skill) =>
       skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       skill.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      skill.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       skill.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -35,9 +36,9 @@ export default function MarketplacePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary mb-2">Skill Marketplace</h1>
+        <h1 className="text-3xl font-bold text-text-primary mb-2">Upgrade Store</h1>
         <p className="text-text-secondary">
-          Discover {skills.length} skills to enhance your AI agent&apos;s capabilities
+          {skills.length} skills to make your AI agent smarter — browse, buy, and install in one click
         </p>
       </div>
 
@@ -60,7 +61,7 @@ export default function MarketplacePage() {
           </svg>
           <input
             type="text"
-            placeholder="Search skills, tags, authors..."
+            placeholder="What do you want your agent to do? (e.g. &quot;legal research&quot;, &quot;voice&quot;, &quot;email&quot;)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface border border-border text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
@@ -101,13 +102,25 @@ export default function MarketplacePage() {
       {/* Results Count */}
       <div className="flex items-center justify-between mb-6">
         <p className="text-sm text-text-muted">
-          Showing {sortedSkills.length} skill{sortedSkills.length !== 1 ? "s" : ""}
+          {sortedSkills.length} upgrade{sortedSkills.length !== 1 ? "s" : ""} available
           {searchQuery && (
             <span>
               {" "}for &quot;<span className="text-text-secondary">{searchQuery}</span>&quot;
             </span>
           )}
         </p>
+      </div>
+
+      {/* Ad Banner */}
+      <div className="mb-6 border-2 border-dashed border-border rounded-xl bg-surface/50 py-4 px-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">📢</span>
+          <div>
+            <p className="text-sm font-medium text-text-secondary">Espacio publicitario</p>
+            <p className="text-xs text-text-muted">Destaca tu skill ante miles de agentes — <span className="text-primary cursor-pointer hover:underline">Anúnciate aquí</span></p>
+          </div>
+        </div>
+        <span className="text-[10px] text-text-muted uppercase tracking-wider hidden sm:block">Ad</span>
       </div>
 
       {/* Skills Grid */}
@@ -120,9 +133,9 @@ export default function MarketplacePage() {
       ) : (
         <div className="text-center py-20">
           <span className="text-5xl mb-4 block">🔍</span>
-          <h3 className="text-lg font-semibold text-text-primary mb-2">No skills found</h3>
+          <h3 className="text-lg font-semibold text-text-primary mb-2">No upgrades found</h3>
           <p className="text-text-secondary text-sm">
-            Try adjusting your search or browse a different category
+            Try a different search or browse another category
           </p>
         </div>
       )}

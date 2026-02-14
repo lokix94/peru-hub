@@ -109,22 +109,22 @@ export default function MySkillsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-text-primary mb-2">My Skills</h1>
+          <h1 className="text-3xl font-bold text-text-primary mb-2">My Agent</h1>
           <p className="text-text-secondary">
-            {mySkills.length} installed · {activeCount} active · {totalUsage} total uses
+            {mySkills.length} skills installed · {activeCount} active · {totalUsage} total uses
           </p>
         </div>
         <Link
           href="/marketplace"
           className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-medium transition-colors"
         >
-          + Add Skill
+          + Get More Upgrades
         </Link>
       </div>
 
       {/* Installed Skills */}
       <div className="mb-12">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Installed & Purchased</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-4">Skills Installed on Your Agent</h2>
         <div className="grid grid-cols-1 gap-3">
           {mySkills.map((skill) => (
             <Link key={skill.id} href={`/marketplace/${skill.id}`}>
@@ -171,7 +171,7 @@ export default function MySkillsPage() {
 
       {/* Published Skills */}
       <div>
-        <h2 className="text-lg font-semibold text-text-primary mb-4">Published by You</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-4">Skills You Created</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {publishedSkills.map((skill) => (
             <div key={skill.name} className="glass-card p-5">

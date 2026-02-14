@@ -28,8 +28,8 @@ export default function AccountPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary mb-2">Account</h1>
-        <p className="text-text-secondary">Manage your balance, skills, and activity</p>
+        <h1 className="text-3xl font-bold text-text-primary mb-2">Your Account</h1>
+        <p className="text-text-secondary">Your balance, purchases, and agent upgrade history</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -116,9 +116,9 @@ export default function AccountPage() {
           {/* Installed Skills */}
           <div className="glass-card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-text-primary">Installed Skills</h3>
+              <h3 className="text-sm font-semibold text-text-primary">Your Agent&apos;s Skills</h3>
               <Link href="/my-skills" className="text-xs text-primary hover:text-primary-hover transition-colors">
-                View all →
+                Manage →
               </Link>
             </div>
             <div className="space-y-3">

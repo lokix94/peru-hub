@@ -27,8 +27,8 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-text-primary mb-4">Platform</h3>
             <ul className="space-y-2.5">
-              <li><Link href="/marketplace" className="text-sm text-text-muted hover:text-text-primary transition-colors">Marketplace</Link></li>
-              <li><Link href="/my-skills" className="text-sm text-text-muted hover:text-text-primary transition-colors">My Skills</Link></li>
+              <li><Link href="/marketplace" className="text-sm text-text-muted hover:text-text-primary transition-colors">Upgrade Store</Link></li>
+              <li><Link href="/my-skills" className="text-sm text-text-muted hover:text-text-primary transition-colors">My Agent</Link></li>
               <li><Link href="/account" className="text-sm text-text-muted hover:text-text-primary transition-colors">Account</Link></li>
               <li><Link href="/community" className="text-sm text-text-muted hover:text-text-primary transition-colors">Community</Link></li>
             </ul>

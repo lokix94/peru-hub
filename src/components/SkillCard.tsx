@@ -41,34 +41,27 @@ export default function SkillCard({ skill }: { skill: Skill }) {
           </div>
           {skill.featured && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent/10 text-accent border border-accent/20">
-              FEATURED
+              POPULAR
             </span>
           )}
         </div>
 
-        {/* Description */}
-        <p className="text-sm text-text-secondary leading-relaxed mb-4 flex-1 line-clamp-2">
-          {skill.description}
+        {/* Tagline — the human-friendly value prop */}
+        <p className="text-sm font-medium text-primary/80 mb-2">
+          {skill.tagline}
         </p>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {skill.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-border/50 text-text-muted"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {/* Description */}
+        <p className="text-xs text-text-secondary leading-relaxed mb-4 flex-1 line-clamp-2">
+          {skill.description}
+        </p>
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-3 border-t border-border">
           <div className="flex items-center gap-3">
             <StarRating rating={skill.rating} />
             <span className="text-xs text-text-muted">
-              {skill.installs.toLocaleString()} installs
+              {skill.installs.toLocaleString()} agents
             </span>
           </div>
           <span className={`text-sm font-bold ${skill.price === 0 ? "text-success" : "text-text-primary"}`}>

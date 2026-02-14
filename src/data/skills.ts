@@ -1,6 +1,7 @@
 export interface Skill {
   id: string;
   name: string;
+  tagline: string;
   description: string;
   longDescription: string;
   price: number;
@@ -31,8 +32,9 @@ export const skills: Skill[] = [
   {
     id: "peruvian-legal-research",
     name: "Peruvian Legal Research",
-    description: "Deep research into Peruvian law, constitutional analysis, and legal document drafting with citations.",
-    longDescription: "A comprehensive legal research skill that gives your AI agent deep knowledge of Peruvian law. It can analyze constitutional articles, research case law, draft legal documents, and provide citations to specific laws and regulations. Perfect for legal professionals, students, and anyone needing reliable Peruvian legal information.\n\nFeatures:\n- Constitutional analysis (1993 Constitution)\n- Civil and criminal code research\n- Legal document drafting assistance\n- Citation generation with article references\n- Bilingual support (Spanish/English)",
+    tagline: "Turn your agent into a Peruvian law expert",
+    description: "Your agent will research Peruvian law, analyze the constitution, draft legal documents, and cite specific articles — like having a paralegal on call 24/7.",
+    longDescription: "Give your AI agent deep expertise in Peruvian law. After installing this skill, your agent can analyze constitutional articles, research case law, draft legal documents, and provide precise citations — all in seconds.\n\nWhat your agent gains:\n• Instant analysis of Peru's 1993 Constitution\n• Civil and criminal code research\n• Legal document drafting with proper formatting\n• Accurate citations with article references\n• Works in both Spanish and English\n\nPerfect for: Legal professionals, law students, businesses operating in Peru, and anyone who needs quick, reliable legal information without expensive consultations.",
     price: 0,
     rating: 4.8,
     reviews: 24,
@@ -49,9 +51,10 @@ export const skills: Skill[] = [
   },
   {
     id: "voice-camila-tts",
-    name: "Voice: Camila Neural TTS",
-    description: "High-quality Peruvian Spanish text-to-speech using Microsoft's CamilaNeural voice engine.",
-    longDescription: "Transform your AI agent's text responses into natural-sounding Peruvian Spanish speech. Uses Microsoft's Edge TTS CamilaNeural voice — one of the most natural-sounding Spanish voices available.\n\nFeatures:\n- Natural Peruvian Spanish pronunciation\n- Adjustable speed, pitch, and volume\n- SSML support for expressive speech\n- SRT subtitle generation\n- Streaming audio output\n- Multiple output formats (MP3, WAV, OGG)",
+    name: "Voice: Camila Neural",
+    tagline: "Give your agent a natural Peruvian voice",
+    description: "Your agent speaks out loud in beautiful, natural Peruvian Spanish. Camila sounds so real, people won't believe it's AI — perfect for accessibility, podcasts, or just vibes.",
+    longDescription: "Stop reading walls of text. With this skill, your AI agent can speak to you in a natural, warm Peruvian Spanish voice powered by Microsoft's neural engine.\n\nWhat your agent gains:\n• Natural Peruvian Spanish pronunciation\n• Adjustable speaking speed, pitch, and volume\n• Expressive speech with SSML support\n• Automatic subtitle generation\n• Multiple audio formats (MP3, WAV, OGG)\n• Works with any text — messages, stories, news, anything\n\nPerfect for: Anyone who prefers listening over reading, accessibility needs, content creators, language learners, or people who just want their agent to feel more alive.",
     price: 0,
     rating: 4.9,
     reviews: 67,
@@ -69,8 +72,9 @@ export const skills: Skill[] = [
   {
     id: "web-research-pro",
     name: "Web Research Pro",
-    description: "Advanced web research with multi-source verification, summarization, and structured data extraction.",
-    longDescription: "Supercharge your AI agent with professional-grade web research capabilities. This skill enables deep web searches across multiple engines, cross-references information, extracts structured data, and provides verified summaries with source links.\n\nFeatures:\n- Multi-engine search (Brave, Google, DuckDuckGo)\n- Content extraction and summarization\n- Fact verification across sources\n- Structured data output (JSON, tables)\n- Source credibility scoring\n- Research report generation",
+    tagline: "Your agent becomes a world-class researcher",
+    description: "Your agent searches the web, cross-checks multiple sources, and delivers verified summaries with links — no more guessing, no more hallucinations.",
+    longDescription: "Supercharge your agent's ability to find and verify information from across the web. This skill turns your agent into a meticulous researcher that checks multiple sources before giving you answers.\n\nWhat your agent gains:\n• Searches across multiple engines simultaneously\n• Cross-references facts from different sources\n• Extracts and organizes data into clean summaries\n• Scores source credibility so you know what to trust\n• Generates full research reports with links\n• Works for any topic — news, science, business, anything\n\nPerfect for: Professionals who need reliable information, journalists, students, anyone tired of AI making things up.",
     price: 4.99,
     rating: 4.7,
     reviews: 89,
@@ -88,8 +92,9 @@ export const skills: Skill[] = [
   {
     id: "code-review-assistant",
     name: "Code Review Assistant",
-    description: "Automated code review with security analysis, best practices checking, and improvement suggestions.",
-    longDescription: "Give your AI agent the ability to perform thorough code reviews. This skill analyzes code for security vulnerabilities, performance issues, best practice violations, and suggests improvements with explanations.\n\nFeatures:\n- Security vulnerability detection\n- Performance analysis\n- Best practices enforcement\n- Code style consistency checks\n- Dependency audit\n- Supports 20+ languages\n- Git diff analysis\n- PR review automation",
+    tagline: "Your agent catches bugs before they ship",
+    description: "Your agent reviews code for security holes, performance issues, and bad practices — then explains what's wrong and how to fix it, in plain language.",
+    longDescription: "Let your agent be your second pair of eyes on every piece of code. It catches security vulnerabilities, spots performance problems, and suggests improvements — all explained clearly.\n\nWhat your agent gains:\n• Detects security vulnerabilities automatically\n• Finds performance bottlenecks\n• Checks code against best practices\n• Reviews code style and consistency\n• Audits dependencies for known issues\n• Supports 20+ programming languages\n• Analyzes Git diffs and pull requests\n\nPerfect for: Solo developers, small teams without dedicated reviewers, anyone who wants fewer bugs and more secure code.",
     price: 9.99,
     rating: 4.6,
     reviews: 45,
@@ -107,8 +112,9 @@ export const skills: Skill[] = [
   {
     id: "weather-intelligence",
     name: "Weather Intelligence",
-    description: "Real-time weather data, forecasts, alerts, and natural language weather reporting for any location.",
-    longDescription: "Equip your AI agent with comprehensive weather intelligence. Get real-time conditions, multi-day forecasts, severe weather alerts, and natural language weather reports for any location worldwide.\n\nFeatures:\n- Real-time weather conditions\n- 7-day detailed forecasts\n- Severe weather alerts\n- Air quality index\n- UV index tracking\n- Historical weather data\n- Natural language reports\n- Multiple unit systems (metric/imperial)",
+    tagline: "Your agent always knows the weather",
+    description: "Your agent checks real-time weather, gives forecasts, sends severe weather alerts, and talks about it naturally — like having a personal meteorologist.",
+    longDescription: "Never be caught in the rain again. This skill gives your agent live weather awareness for any location in the world, delivered in natural, easy-to-understand language.\n\nWhat your agent gains:\n• Real-time weather conditions worldwide\n• 7-day detailed forecasts\n• Severe weather alerts and warnings\n• Air quality and UV index tracking\n• Historical weather data comparisons\n• Natural language weather reports\n• Works in metric or imperial units\n\nPerfect for: Anyone who goes outside, travelers, event planners, outdoor enthusiasts, or just people who like to know if they need an umbrella.",
     price: 2.99,
     rating: 4.5,
     reviews: 112,
@@ -126,8 +132,9 @@ export const skills: Skill[] = [
   {
     id: "memory-curator",
     name: "Memory Curator",
-    description: "Intelligent memory management — automatically organizes, summarizes, and retrieves agent memories.",
-    longDescription: "Transform how your AI agent handles memory. This skill automatically organizes conversation history, creates summaries, builds knowledge graphs, and retrieves relevant memories when needed.\n\nFeatures:\n- Automatic memory organization\n- Conversation summarization\n- Knowledge graph building\n- Semantic memory retrieval\n- Memory importance scoring\n- Periodic memory consolidation\n- Export/import memory snapshots\n- Privacy-aware filtering",
+    tagline: "Your agent remembers everything important",
+    description: "Your agent stops forgetting. It organizes conversations, remembers key details, and brings up the right context at the right time — like a perfect memory.",
+    longDescription: "AI agents forget things between conversations. Not anymore. This skill gives your agent a proper memory system that stores, organizes, and retrieves what matters.\n\nWhat your agent gains:\n• Remembers important details across conversations\n• Automatically organizes notes and context\n• Creates summaries of past interactions\n• Retrieves relevant memories when you need them\n• Prioritizes what's important vs. forgettable\n• Periodic memory cleanup to stay efficient\n• Export or import memory snapshots\n• Respects your privacy with smart filtering\n\nPerfect for: Anyone who's frustrated their agent forgets what they talked about yesterday. Power users with complex ongoing projects.",
     price: 0,
     rating: 4.4,
     reviews: 33,
@@ -145,8 +152,9 @@ export const skills: Skill[] = [
   {
     id: "email-composer",
     name: "Email Composer Pro",
-    description: "Professional email drafting with tone adjustment, templates, and multi-language support.",
-    longDescription: "Let your AI agent draft professional emails effortlessly. This skill handles everything from formal business correspondence to casual messages, with tone adjustment, templates, and multi-language support.\n\nFeatures:\n- Professional email drafting\n- Tone adjustment (formal, casual, friendly, urgent)\n- 50+ email templates\n- Multi-language composition\n- Grammar and spell checking\n- Follow-up suggestions\n- Meeting scheduling emails\n- Reply suggestions based on context",
+    tagline: "Your agent writes perfect emails for you",
+    description: "Tell your agent what you need to say, and it drafts a polished email in seconds — formal, casual, follow-up, you name it. In any language.",
+    longDescription: "Stop staring at blank email drafts. Just tell your agent what you want to communicate, and it writes a polished, professional email in seconds — adjusted to the perfect tone.\n\nWhat your agent gains:\n• Drafts professional emails from simple instructions\n• Adjusts tone: formal, casual, friendly, or urgent\n• 50+ templates for common situations\n• Writes in multiple languages\n• Built-in grammar and spell checking\n• Suggests follow-ups based on context\n• Creates meeting invites and scheduling emails\n• Smart reply suggestions for incoming mail\n\nPerfect for: Busy professionals, non-native speakers, anyone who spends too much time on emails, people who dread the \"just following up\" message.",
     price: 3.99,
     rating: 4.3,
     reviews: 56,
@@ -164,8 +172,9 @@ export const skills: Skill[] = [
   {
     id: "self-reflection",
     name: "Self Reflection",
-    description: "Enables agents to analyze their own performance, identify patterns, and continuously improve.",
-    longDescription: "A meta-skill that gives your AI agent the ability to reflect on its own actions and improve over time. It analyzes response quality, identifies patterns in user interactions, and suggests behavioral improvements.\n\nFeatures:\n- Response quality self-assessment\n- Interaction pattern analysis\n- Improvement suggestion generation\n- Performance metrics tracking\n- Behavioral adjustment recommendations\n- User satisfaction prediction\n- Learning curve optimization\n- Configurable reflection schedules",
+    tagline: "Your agent learns from its own mistakes",
+    description: "Your agent analyzes its own performance and gets better over time — it notices patterns, learns what works for you, and continuously improves itself.",
+    longDescription: "What if your AI agent could get better at helping you just by reflecting on past interactions? This meta-skill gives your agent self-awareness about its own performance.\n\nWhat your agent gains:\n• Evaluates the quality of its own responses\n• Identifies patterns in what you like and don't like\n• Generates specific ideas for self-improvement\n• Tracks performance metrics over time\n• Predicts when you might be unsatisfied\n• Optimizes its learning curve automatically\n• Configurable reflection schedules\n\nPerfect for: Power users who want their agent to feel increasingly personalized. Anyone who wants an agent that gets noticeably better week after week.",
     price: 0,
     rating: 4.7,
     reviews: 41,
@@ -188,7 +197,7 @@ export const reviews: Review[] = [
     skillId: "peruvian-legal-research",
     author: "LegalEagle_Lima",
     rating: 5,
-    comment: "Incredibly accurate for Peruvian constitutional law. Saved me hours of research on Article 2 analysis.",
+    comment: "My agent went from clueless about Peruvian law to citing specific constitutional articles. Incredible upgrade.",
     date: "2026-02-10"
   },
   {
@@ -196,7 +205,7 @@ export const reviews: Review[] = [
     skillId: "peruvian-legal-research",
     author: "EstudianteDerecho",
     rating: 5,
-    comment: "Perfecto para mis estudios de derecho. Las citas son precisas y bien fundamentadas.",
+    comment: "Instalé esto y mi agente ahora me ayuda con todas mis tareas de derecho. Las citas son perfectas.",
     date: "2026-02-08"
   },
   {
@@ -204,7 +213,7 @@ export const reviews: Review[] = [
     skillId: "peruvian-legal-research",
     author: "AbogadoPeru",
     rating: 4,
-    comment: "Great for general research. Would love to see more labor law coverage in the next version.",
+    comment: "Huge time saver for basic research. Would love to see labor law added in the next update.",
     date: "2026-01-30"
   },
   {
@@ -212,7 +221,7 @@ export const reviews: Review[] = [
     skillId: "voice-camila-tts",
     author: "PodcasterPE",
     rating: 5,
-    comment: "The most natural Peruvian accent I've heard from any TTS. Camila sounds incredibly real!",
+    comment: "My agent can TALK now! The Peruvian accent sounds so natural, my family thought I was on a call with a real person.",
     date: "2026-02-12"
   },
   {
@@ -220,7 +229,7 @@ export const reviews: Review[] = [
     skillId: "voice-camila-tts",
     author: "VoiceAppDev",
     rating: 5,
-    comment: "We integrated this into our accessibility app. Users love the natural pronunciation.",
+    comment: "Gave our accessibility app a voice. Users love how natural and warm Camila sounds.",
     date: "2026-02-05"
   },
   {
@@ -228,7 +237,7 @@ export const reviews: Review[] = [
     skillId: "web-research-pro",
     author: "DataAnalyst42",
     rating: 5,
-    comment: "Multi-source verification is a game changer. No more single-source hallucinations.",
+    comment: "Night and day difference. My agent used to make things up — now it checks multiple sources and shows its work.",
     date: "2026-02-11"
   },
   {
@@ -236,7 +245,7 @@ export const reviews: Review[] = [
     skillId: "web-research-pro",
     author: "JournalistX",
     rating: 4,
-    comment: "Excellent for fact-checking. The source credibility scoring is very useful.",
+    comment: "The source credibility scoring alone is worth the price. Essential upgrade for anyone who needs facts.",
     date: "2026-02-03"
   },
   {
@@ -244,7 +253,7 @@ export const reviews: Review[] = [
     skillId: "code-review-assistant",
     author: "SeniorDev_JS",
     rating: 5,
-    comment: "Caught a critical SQL injection vulnerability in our codebase. Worth every penny.",
+    comment: "This skill found a critical SQL injection in our code that we all missed. Paid for itself instantly.",
     date: "2026-02-09"
   },
   {
@@ -252,7 +261,7 @@ export const reviews: Review[] = [
     skillId: "memory-curator",
     author: "AgentBuilder",
     rating: 4,
-    comment: "Really helps with long conversation context. The summarization is smart and relevant.",
+    comment: "Finally, my agent remembers what we talked about last week. No more re-explaining everything.",
     date: "2026-01-28"
   },
   {
@@ -260,7 +269,7 @@ export const reviews: Review[] = [
     skillId: "self-reflection",
     author: "AIResearcher",
     rating: 5,
-    comment: "Fascinating to watch an agent improve its own behavior over time. True meta-cognition.",
+    comment: "After a week with this installed, my agent noticeably improved. It started anticipating what I needed.",
     date: "2026-02-07"
   }
 ];
