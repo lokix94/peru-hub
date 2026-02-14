@@ -3,42 +3,42 @@
 import Link from "next/link";
 import { useState } from "react";
 import SkillCard from "@/components/SkillCard";
-import { skills, getFeaturedSkills } from "@/data/skills";
+import { skills, getFeaturedSkills, getNewSkills } from "@/data/skills";
 import { useLanguage } from "@/context/LanguageContext";
 
 const banners = [
   {
     id: 1,
-    headline: { es: "Dale voz a tu agente 🎙️", en: "Give your agent a voice 🎙️" },
+    headline: { es: "Moltbook Tools — ¡Ya llegaron! 🦞", en: "Moltbook Tools — They're here! 🦞" },
     sub: {
-      es: "Voz neural peruana — Camila suena tan real que nadie nota la diferencia",
-      en: "Peruvian neural voice — Camila sounds so real nobody notices the difference",
+      es: "Analytics, Auto-Poster, Community Manager y Trend Scanner. Todo para dominar Moltbook.",
+      en: "Analytics, Auto-Poster, Community Manager & Trend Scanner. Everything to dominate Moltbook.",
     },
-    cta: { es: "Instalar gratis", en: "Install free" },
-    link: "/marketplace/voice-camila-tts",
-    gradient: "from-violet-600 to-indigo-700",
+    cta: { es: "Ver Moltbook Tools", en: "See Moltbook Tools" },
+    link: "/marketplace/moltbook-analytics",
+    gradient: "from-orange-500 to-red-600",
   },
   {
     id: 2,
-    headline: { es: "¿Tu agente olvida todo? 🧠", en: "Does your agent forget everything? 🧠" },
+    headline: { es: "Investigación inteligente 🔍", en: "Smart Research 🔍" },
     sub: {
-      es: "Instala Memory Curator y tu agente recordará cada detalle importante",
-      en: "Install Memory Curator and your agent will remember every important detail",
+      es: "Smart Web Researcher verifica en múltiples fuentes y puntúa la confiabilidad",
+      en: "Smart Web Researcher verifies across multiple sources and scores reliability",
     },
-    cta: { es: "Ver skill", en: "See skill" },
-    link: "/marketplace/memory-curator",
-    gradient: "from-amber-500 to-orange-600",
+    cta: { es: "Desde $4.99", en: "From $4.99" },
+    link: "/marketplace/smart-web-researcher",
+    gradient: "from-emerald-500 to-teal-600",
   },
   {
     id: 3,
-    headline: { es: "Nuevo: Research Pro 🌐", en: "New: Research Pro 🌐" },
+    headline: { es: "Tu agente habla 🎤", en: "Your agent speaks 🎤" },
     sub: {
-      es: "Tu agente verifica información en múltiples fuentes — adiós alucinaciones",
-      en: "Your agent verifies information from multiple sources — goodbye hallucinations",
+      es: "Voz neural peruana gratis — Camila suena tan real que nadie nota la diferencia",
+      en: "Free Peruvian neural voice — Camila sounds so real nobody notices the difference",
     },
-    cta: { es: "Desde $4.99", en: "From $4.99" },
-    link: "/marketplace/web-research-pro",
-    gradient: "from-emerald-500 to-teal-600",
+    cta: { es: "Instalar gratis", en: "Install free" },
+    link: "/marketplace/voice-synthesis",
+    gradient: "from-violet-600 to-indigo-700",
   },
 ];
 
@@ -50,13 +50,13 @@ export default function HomePage() {
   const free = skills.filter(s => s.price === 0);
 
   const storeCategories = [
-    { nameKey: "cat.research", icon: "🔍", slug: "Research", color: "bg-blue-50 border-blue-200 hover:bg-blue-100", iconBg: "bg-blue-100" },
-    { nameKey: "cat.voice", icon: "🎤", slug: "Voice", color: "bg-purple-50 border-purple-200 hover:bg-purple-100", iconBg: "bg-purple-100" },
-    { nameKey: "cat.legal", icon: "⚖️", slug: "Research", color: "bg-red-50 border-red-200 hover:bg-red-100", iconBg: "bg-red-100" },
-    { nameKey: "cat.code", icon: "💻", slug: "Development", color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100", iconBg: "bg-emerald-100" },
-    { nameKey: "cat.productivity", icon: "📧", slug: "Productivity", color: "bg-amber-50 border-amber-200 hover:bg-amber-100", iconBg: "bg-amber-100" },
-    { nameKey: "cat.agent.core", icon: "🧠", slug: "Agent Core", color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100", iconBg: "bg-indigo-100" },
-    { nameKey: "cat.utilities", icon: "🌤️", slug: "Utilities", color: "bg-teal-50 border-teal-200 hover:bg-teal-100", iconBg: "bg-teal-100" },
+    { nameKey: "cat.research", icon: "🔍", slug: "Investigación", color: "bg-blue-50 border-blue-200 hover:bg-blue-100", iconBg: "bg-blue-100" },
+    { nameKey: "cat.moltbook", icon: "🦞", slug: "Moltbook Tools", color: "bg-orange-50 border-orange-200 hover:bg-orange-100", iconBg: "bg-orange-100" },
+    { nameKey: "cat.voice", icon: "🎤", slug: "Voz y Audio", color: "bg-purple-50 border-purple-200 hover:bg-purple-100", iconBg: "bg-purple-100" },
+    { nameKey: "cat.legal", icon: "⚖️", slug: "Legal y Compliance", color: "bg-red-50 border-red-200 hover:bg-red-100", iconBg: "bg-red-100" },
+    { nameKey: "cat.code", icon: "💻", slug: "Código", color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100", iconBg: "bg-emerald-100" },
+    { nameKey: "cat.productivity", icon: "📧", slug: "Productividad", color: "bg-amber-50 border-amber-200 hover:bg-amber-100", iconBg: "bg-amber-100" },
+    { nameKey: "cat.agent.core", icon: "🧠", slug: "Core del Agente", color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100", iconBg: "bg-indigo-100" },
     { nameKey: "cat.all", icon: "🛒", slug: "all", color: "bg-gray-50 border-gray-200 hover:bg-gray-100", iconBg: "bg-gray-100" },
   ];
 
@@ -195,7 +195,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
           {featured.map((skill, i) => (
-            <SkillCard key={skill.id} skill={skill} index={i} />
+            <SkillCard key={skill.id} skill={skill} />
           ))}
         </div>
       </section>

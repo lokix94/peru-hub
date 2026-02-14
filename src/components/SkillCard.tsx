@@ -25,7 +25,7 @@ function StarRating({ rating, showValue = true }: { rating: number; showValue?: 
   );
 }
 
-export default function SkillCard({ skill }: { skill: Skill }) {
+export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: number }) {
   const { addItem, isInCart } = useCart();
   const { t } = useLanguage();
   const inCart = isInCart(skill.id);
