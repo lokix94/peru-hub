@@ -163,6 +163,7 @@ export default function Header() {
               { href: "/marketplace#dev", label: "💻 Código" },
               { href: "/marketplace#productivity", label: "📧 Productividad" },
               { href: "/community", label: "👥 Comunidad" },
+              { href: "/sugerencias", label: "📬 Sugerencias" },
             ].map((item) => {
               const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href.split("#")[0]) && item.href !== "/";
               return (
@@ -193,6 +194,7 @@ export default function Header() {
               { href: "/my-skills", label: "📋 Mi agente" },
               { href: "/account", label: "👤 Mi cuenta" },
               { href: "/community", label: "👥 Comunidad" },
+              { href: "/sugerencias", label: "📬 Sugerencias" },
               { href: "/admin", label: "⚙️ Admin" },
             ].map((item) => (
               <Link
