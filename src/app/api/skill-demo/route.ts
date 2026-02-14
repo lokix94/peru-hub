@@ -493,6 +493,108 @@ async function runSocialMediaDemo() {
   };
 }
 
+/* ── Stock Market Analyzer Demo ── */
+async function runStockMarketAnalyzerDemo() {
+  return {
+    skill: "stock-market-analyzer",
+    title: "📈 Stock Market Analyzer — Análisis en Vivo",
+    timestamp: new Date().toISOString(),
+    data: {
+      stock: {
+        symbol: "AAPL",
+        name: "Apple Inc.",
+        exchange: "NASDAQ",
+        price: 237.42,
+        change: +3.18,
+        changePercent: +1.36,
+        open: 234.10,
+        high: 238.95,
+        low: 233.87,
+        volume: "48.2M",
+        marketCap: "$3.62T",
+        pe: 38.7,
+        dividend: "0.51%",
+      },
+      technicalIndicators: {
+        rsi: { value: 62.4, signal: "Neutral — acercándose a sobrecompra", zone: "neutral" },
+        macd: { value: 1.87, signal: "Bullish crossover", histogram: 0.34, zone: "bullish" },
+        bollinger: { upper: 241.20, middle: 235.50, lower: 229.80, position: "upper-half" },
+        movingAverages: {
+          sma20: 233.15,
+          sma50: 228.90,
+          sma200: 215.42,
+          trend: "Alcista — precio sobre todas las medias",
+        },
+      },
+      supportResistance: {
+        resistance: [{ level: 240.00, strength: "Fuerte" }, { level: 245.50, strength: "Moderada" }],
+        support: [{ level: 232.00, strength: "Fuerte" }, { level: 225.80, strength: "Moderada" }],
+      },
+      recommendation: {
+        action: "HOLD",
+        confidence: 74,
+        reasoning: "RSI neutral con tendencia alcista. MACD muestra crossover bullish. Precio sobre SMA200. Esperar pullback a $232 para comprar, o ruptura de $240 para confirmar rally.",
+      },
+      earnings: {
+        nextDate: "2026-04-24",
+        estimatedEPS: "$2.38",
+        previousEPS: "$2.18",
+        surprise: "+4.1%",
+      },
+      insight: "AAPL cotiza a $237.42 (+1.36%). Análisis técnico: tendencia alcista confirmada. MACD bullish, RSI neutral. Recomendación: HOLD con soporte en $232 y resistencia en $240.",
+    },
+  };
+}
+
+/* ── Crypto Intelligence Demo ── */
+async function runCryptoIntelligenceDemo() {
+  return {
+    skill: "crypto-intelligence",
+    title: "🪙 Crypto Intelligence — Mercado en Vivo",
+    timestamp: new Date().toISOString(),
+    data: {
+      marketOverview: {
+        totalMarketCap: "$3.42T",
+        totalVolume24h: "$142.8B",
+        btcDominance: "52.3%",
+        activeCryptos: 12847,
+      },
+      fearGreedIndex: {
+        value: 71,
+        label: "Greed",
+        previous: 65,
+        trend: "Subiendo",
+      },
+      topAssets: [
+        { symbol: "BTC", name: "Bitcoin", price: 97842.50, change24h: +2.14, marketCap: "$1.94T", volume: "$38.2B" },
+        { symbol: "ETH", name: "Ethereum", price: 3421.80, change24h: -0.87, marketCap: "$411.2B", volume: "$18.7B" },
+        { symbol: "SOL", name: "Solana", price: 187.35, change24h: +5.42, marketCap: "$87.3B", volume: "$4.1B" },
+        { symbol: "BNB", name: "BNB", price: 642.10, change24h: +1.23, marketCap: "$93.8B", volume: "$2.3B" },
+      ],
+      topGainers: [
+        { symbol: "RENDER", change24h: +18.7, price: 11.42 },
+        { symbol: "FET", change24h: +14.2, price: 2.87 },
+        { symbol: "INJ", change24h: +12.1, price: 38.90 },
+      ],
+      topLosers: [
+        { symbol: "DOGE", change24h: -6.3, price: 0.1842 },
+        { symbol: "SHIB", change24h: -5.1, price: 0.00002134 },
+        { symbol: "AVAX", change24h: -3.8, price: 42.15 },
+      ],
+      gasFees: {
+        ethereum: { low: 12, average: 24, high: 48, unit: "gwei" },
+        bsc: { low: 1, average: 3, high: 5, unit: "gwei" },
+      },
+      onChain: {
+        btcActiveAddresses: "1.02M",
+        ethDailyTx: "1.24M",
+        whaleMovements: "3 transacciones de +1000 BTC en las últimas 24h",
+      },
+      insight: "BTC a $97,842 (+2.14%). Fear & Greed Index: 71 (Greed). Top gainer: RENDER +18.7%. Gas Ethereum: 24 gwei promedio. 3 movimientos de ballenas detectados.",
+    },
+  };
+}
+
 /* ── Route Handler ── */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -663,6 +765,45 @@ export async function GET(request: NextRequest) {
           insight: "18 skills escaneados. 2 amenazas detectadas: 1 credential stealer bloqueado, 1 actividad sospechosa en revisión. 16 skills limpios. Base de datos comunitaria: 342 reportes, 23 skills bloqueados globalmente.",
         },
       };
+      break;
+    case "3d-model-creator":
+      result = {
+        skill: "3d-model-creator",
+        title: "🎨 3D Model Creator — Modelo Generado",
+        timestamp: new Date().toISOString(),
+        data: {
+          model: {
+            name: "Llama Peruana",
+            polygonCount: 12847,
+            textureResolution: "2048x2048",
+            renderTime: "4.3 seconds",
+            dimensions: { width: "1.2m", height: "1.8m", depth: "0.6m" },
+            previewDescription: "Llama adulta en pose natural con pelaje texturizado detallado, colores tierra cálidos y ojos expresivos. Optimizada para rendering en tiempo real.",
+          },
+          formats: [
+            { name: "OBJ", size: "3.4 MB", status: "✅ Listo" },
+            { name: "GLTF", size: "2.8 MB", status: "✅ Listo" },
+            { name: "STL", size: "4.1 MB", status: "✅ Listo" },
+            { name: "FBX", size: "5.2 MB", status: "✅ Listo" },
+          ],
+          specs: {
+            vertices: 6524,
+            faces: 12847,
+            materials: 3,
+            textures: ["Diffuse 2048x2048", "Normal Map 2048x2048", "Roughness 1024x1024"],
+            rigged: true,
+            animated: false,
+          },
+          compatibility: ["Blender 3.6+", "Unity 2022+", "Unreal Engine 5", "Impresión 3D (FDM/SLA)"],
+          insight: "Modelo 'Llama Peruana' generado en 4.3 segundos. 12,847 polígonos optimizados para rendering en tiempo real. Exportado en 4 formatos. Texturas PBR incluidas a 2048x2048.",
+        },
+      };
+      break;
+    case "stock-market-analyzer":
+      result = await runStockMarketAnalyzerDemo();
+      break;
+    case "crypto-intelligence":
+      result = await runCryptoIntelligenceDemo();
       break;
     case "agent-face-creator":
       result = {

@@ -1254,8 +1254,92 @@ function DemoResultView({ result }: { result: any }) {
         </div>
       )}
 
+      {/* ── 3D Model Creator ── */}
+      {skill === "3d-model-creator" && data.model && (
+        <div className="space-y-3">
+          {/* Model preview card */}
+          <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-3xl shadow-lg">
+                🦙
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-800">{data.model.name}</p>
+                <p className="text-[10px] text-gray-500">
+                  {data.model.dimensions.width} × {data.model.dimensions.height} × {data.model.dimensions.depth}
+                </p>
+                <p className="text-[10px] text-indigo-600 font-medium">⏱️ Generado en {data.model.renderTime}</p>
+              </div>
+            </div>
+            <p className="text-[11px] text-gray-600 italic leading-relaxed">{data.model.previewDescription}</p>
+          </div>
+
+          {/* Specs grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { label: "Polígonos", value: data.model.polygonCount.toLocaleString(), color: "blue" },
+              { label: "Vértices", value: data.specs.vertices.toLocaleString(), color: "green" },
+              { label: "Materiales", value: data.specs.materials, color: "purple" },
+              { label: "Textura", value: data.model.textureResolution, color: "amber" },
+            ].map((stat) => (
+              <div key={stat.label} className={`p-2 rounded-lg bg-${stat.color}-50 border border-${stat.color}-200 text-center`}>
+                <p className={`text-sm font-bold text-${stat.color}-600`}>{stat.value}</p>
+                <p className="text-[9px] text-gray-500">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Export formats */}
+          <div>
+            <p className="text-[10px] text-gray-500 uppercase font-bold mb-1.5">📦 Formatos de Exportación</p>
+            <div className="grid grid-cols-2 gap-1.5">
+              {data.formats.map((f: any) => (
+                <div key={f.name} className="flex items-center justify-between p-2 rounded-lg bg-white border border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-indigo-600">{f.name}</span>
+                    <span className="text-[9px] text-gray-400">{f.size}</span>
+                  </div>
+                  <span className="text-[9px] text-green-600 font-medium">{f.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Textures */}
+          <div>
+            <p className="text-[10px] text-gray-500 uppercase font-bold mb-1.5">🎨 Texturas PBR</p>
+            <div className="flex flex-wrap gap-1.5">
+              {data.specs.textures.map((t: string) => (
+                <span key={t} className="px-2 py-1 rounded-full bg-purple-50 border border-purple-200 text-[9px] font-medium text-purple-700">{t}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Compatibility */}
+          <div>
+            <p className="text-[10px] text-gray-500 uppercase font-bold mb-1.5">🔧 Compatibilidad</p>
+            <div className="flex flex-wrap gap-1.5">
+              {data.compatibility.map((c: string) => (
+                <span key={c} className="px-2 py-1 rounded-full bg-green-50 border border-green-200 text-[9px] font-medium text-green-700">{c}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Extra info */}
+          <div className="flex items-center gap-3 p-2 rounded-lg bg-white border border-gray-100 text-[11px]">
+            <span className="text-gray-500">🦴 Rigged:</span>
+            <span className="font-medium text-green-600">{data.specs.rigged ? "Sí" : "No"}</span>
+            <span className="text-gray-300">|</span>
+            <span className="text-gray-500">🎬 Animado:</span>
+            <span className="font-medium text-gray-600">{data.specs.animated ? "Sí" : "No"}</span>
+          </div>
+
+          <p className="text-xs text-indigo-700 font-medium p-2 bg-indigo-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
       {/* ── Generic fallback ── */}
-      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro", "agent-face-creator", "agent-live-monitor"].includes(skill) && data && (
+      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro", "agent-face-creator", "agent-live-monitor", "3d-model-creator"].includes(skill) && data && (
         <div className="p-3 rounded-lg bg-green-50 border border-green-200">
           {data.message && <p className="text-xs text-green-700">✅ {data.message}</p>}
           {!data.message && Object.keys(data).length > 0 && (
