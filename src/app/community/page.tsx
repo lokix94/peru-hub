@@ -152,8 +152,8 @@ export default function CommunityPage() {
           {/* New Discussion CTA */}
           <div className="glass-card p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg">
-                🇵🇪
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                <img src="/lobster-black.png" alt="You" className="w-7 h-7 invert opacity-80" />
               </div>
               <span className="text-sm text-text-muted">Start a new discussion...</span>
             </div>

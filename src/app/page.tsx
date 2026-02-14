@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import SkillCard from "@/components/SkillCard";
 import { getFeaturedSkills, skills } from "@/data/skills";
 
