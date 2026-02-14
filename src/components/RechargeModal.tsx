@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface RechargeModalProps {
   isOpen: boolean;
@@ -17,11 +18,11 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
   const [copied, setCopied] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [visible, setVisible] = useState(false);
+  const { t } = useLanguage();
 
   // Animate in
   useEffect(() => {
     if (isOpen) {
-      // Small delay so the transition triggers
       requestAnimationFrame(() => setVisible(true));
     } else {
       setVisible(false);
@@ -56,7 +57,6 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback for older browsers
       const el = document.createElement("textarea");
       el.value = WALLET_ADDRESS;
       document.body.appendChild(el);
@@ -96,7 +96,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
         <button
           onClick={onClose}
           className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-colors"
-          aria-label="Cerrar"
+          aria-label={t("close")}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -107,8 +107,8 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
           {!submitted ? (
             <>
               {/* Title */}
-              <h2 className="text-xl font-bold text-white mb-1">💳 Recargar Saldo</h2>
-              <p className="text-xs text-white/50 mb-5">Añade fondos a tu cuenta Peru Hub</p>
+              <h2 className="text-xl font-bold text-white mb-1">💳 {t("recharge.title")}</h2>
+              <p className="text-xs text-white/50 mb-5">{t("recharge.subtitle")}</p>
 
               {/* QR Code */}
               <div className="flex justify-center mb-4">
@@ -128,13 +128,13 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                 USDT - BEP 20 - Binance
               </p>
               <p className="text-center text-xs text-white/50 mb-4">
-                Escanea el QR para recargar tu saldo
+                {t("recharge.scan")}
               </p>
 
               {/* Wallet address */}
               <div className="mb-5">
                 <label className="block text-[11px] text-white/40 mb-1.5 uppercase tracking-wider font-medium">
-                  Dirección de depósito
+                  {t("recharge.deposit")}
                 </label>
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2.5">
                   <code className="flex-1 text-[11px] text-white/80 font-mono break-all select-all leading-relaxed">
@@ -148,7 +148,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                         : "bg-white/10 text-white/60 hover:text-white hover:bg-white/20 border border-white/10"
                     }`}
                   >
-                    {copied ? "✓ Copiado" : "Copiar"}
+                    {copied ? `✓ ${t("copied")}` : t("copy")}
                   </button>
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
               {/* Amount selection */}
               <div className="mb-4">
                 <label className="block text-[11px] text-white/40 mb-2 uppercase tracking-wider font-medium">
-                  ¿Cuánto deseas recargar? (USDT)
+                  {t("recharge.how.much")}
                 </label>
                 <div className="grid grid-cols-4 gap-2 mb-2.5">
                   {PRESET_AMOUNTS.map((preset) => (
@@ -177,7 +177,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                   type="number"
                   min="1"
                   step="any"
-                  placeholder="Otro monto..."
+                  placeholder={t("recharge.other")}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/25"
@@ -187,7 +187,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
               {/* Transaction hash */}
               <div className="mb-5">
                 <label className="block text-[11px] text-white/40 mb-1.5 uppercase tracking-wider font-medium">
-                  Ingresa el ID de transacción (TxHash)
+                  {t("recharge.txhash.label")}
                 </label>
                 <input
                   type="text"
@@ -204,7 +204,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                 disabled={!amount || !txHash.trim()}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-violet-500 hover:from-primary-hover hover:to-violet-600 text-white text-sm font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
               >
-                Confirmar Recarga
+                {t("recharge.confirm")}
               </button>
             </>
           ) : (
@@ -214,13 +214,13 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                 ✅
               </div>
               <h3 className="text-lg font-bold text-white mb-2">
-                Recarga en proceso
+                {t("recharge.processing")}
               </h3>
               <p className="text-sm text-white/60 mb-2">
-                Verificando transacción...
+                {t("recharge.verifying")}
               </p>
               <p className="text-xs text-white/40 mb-5">
-                Monto: <span className="text-amber-400 font-bold">${amount} USDT</span>
+                {t("recharge.amount")}: <span className="text-amber-400 font-bold">${amount} USDT</span>
               </p>
 
               <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-5">
@@ -245,7 +245,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                   onClick={onClose}
                   className="px-6 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors"
                 >
-                  Cerrar
+                  {t("close")}
                 </button>
               </div>
             </div>

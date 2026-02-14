@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { skills, getSkillById, getReviewsBySkillId } from "@/data/skills";
+import { skills, getSkillById, getReviewsBySkillId, getSkillsByCategory } from "@/data/skills";
 import { StarRating } from "@/components/SkillCard";
+import SkillCard from "@/components/SkillCard";
 import VoiceDemo from "@/components/VoiceDemo";
 import { AddToCartButton, AddAndUpgradeButton, InstallFreeButton } from "@/components/SkillDetailClient";
 
@@ -17,15 +18,22 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
     notFound();
   }
 
-  const reviews = getReviewsBySkillId(skill.id);
+  const reviewsList = getReviewsBySkillId(skill.id);
+  const relatedSkills = getSkillsByCategory(skill.category)
+    .filter((s) => s.id !== skill.id)
+    .slice(0, 3);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Breadcrumb */}
       <nav className="text-xs text-text-muted mb-6">
-        <Link href="/" className="hover:text-primary">Inicio</Link>
+        <Link href="/" className="hover:text-primary">
+          Inicio
+        </Link>
         <span className="mx-1.5">›</span>
-        <Link href="/marketplace" className="hover:text-primary">Todas las skills</Link>
+        <Link href="/marketplace" className="hover:text-primary">
+          Todas las skills
+        </Link>
         <span className="mx-1.5">›</span>
         <span className="text-text-primary font-medium">{skill.name}</span>
       </nav>
@@ -43,19 +51,28 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <h1 className="text-xl font-bold text-text-primary">{skill.name}</h1>
-                  {skill.price === 0 && (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-100 text-green-700">GRATIS</span>
+                  {skill.isFree && (
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-100 text-green-700">
+                      GRATIS
+                    </span>
                   )}
-                  {skill.featured && (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">⭐ TOP</span>
+                  {skill.isNew && (
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 text-blue-700">
+                      🆕 NUEVO
+                    </span>
+                  )}
+                  {skill.isFeatured && (
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">
+                      ⭐ TOP
+                    </span>
                   )}
                 </div>
 
-                {/* Tagline */}
-                <p className="text-sm text-primary font-medium mb-2">{skill.tagline}</p>
+                {/* Short description */}
+                <p className="text-sm text-primary font-medium mb-2">{skill.shortDescription}</p>
 
                 <div className="flex items-center gap-3 flex-wrap text-xs text-text-muted mb-2">
-                  <span className="flex items-center gap-1">{skill.authorAvatar} {skill.author}</span>
+                  <span>{skill.author}</span>
                   <span>·</span>
                   <span>v{skill.version}</span>
                   <span>·</span>
@@ -64,64 +81,76 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
                 <div className="flex items-center gap-3">
                   <StarRating rating={skill.rating} />
-                  <span className="text-xs text-text-muted">{skill.reviews} reseñas</span>
+                  <span className="text-xs text-text-muted">{skill.reviewCount} reseñas</span>
                   <span className="text-xs text-text-muted">·</span>
-                  <span className="text-xs text-text-muted">{skill.installs.toLocaleString()} agentes mejorados</span>
+                  <span className="text-xs text-text-muted">
+                    {skill.installCount.toLocaleString()} agentes mejorados
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Description */}
+          {/* Features list */}
+          {skill.features.length > 0 && (
+            <div className="bg-white rounded-xl border border-border p-6">
+              <h2 className="text-base font-bold text-text-primary mb-3">✨ Características</h2>
+              <ul className="space-y-2.5">
+                {skill.features.map((feature, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-text-secondary">
+                    <span className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center text-primary text-xs shrink-0 mt-0.5">
+                      ✓
+                    </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Full description */}
           <div className="bg-white rounded-xl border border-border p-6">
             <h2 className="text-base font-bold text-text-primary mb-3">¿Qué gana tu agente?</h2>
             <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
-              {skill.longDescription}
+              {skill.description}
             </div>
           </div>
 
           {/* Voice Demo */}
-          {skill.category === "Voice" && (
+          {skill.category === "Voz y Audio" && (
             <div className="bg-white rounded-xl border border-border p-6">
               <h2 className="text-base font-bold text-text-primary mb-1">🎙️ Escúchalo en acción</h2>
-              <p className="text-xs text-text-muted mb-4">Así sonará tu agente después de instalar este skill</p>
+              <p className="text-xs text-text-muted mb-4">
+                Así sonará tu agente después de instalar este skill
+              </p>
               <VoiceDemo />
-            </div>
-          )}
-
-          {/* Demo placeholder */}
-          {skill.demoAvailable && skill.category !== "Voice" && (
-            <div className="bg-white rounded-xl border border-border p-6">
-              <h2 className="text-base font-bold text-text-primary mb-3">Pruébalo antes de comprar</h2>
-              <div className="rounded-xl bg-gray-50 border border-border p-8 text-center">
-                <span className="text-4xl mb-3 block">🧪</span>
-                <p className="text-sm text-text-muted mb-4">
-                  Demo interactivo próximamente. Instala el skill para probarlo con tu agente.
-                </p>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-border text-text-muted text-sm font-mono">
-                  <span className="text-primary">$</span> clawhub install {skill.id}
-                </div>
-              </div>
             </div>
           )}
 
           {/* Reviews */}
           <div className="bg-white rounded-xl border border-border p-6">
             <h2 className="text-base font-bold text-text-primary mb-4">
-              Reseñas ({reviews.length})
+              Reseñas ({reviewsList.length})
             </h2>
-            {reviews.length > 0 ? (
+            {reviewsList.length > 0 ? (
               <div className="space-y-4">
-                {reviews.map((review) => (
-                  <div key={review.id} className="pb-4 border-b border-border last:border-0 last:pb-0">
+                {reviewsList.map((review) => (
+                  <div
+                    key={review.id}
+                    className="pb-4 border-b border-border last:border-0 last:pb-0"
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-xs text-primary font-semibold">
                           {review.author.charAt(0)}
                         </div>
                         <div>
-                          <span className="text-sm font-medium text-text-primary">{review.author}</span>
-                          <div className="mt-0.5"><StarRating rating={review.rating} showValue={false} /></div>
+                          <span className="text-sm font-medium text-text-primary">
+                            {review.author}
+                          </span>
+                          <div className="mt-0.5">
+                            <StarRating rating={review.rating} showValue={false} />
+                          </div>
                         </div>
                       </div>
                       <span className="text-[11px] text-text-muted">{review.date}</span>
@@ -136,6 +165,20 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               </p>
             )}
           </div>
+
+          {/* Related skills */}
+          {relatedSkills.length > 0 && (
+            <div>
+              <h2 className="text-base font-bold text-text-primary mb-3">
+                Más en {skill.category}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {relatedSkills.map((s) => (
+                  <SkillCard key={s.id} skill={s} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar — Buy box */}
@@ -151,24 +194,62 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 </div>
               ) : (
                 <div>
-                  <span className="text-3xl font-bold text-text-primary">${skill.price.toFixed(2)}</span>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-3xl font-bold text-text-primary">
+                      ${skill.price.toFixed(2)}
+                    </span>
+                    {skill.originalPrice && (
+                      <span className="text-lg text-text-muted line-through">
+                        ${skill.originalPrice.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-text-muted mt-1">Pago único · Tuyo para siempre</p>
+                  {skill.originalPrice && (
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600">
+                      {Math.round((1 - skill.price / skill.originalPrice) * 100)}% OFF
+                    </span>
+                  )}
                 </div>
               )}
             </div>
 
             {/* CTA buttons */}
             {skill.price === 0 ? (
-              <InstallFreeButton skill={{ id: skill.id, name: skill.name, icon: skill.icon, author: skill.author, price: skill.price }} />
+              <InstallFreeButton
+                skill={{
+                  id: skill.id,
+                  name: skill.name,
+                  icon: skill.icon,
+                  author: skill.author,
+                  price: skill.price,
+                }}
+              />
             ) : (
               <>
-                <AddAndUpgradeButton skill={{ id: skill.id, name: skill.name, icon: skill.icon, author: skill.author, price: skill.price }} />
-                <AddToCartButton skill={{ id: skill.id, name: skill.name, icon: skill.icon, author: skill.author, price: skill.price }} />
+                <AddAndUpgradeButton
+                  skill={{
+                    id: skill.id,
+                    name: skill.name,
+                    icon: skill.icon,
+                    author: skill.author,
+                    price: skill.price,
+                  }}
+                />
+                <AddToCartButton
+                  skill={{
+                    id: skill.id,
+                    name: skill.name,
+                    icon: skill.icon,
+                    author: skill.author,
+                    price: skill.price,
+                  }}
+                />
               </>
             )}
 
             <p className="text-center text-[11px] text-text-muted mt-3">
-              {skill.installs.toLocaleString()} personas ya mejoraron su agente
+              {skill.installCount.toLocaleString()} personas ya mejoraron su agente
             </p>
 
             {/* CLI install */}
@@ -181,12 +262,14 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
             {/* Details */}
             <div className="mt-4 pt-4 border-t border-border space-y-2.5">
-              {[
-                ["Versión", skill.version],
-                ["Publicado", skill.createdAt],
-                ["Categoría", skill.category],
-                ["Agentes mejorados", skill.installs.toLocaleString()],
-              ].map(([label, value]) => (
+              {(
+                [
+                  ["Versión", skill.version],
+                  ["Categoría", skill.category],
+                  ["Agentes mejorados", skill.installCount.toLocaleString()],
+                  ["Reseñas", skill.reviewCount.toString()],
+                ] as const
+              ).map(([label, value]) => (
                 <div key={label} className="flex items-center justify-between">
                   <span className="text-xs text-text-muted">{label}</span>
                   <span className="text-xs text-text-primary font-medium">{value}</span>
@@ -197,7 +280,9 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
           {/* Tags */}
           <div className="bg-white rounded-xl border border-border p-5">
-            <h3 className="text-xs font-bold text-text-primary mb-2 uppercase tracking-wider">Etiquetas</h3>
+            <h3 className="text-xs font-bold text-text-primary mb-2 uppercase tracking-wider">
+              Etiquetas
+            </h3>
             <div className="flex flex-wrap gap-1.5">
               {skill.tags.map((tag) => (
                 <Link
@@ -213,10 +298,12 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
 
           {/* Author */}
           <div className="bg-white rounded-xl border border-border p-5">
-            <h3 className="text-xs font-bold text-text-primary mb-2 uppercase tracking-wider">Vendido por</h3>
+            <h3 className="text-xs font-bold text-text-primary mb-2 uppercase tracking-wider">
+              Vendido por
+            </h3>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-xl">
-                {skill.authorAvatar}
+                {skill.icon}
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">{skill.author}</p>

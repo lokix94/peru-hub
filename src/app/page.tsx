@@ -46,7 +46,7 @@ export default function HomePage() {
   const [activeBanner, setActiveBanner] = useState(0);
   const { lang, t } = useLanguage();
   const featured = getFeaturedSkills();
-  const popular = [...skills].sort((a, b) => b.installs - a.installs);
+  const popular = [...skills].sort((a, b) => b.installCount - a.installCount);
   const free = skills.filter(s => s.price === 0);
 
   const storeCategories = [

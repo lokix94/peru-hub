@@ -52,12 +52,17 @@ export default function SkillCard({ skill }: { skill: Skill }) {
           <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{skill.icon}</span>
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {skill.price === 0 && (
+            {(skill.isFree || skill.price === 0) && (
               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-500 text-white shadow-sm">
                 GRATIS
               </span>
             )}
-            {skill.featured && (
+            {skill.isNew && (
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500 text-white shadow-sm">
+                🆕 NUEVO
+              </span>
+            )}
+            {skill.isFeatured && !skill.isNew && (
               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500 text-white shadow-sm">
                 ⭐ TOP
               </span>
@@ -77,7 +82,6 @@ export default function SkillCard({ skill }: { skill: Skill }) {
         <div className="flex-1 flex flex-col">
           {/* Author */}
           <div className="flex items-center gap-1 mb-1">
-            <span className="text-xs">{skill.authorAvatar}</span>
             <span className="text-[11px] text-text-muted">{skill.author}</span>
           </div>
 
@@ -86,26 +90,31 @@ export default function SkillCard({ skill }: { skill: Skill }) {
             {skill.name}
           </h3>
 
-          {/* Tagline */}
+          {/* Short description */}
           <p className="text-xs text-text-secondary leading-relaxed mb-3 line-clamp-2 flex-1">
-            {skill.tagline}
+            {skill.shortDescription}
           </p>
 
-          {/* Rating & installs */}
+          {/* Rating & reviews */}
           <div className="flex items-center gap-2 mb-3">
             <StarRating rating={skill.rating} />
             <span className="text-[10px] text-text-muted">
-              {skill.installs.toLocaleString()} {t("agents")}
+              {skill.reviewCount} {t("reviews")}
             </span>
           </div>
 
           {/* Price + CTA */}
           <div className="flex items-center justify-between pt-3 border-t border-border">
-            <div>
+            <div className="flex items-center gap-1.5">
               {skill.price === 0 ? (
                 <span className="text-lg font-bold text-green-600">{t("free")}</span>
               ) : (
-                <span className="text-lg font-bold text-text-primary">${skill.price.toFixed(2)}</span>
+                <>
+                  <span className="text-lg font-bold text-text-primary">${skill.price.toFixed(2)}</span>
+                  {skill.originalPrice && (
+                    <span className="text-xs text-text-muted line-through">${skill.originalPrice.toFixed(2)}</span>
+                  )}
+                </>
               )}
             </div>
             <button

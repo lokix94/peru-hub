@@ -2,6 +2,7 @@
 
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface SkillData {
   id: string;
@@ -13,6 +14,7 @@ interface SkillData {
 
 export function AddToCartButton({ skill }: { skill: SkillData }) {
   const { addItem, isInCart } = useCart();
+  const { t } = useLanguage();
   const inCart = isInCart(skill.id);
 
   const handleAdd = () => {
@@ -36,13 +38,14 @@ export function AddToCartButton({ skill }: { skill: SkillData }) {
           : "bg-white border-2 border-primary text-primary hover:bg-primary-light"
       }`}
     >
-      {inCart ? "✓ Agregado al carrito" : "Agregar al carrito"}
+      {inCart ? `✓ ${t("added.to.cart")}` : t("add.to.cart")}
     </button>
   );
 }
 
 export function AddAndUpgradeButton({ skill }: { skill: SkillData }) {
   const { addItem, isInCart } = useCart();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const handleAddAndGo = () => {
@@ -63,13 +66,14 @@ export function AddAndUpgradeButton({ skill }: { skill: SkillData }) {
       onClick={handleAddAndGo}
       className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-all shadow-md shadow-primary/20 text-sm mb-2"
     >
-      🛒 Agregar y mejorar agente
+      🛒 {t("add.and.upgrade")}
     </button>
   );
 }
 
 export function InstallFreeButton({ skill }: { skill: SkillData }) {
   const { addItem, isInCart } = useCart();
+  const { t } = useLanguage();
   const router = useRouter();
 
   const handleInstall = () => {
@@ -90,7 +94,7 @@ export function InstallFreeButton({ skill }: { skill: SkillData }) {
       onClick={handleInstall}
       className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-all shadow-md shadow-primary/20 text-sm mb-2"
     >
-      ⚡ Instalar gratis
+      ⚡ {t("install.free")}
     </button>
   );
 }
