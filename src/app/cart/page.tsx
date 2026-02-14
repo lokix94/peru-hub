@@ -301,14 +301,8 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                <p className="text-center text-xs text-text-muted mb-3">Escanea para pagar con USDT (BEP20)</p>
-
-                {/* Network Badge */}
-                <div className="flex justify-center mb-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    Red: BSC (BEP20) · USDT
-                  </span>
-                </div>
+                <p className="text-center text-sm font-bold text-amber-400 mb-1">USDT - BEP 20 - Binance</p>
+                <p className="text-center text-xs text-text-muted mb-4">Escanea para recargar tu saldo</p>
 
                 {/* Wallet Address */}
                 <div className="mb-4">

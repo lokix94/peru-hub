@@ -124,17 +124,12 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                 </div>
               </div>
 
-              <p className="text-center text-sm text-white/70 mb-3">
-                Escanea el QR para recargar tu saldo con USDT (BEP20)
+              <p className="text-center text-base font-bold text-amber-400 mb-1">
+                USDT - BEP 20 - Binance
               </p>
-
-              {/* Network badge */}
-              <div className="flex justify-center mb-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  Red: BSC (BEP20) · USDT
-                </span>
-              </div>
+              <p className="text-center text-xs text-white/50 mb-4">
+                Escanea el QR para recargar tu saldo
+              </p>
 
               {/* Wallet address */}
               <div className="mb-5">
