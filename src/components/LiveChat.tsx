@@ -281,7 +281,7 @@ export default function LiveChat() {
       </div>
 
       {/* Animations */}
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes pulse-chat {
           0%, 100% {
             box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5);
@@ -315,7 +315,7 @@ export default function LiveChat() {
             height: 100vh !important;
           }
         }
-      `}</style>
+      `}} />
     </>
   );
 }
