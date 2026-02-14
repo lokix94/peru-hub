@@ -6,12 +6,19 @@ const MOLTBOOK_API = "https://www.moltbook.com/api/v1";
 async function fetchMoltbookPosts(limit: number = 10) {
   try {
     const res = await fetch(`${MOLTBOOK_API}/posts?limit=${limit}`, {
-      headers: { "Accept": "application/json" },
-      next: { revalidate: 60 },
+      headers: { "Accept": "application/json", "User-Agent": "LangostaHub/1.0" },
+      cache: "no-store",
     });
     if (!res.ok) return null;
     const data = await res.json();
-    return data;
+    // API returns { success: true, posts: [...] } — extract the array
+    if (data && data.posts && Array.isArray(data.posts)) {
+      return data.posts;
+    }
+    if (Array.isArray(data)) {
+      return data;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -38,14 +45,14 @@ async function runAnalyticsDemo() {
   // Submolt breakdown
   const submoltMap: Record<string, { count: number; upvotes: number }> = {};
   posts.forEach((p: any) => {
-    const sub = p.submolt || p.community || "general";
+    const sub = p.submolt?.name || p.submolt || p.community || "general";
     if (!submoltMap[sub]) submoltMap[sub] = { count: 0, upvotes: 0 };
     submoltMap[sub].count++;
     submoltMap[sub].upvotes += (p.upvotes || 0);
   });
 
   // Unique authors
-  const authors = new Set(posts.map((p: any) => p.author || p.username || "unknown"));
+  const authors = new Set(posts.map((p: any) => p.author?.name || p.author || p.username || "unknown"));
 
   return {
     skill: "moltbook-analytics",
@@ -61,9 +68,9 @@ async function runAnalyticsDemo() {
       },
       topPost: topPost ? {
         title: topPost.title || "(sin título)",
-        author: topPost.author || topPost.username || "anónimo",
+        author: topPost.author?.name || topPost.author || topPost.username || "anónimo",
         upvotes: topPost.upvotes || 0,
-        submolt: topPost.submolt || topPost.community || "general",
+        submolt: topPost.submolt?.name || topPost.submolt || topPost.community || "general",
       } : null,
       submoltBreakdown: Object.entries(submoltMap)
         .map(([name, data]) => ({ name, ...data }))
@@ -104,9 +111,9 @@ async function runTrendScannerDemo() {
   // Recent posts summary
   const recentPosts = posts.slice(0, 5).map((p: any) => ({
     title: p.title || "(sin título)",
-    author: p.author || p.username || "anónimo",
+    author: p.author?.name || p.author || p.username || "anónimo",
     upvotes: p.upvotes || 0,
-    submolt: p.submolt || p.community || "general",
+    submolt: p.submolt?.name || p.submolt || p.community || "general",
   }));
 
   return {
@@ -142,7 +149,7 @@ async function runCommunityManagerDemo() {
     .slice(0, 5)
     .map((p: any) => ({
       title: p.title || "(sin título)",
-      author: p.author || p.username || "anónimo",
+      author: p.author?.name || p.author || p.username || "anónimo",
       comments: p.comment_count || 0,
       upvotes: p.upvotes || 0,
       status: (p.comment_count || 0) > 3 ? "🔥 Alta actividad" : "✅ Normal",
