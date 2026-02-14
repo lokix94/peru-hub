@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 export default function RegistroPage() {
   const router = useRouter();
-  const { signUp } = useAuth();
+  const { signUp, isAuthenticated, isLoading } = useAuth();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -17,6 +17,14 @@ export default function RegistroPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [successType, setSuccessType] = useState<"verify" | "created">("created");
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/account");
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   function validate(): boolean {
     const errors: Record<string, string> = {};
@@ -70,15 +78,36 @@ export default function RegistroPage() {
     }
 
     if (result.needsVerification) {
+      setSuccessType("verify");
       setSuccess(true);
       return;
     }
 
-    // Direct sign-in after register (fallback mode)
-    router.push("/account");
+    // Registration successful (fallback mode - auto signed in)
+    setSuccessType("created");
+    setSuccess(true);
+
+    // Auto-redirect to /account after 2 seconds
+    setTimeout(() => {
+      router.push("/account");
+    }, 2000);
   }
 
-  if (success) {
+  // Don't show form while checking auth state
+  if (isLoading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-gray-400 text-sm">Cargando...</div>
+      </div>
+    );
+  }
+
+  // Don't show form if already authenticated (will redirect via useEffect)
+  if (isAuthenticated) {
+    return null;
+  }
+
+  if (success && successType === "verify") {
     return (
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="w-full max-w-md bg-[#16161d] rounded-2xl border border-white/10 p-8 text-center animate-fade-in">
@@ -92,6 +121,26 @@ export default function RegistroPage() {
             className="inline-block px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-semibold transition-colors"
           >
             Ir a Iniciar Sesión
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (success && successType === "created") {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-[#16161d] rounded-2xl border border-white/10 p-8 text-center animate-fade-in">
+          <div className="text-5xl mb-4">✅</div>
+          <h1 className="text-xl font-bold text-white mb-2">¡Cuenta creada exitosamente!</h1>
+          <p className="text-sm text-gray-400 mb-6">
+            Serás redirigido a tu cuenta en un momento...
+          </p>
+          <Link
+            href="/account"
+            className="inline-block px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-semibold transition-colors"
+          >
+            Ir a mi cuenta →
           </Link>
         </div>
       </div>
@@ -226,8 +275,13 @@ export default function RegistroPage() {
           </button>
         </form>
 
+        {/* Security note */}
+        <p className="mt-4 text-center text-[11px] text-gray-500">
+          🔒 Tus datos se almacenan de forma segura
+        </p>
+
         {/* Link to login */}
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-4 text-center text-xs text-gray-400">
           ¿Ya tienes cuenta?{" "}
           <Link
             href="/login"

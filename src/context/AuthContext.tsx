@@ -30,6 +30,20 @@ export interface AuthAgent {
   created_at: string;
 }
 
+interface StoredUserLocal {
+  id: string;
+  username: string;
+  email: string;
+  passwordHash: string;
+  created_at: string;
+  agents: AuthAgent[];
+}
+
+interface SessionLocal {
+  user: AuthUser;
+  token: string;
+}
+
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
@@ -55,12 +69,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_USER_KEY = "peru-hub-auth-user";
-const STORAGE_TOKEN_KEY = "peru-hub-auth-token";
-const STORAGE_AGENTS_KEY = "peru-hub-agents";
+/* ------------------------------------------------------------------ */
+/*  Keys                                                               */
+/* ------------------------------------------------------------------ */
+
+// Legacy keys (kept for cleanup)
+const LEGACY_USER_KEY = "peru-hub-auth-user";
+const LEGACY_TOKEN_KEY = "peru-hub-auth-token";
+const LEGACY_AGENTS_KEY = "peru-hub-agents";
+
+// New localStorage keys for client-side fallback auth
+const LS_USERS_KEY = "langosta-users";
+const LS_SESSION_KEY = "langosta-session";
 
 /* ------------------------------------------------------------------ */
-/*  Helper — localStorage                                             */
+/*  Helpers — localStorage                                             */
 /* ------------------------------------------------------------------ */
 
 function loadFromStorage<T>(key: string): T | null {
@@ -90,6 +113,63 @@ function removeFromStorage(key: string) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Client-side password hashing (mirrors auth-store.ts)               */
+/* ------------------------------------------------------------------ */
+
+const SALT = "langosta-hub-salt-2026";
+
+function hashPasswordClient(password: string): string {
+  return btoa(`${SALT}:${password}`);
+}
+
+function verifyPasswordClient(password: string, hash: string): boolean {
+  return hashPasswordClient(password) === hash;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Client-side token generation                                       */
+/* ------------------------------------------------------------------ */
+
+function generateTokenClient(userId: string): string {
+  const payload = { id: userId, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 };
+  return btoa(JSON.stringify(payload));
+}
+
+function verifyTokenClient(token: string): { id: string } | null {
+  try {
+    const payload = JSON.parse(atob(token));
+    if (payload.exp < Date.now()) return null;
+    return { id: payload.id };
+  } catch {
+    return null;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Client-side user store helpers                                     */
+/* ------------------------------------------------------------------ */
+
+function getLocalUsers(): StoredUserLocal[] {
+  return loadFromStorage<StoredUserLocal[]>(LS_USERS_KEY) ?? [];
+}
+
+function saveLocalUsers(users: StoredUserLocal[]) {
+  saveToStorage(LS_USERS_KEY, users);
+}
+
+function getLocalSession(): SessionLocal | null {
+  return loadFromStorage<SessionLocal>(LS_SESSION_KEY);
+}
+
+function saveLocalSession(session: SessionLocal) {
+  saveToStorage(LS_SESSION_KEY, session);
+}
+
+function clearLocalSession() {
+  removeFromStorage(LS_SESSION_KEY);
+}
+
+/* ------------------------------------------------------------------ */
 /*  Provider                                                           */
 /* ------------------------------------------------------------------ */
 
@@ -103,6 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function restore() {
       try {
         if (isSupabaseConfigured()) {
+          // --- Supabase mode ---
           const supabase = createBrowserClient();
           if (supabase) {
             const {
@@ -117,31 +198,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 created_at: session.user.created_at,
               };
               setUser(u);
-              saveToStorage(STORAGE_USER_KEY, u);
             }
           }
         } else {
-          // Fallback: check localStorage + validate via /api/auth/me
-          const token = loadFromStorage<string>(STORAGE_TOKEN_KEY);
-          if (token) {
-            const res = await fetch("/api/auth/me", {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            if (res.ok) {
-              const data = await res.json();
-              setUser(data.user);
-              saveToStorage(STORAGE_USER_KEY, data.user);
+          // --- Client-side fallback mode ---
+          const session = getLocalSession();
+          if (session && session.token) {
+            const tokenData = verifyTokenClient(session.token);
+            if (tokenData) {
+              // Token valid, restore user
+              setUser(session.user);
+              // Also load agents from the user record
+              const users = getLocalUsers();
+              const storedUser = users.find((u) => u.id === session.user.id);
+              if (storedUser?.agents) {
+                setAgents(storedUser.agents);
+              }
             } else {
-              // Token expired / invalid
-              removeFromStorage(STORAGE_TOKEN_KEY);
-              removeFromStorage(STORAGE_USER_KEY);
+              // Token expired
+              clearLocalSession();
             }
           }
         }
 
-        // Load agents from localStorage (works for both modes in demo)
-        const savedAgents = loadFromStorage<AuthAgent[]>(STORAGE_AGENTS_KEY);
-        if (savedAgents) setAgents(savedAgents);
+        // Clean up legacy keys
+        removeFromStorage(LEGACY_USER_KEY);
+        removeFromStorage(LEGACY_TOKEN_KEY);
+        // Note: LEGACY_AGENTS_KEY cleaned up separately if needed
       } catch {
         /* silent fail */
       } finally {
@@ -150,13 +233,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     restore();
   }, []);
-
-  // Persist agents whenever they change
-  useEffect(() => {
-    if (agents.length > 0) {
-      saveToStorage(STORAGE_AGENTS_KEY, agents);
-    }
-  }, [agents]);
 
   /* ---- Sign Up ---- */
   const signUp = useCallback(
@@ -167,6 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ): Promise<{ success: boolean; error?: string; needsVerification?: boolean }> => {
       try {
         if (isSupabaseConfigured()) {
+          // --- Supabase mode ---
           const supabase = createBrowserClient();
           if (!supabase) return { success: false, error: "Error de configuración" };
           const { data, error } = await supabase.auth.signUp({
@@ -176,7 +253,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           if (error) return { success: false, error: error.message };
           if (data.user && !data.session) {
-            // Email confirmation required
             return { success: true, needsVerification: true };
           }
           if (data.user && data.session) {
@@ -187,23 +263,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               created_at: data.user.created_at,
             };
             setUser(u);
-            saveToStorage(STORAGE_USER_KEY, u);
             return { success: true };
           }
           return { success: false, error: "Error inesperado" };
         }
 
-        // Fallback API
-        const res = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, email, password }),
-        });
-        const data = await res.json();
-        if (!res.ok) return { success: false, error: data.error ?? "Error al registrar" };
-        setUser(data.user);
-        saveToStorage(STORAGE_USER_KEY, data.user);
-        saveToStorage(STORAGE_TOKEN_KEY, data.token);
+        // --- Client-side fallback mode ---
+        const normalEmail = email.toLowerCase().trim();
+        const normalUsername = username.toLowerCase().trim();
+        const users = getLocalUsers();
+
+        // Duplicate checks
+        if (users.some((u) => u.email === normalEmail)) {
+          return { success: false, error: "Ya existe una cuenta con este email" };
+        }
+        if (users.some((u) => u.username.toLowerCase() === normalUsername)) {
+          return { success: false, error: "Este nombre de usuario ya está en uso" };
+        }
+
+        // Create user
+        const id = crypto.randomUUID();
+        const now = new Date().toISOString();
+        const newUser: StoredUserLocal = {
+          id,
+          username: username.trim(),
+          email: normalEmail,
+          passwordHash: hashPasswordClient(password),
+          created_at: now,
+          agents: [],
+        };
+
+        users.push(newUser);
+        saveLocalUsers(users);
+
+        // Create session
+        const authUser: AuthUser = {
+          id,
+          email: normalEmail,
+          username: username.trim(),
+          created_at: now,
+        };
+        const token = generateTokenClient(id);
+        saveLocalSession({ user: authUser, token });
+
+        setUser(authUser);
+        setAgents([]);
         return { success: true };
       } catch {
         return { success: false, error: "Error de conexión" };
@@ -220,6 +324,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ): Promise<{ success: boolean; error?: string }> => {
       try {
         if (isSupabaseConfigured()) {
+          // --- Supabase mode ---
           const supabase = createBrowserClient();
           if (!supabase) return { success: false, error: "Error de configuración" };
           const { data, error } = await supabase.auth.signInWithPassword({
@@ -236,23 +341,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               created_at: data.user.created_at,
             };
             setUser(u);
-            saveToStorage(STORAGE_USER_KEY, u);
             return { success: true };
           }
           return { success: false, error: "Error inesperado" };
         }
 
-        // Fallback API
-        const res = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        const data = await res.json();
-        if (!res.ok) return { success: false, error: data.error ?? "Error al iniciar sesión" };
-        setUser(data.user);
-        saveToStorage(STORAGE_USER_KEY, data.user);
-        saveToStorage(STORAGE_TOKEN_KEY, data.token);
+        // --- Client-side fallback mode ---
+        const normalEmail = email.toLowerCase().trim();
+        const users = getLocalUsers();
+        const storedUser = users.find((u) => u.email === normalEmail);
+
+        if (!storedUser) {
+          return { success: false, error: "No existe una cuenta con este email" };
+        }
+
+        if (!verifyPasswordClient(password, storedUser.passwordHash)) {
+          return { success: false, error: "Contraseña incorrecta" };
+        }
+
+        // Create session
+        const authUser: AuthUser = {
+          id: storedUser.id,
+          email: storedUser.email,
+          username: storedUser.username,
+          created_at: storedUser.created_at,
+        };
+        const token = generateTokenClient(storedUser.id);
+        saveLocalSession({ user: authUser, token });
+
+        setUser(authUser);
+        setAgents(storedUser.agents ?? []);
         return { success: true };
       } catch {
         return { success: false, error: "Error de conexión" };
@@ -273,9 +391,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(null);
     setAgents([]);
-    removeFromStorage(STORAGE_USER_KEY);
-    removeFromStorage(STORAGE_TOKEN_KEY);
-    removeFromStorage(STORAGE_AGENTS_KEY);
+    clearLocalSession();
+    // Clean up legacy keys too
+    removeFromStorage(LEGACY_USER_KEY);
+    removeFromStorage(LEGACY_TOKEN_KEY);
+    removeFromStorage(LEGACY_AGENTS_KEY);
   }, []);
 
   /* ---- Agents ---- */
@@ -297,7 +417,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       setAgents((prev) => {
         const next = [...prev, agent];
-        saveToStorage(STORAGE_AGENTS_KEY, next);
+        // Also persist agents to the user record in localStorage (fallback mode)
+        if (!isSupabaseConfigured()) {
+          const session = getLocalSession();
+          if (session) {
+            const users = getLocalUsers();
+            const idx = users.findIndex((u) => u.id === session.user.id);
+            if (idx >= 0) {
+              users[idx].agents = next;
+              saveLocalUsers(users);
+            }
+          }
+        }
         return next;
       });
       return { success: true };
@@ -308,7 +439,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const removeAgent = useCallback((id: string) => {
     setAgents((prev) => {
       const next = prev.filter((a) => a.id !== id);
-      saveToStorage(STORAGE_AGENTS_KEY, next);
+      // Also persist to user record in localStorage (fallback mode)
+      if (!isSupabaseConfigured()) {
+        const session = getLocalSession();
+        if (session) {
+          const users = getLocalUsers();
+          const idx = users.findIndex((u) => u.id === session.user.id);
+          if (idx >= 0) {
+            users[idx].agents = next;
+            saveLocalUsers(users);
+          }
+        }
+      }
       return next;
     });
   }, []);
