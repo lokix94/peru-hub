@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import SkillTester from "./SkillTester";
 
 interface Transaction {
   date: string;
@@ -345,6 +346,9 @@ export default function AdminPage() {
             </p>
           )}
         </div>
+
+        {/* Skill Tester */}
+        <SkillTester />
 
         {/* Income Chart Placeholder */}
         <div className="rounded-2xl border border-white/5 bg-[#13131d] p-6">
