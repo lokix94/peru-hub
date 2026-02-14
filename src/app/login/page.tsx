@@ -1,18 +1,37 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn, isAuthenticated, isLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Check URL params for confirmation status
+  useEffect(() => {
+    const confirmed = searchParams.get("confirmed");
+    const urlError = searchParams.get("error");
+
+    if (confirmed === "true") {
+      setSuccessMessage("✅ Email confirmado. Ya puedes iniciar sesión.");
+    }
+    if (urlError === "confirmation_failed") {
+      setError("La confirmación de email falló. Intenta registrarte de nuevo.");
+    } else if (urlError === "configuration") {
+      setError("Error de configuración del servidor.");
+    } else if (urlError) {
+      setError("Ocurrió un error. Intenta de nuevo.");
+    }
+  }, [searchParams]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -24,6 +43,7 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
 
     if (!email.trim()) {
       setError("El email es obligatorio");
@@ -71,6 +91,13 @@ export default function LoginPage() {
             Accede a tu cuenta de Langosta Hub
           </p>
         </div>
+
+        {/* Success message (e.g. email confirmed) */}
+        {successMessage && (
+          <div className="mb-5 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-xs text-center">
+            {successMessage}
+          </div>
+        )}
 
         {/* Error */}
         {error && (
@@ -130,5 +157,19 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[80vh] flex items-center justify-center">
+          <div className="text-gray-400 text-sm">Cargando...</div>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

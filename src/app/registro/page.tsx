@@ -113,8 +113,14 @@ export default function RegistroPage() {
         <div className="w-full max-w-md bg-[#16161d] rounded-2xl border border-white/10 p-8 text-center animate-fade-in">
           <div className="text-5xl mb-4">📧</div>
           <h1 className="text-xl font-bold text-white mb-2">¡Registro exitoso!</h1>
+          <p className="text-sm text-gray-400 mb-2">
+            Te enviamos un email de confirmación a:
+          </p>
+          <p className="text-sm text-white font-semibold mb-4">
+            {email}
+          </p>
           <p className="text-sm text-gray-400 mb-6">
-            Revisa tu email para verificar tu cuenta. Puede tardar unos minutos.
+            Revisa tu bandeja de entrada (y la carpeta de spam) y haz clic en el enlace para activar tu cuenta.
           </p>
           <Link
             href="/login"

@@ -246,10 +246,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // --- Supabase mode ---
           const supabase = createBrowserClient();
           if (!supabase) return { success: false, error: "Error de configuración" };
+          const emailRedirectTo =
+            typeof window !== "undefined"
+              ? `${window.location.origin}/auth/confirm`
+              : undefined;
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: { username } },
+            options: {
+              data: { username },
+              ...(emailRedirectTo ? { emailRedirectTo } : {}),
+            },
           });
           if (error) return { success: false, error: error.message };
           if (data.user && !data.session) {
