@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdSidebar from "@/components/AdSidebar";
+import InstallPrompt from "@/components/InstallPrompt";
 import { CartProvider } from "@/context/CartContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 
@@ -89,9 +90,25 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#7c3aed" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="apple-touch-icon" href="/lobster-black-192.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js').catch(() => {});
+                });
+              }
+            `,
+          }}
         />
       </head>
       <body className="min-h-screen flex flex-col">
@@ -105,6 +122,7 @@ export default function RootLayout({
               </main>
             </div>
             <Footer />
+            <InstallPrompt />
           </CartProvider>
         </LanguageProvider>
       </body>

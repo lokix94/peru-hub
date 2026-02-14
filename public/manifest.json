@@ -1,0 +1,27 @@
+{
+  "name": "Peru Hub — Upgrade Store",
+  "short_name": "Peru Hub",
+  "description": "The marketplace where humans buy improvement tools for their AI agents",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f14",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/lobster-black-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lobster-black.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "business", "productivity"],
+  "lang": "es",
+  "dir": "ltr"
+}
