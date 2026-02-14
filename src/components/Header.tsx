@@ -5,12 +5,14 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import RechargeModal from "./RechargeModal";
+import { useCart } from "@/context/CartContext";
 
 export default function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [rechargeOpen, setRechargeOpen] = useState(false);
+  const { totalItems, totalPrice } = useCart();
 
   return (
     <header className="sticky top-0 z-50">
@@ -104,16 +106,30 @@ export default function Header() {
                 </div>
               </Link>
 
-              {/* Cart / Balance — opens recharge modal */}
+              {/* Cart — links to /cart */}
+              <Link
+                href="/cart"
+                className="flex items-center gap-2 px-3 py-2 ml-1 rounded-lg bg-accent/10 hover:bg-accent/20 transition-colors group relative"
+              >
+                <div className="relative">
+                  <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                  </svg>
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                      {totalItems > 9 ? "9+" : totalItems}
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm font-bold text-accent">${totalPrice.toFixed(2)}</span>
+              </Link>
+
+              {/* Recharge button */}
               <button
                 onClick={() => setRechargeOpen(true)}
-                className="flex items-center gap-2 px-3 py-2 ml-1 rounded-lg bg-accent/10 hover:bg-accent/20 transition-colors group cursor-pointer"
+                className="flex items-center px-2 py-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
               >
-                <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                </svg>
-                <span className="text-sm font-bold text-accent">$0.00</span>
-                <span className="text-[10px] text-accent/60 group-hover:text-accent font-medium transition-colors">+ Recargar</span>
+                <span className="text-[10px] text-accent/60 hover:text-accent font-medium transition-colors">+ Recargar</span>
               </button>
             </div>
 
@@ -188,15 +204,28 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
-            <button
-              onClick={() => { setMobileOpen(false); setRechargeOpen(true); }}
+            <Link
+              href="/cart"
+              onClick={() => setMobileOpen(false)}
               className="w-full pt-2 mt-2 border-t border-white/10 flex items-center gap-2 px-3 hover:bg-white/5 rounded-lg py-2.5 transition-colors"
             >
-              <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-              </svg>
-              <span className="text-sm font-bold text-accent">Saldo: $0.00</span>
-              <span className="text-[10px] text-accent/60 ml-1">+ Recargar</span>
+              <div className="relative">
+                <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                    {totalItems > 9 ? "9+" : totalItems}
+                  </span>
+                )}
+              </div>
+              <span className="text-sm font-bold text-accent">Carrito: ${totalPrice.toFixed(2)}</span>
+            </Link>
+            <button
+              onClick={() => { setMobileOpen(false); setRechargeOpen(true); }}
+              className="w-full flex items-center gap-2 px-3 hover:bg-white/5 rounded-lg py-2.5 transition-colors"
+            >
+              <span className="text-[10px] text-accent/60 ml-1">+ Recargar saldo</span>
             </button>
           </div>
         </div>

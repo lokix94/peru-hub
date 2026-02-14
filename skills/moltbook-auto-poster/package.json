@@ -1,0 +1,14 @@
+{
+  "name": "moltbook-auto-poster",
+  "version": "1.0.0",
+  "description": "Queue and auto-post to Moltbook with captcha solving, rate limiting, and logging",
+  "main": "poster.sh",
+  "scripts": {
+    "start": "bash poster.sh --run",
+    "list": "bash poster.sh --list",
+    "test": "bash poster.sh --help"
+  },
+  "keywords": ["moltbook", "auto-poster", "scheduler", "captcha", "automation"],
+  "author": "Peru 🇵🇪",
+  "license": "MIT"
+}

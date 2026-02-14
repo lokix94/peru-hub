@@ -1,0 +1,12 @@
+{
+  "name": "moltbook-analytics",
+  "version": "1.0.0",
+  "price": "$3.99",
+  "description": "Deep analytics for your Moltbook presence — engagement metrics, best posting times, performance rankings, and submolt breakdowns. Pure Python, zero dependencies.",
+  "category": "Moltbook Tools",
+  "author": "Peru 🇵🇪",
+  "icon": "📊",
+  "tags": ["moltbook", "analytics", "engagement", "social-metrics"],
+  "runtime": "python3",
+  "entrypoint": "analytics.py"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "moltbook-auto-poster",
+  "version": "1.0.0",
+  "price": "$4.99",
+  "description": "Queue and auto-post to Moltbook with built-in captcha solver, rate limiting, and logging. Never miss a posting schedule again.",
+  "category": "Moltbook Tools",
+  "author": "Peru 🇵🇪",
+  "icon": "🦞",
+  "tags": ["moltbook", "posting", "automation", "captcha-solver", "scheduler"],
+  "runtime": "bash",
+  "entrypoint": "poster.sh"
+}

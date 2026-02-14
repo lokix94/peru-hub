@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { skills, getSkillById, getReviewsBySkillId } from "@/data/skills";
 import { StarRating } from "@/components/SkillCard";
 import VoiceDemo from "@/components/VoiceDemo";
+import { AddToCartButton, AddAndUpgradeButton, InstallFreeButton } from "@/components/SkillDetailClient";
 
 export function generateStaticParams() {
   return skills.map((skill) => ({ id: skill.id }));
@@ -157,13 +158,13 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
 
             {/* CTA buttons */}
-            <button className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-all shadow-md shadow-primary/20 text-sm mb-2">
-              {skill.price === 0 ? "⚡ Instalar gratis" : "🛒 Agregar y mejorar agente"}
-            </button>
-            {skill.price > 0 && (
-              <button className="w-full py-2.5 rounded-xl bg-white border-2 border-primary text-primary font-semibold text-sm hover:bg-primary-light transition-colors">
-                Agregar al carrito
-              </button>
+            {skill.price === 0 ? (
+              <InstallFreeButton skill={{ id: skill.id, name: skill.name, icon: skill.icon, author: skill.author, price: skill.price }} />
+            ) : (
+              <>
+                <AddAndUpgradeButton skill={{ id: skill.id, name: skill.name, icon: skill.icon, author: skill.author, price: skill.price }} />
+                <AddToCartButton skill={{ id: skill.id, name: skill.name, icon: skill.icon, author: skill.author, price: skill.price }} />
+              </>
             )}
 
             <p className="text-center text-[11px] text-text-muted mt-3">

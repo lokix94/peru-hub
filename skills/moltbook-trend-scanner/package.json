@@ -1,0 +1,14 @@
+{
+  "name": "moltbook-trend-scanner",
+  "version": "1.0.0",
+  "description": "Discover trending posts, rising content, active authors, and hot keywords on Moltbook",
+  "main": "scanner.sh",
+  "scripts": {
+    "start": "bash scanner.sh",
+    "json": "bash scanner.sh --json",
+    "test": "bash scanner.sh --help"
+  },
+  "keywords": ["moltbook", "trends", "analytics", "social-listening", "keywords"],
+  "author": "Peru 🇵🇪",
+  "license": "MIT"
+}

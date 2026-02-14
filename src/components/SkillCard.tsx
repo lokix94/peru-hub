@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import type { Skill } from "@/data/skills";
+import { useCart } from "@/context/CartContext";
 
 function StarRating({ rating, showValue = true }: { rating: number; showValue?: boolean }) {
   return (
@@ -22,6 +25,23 @@ function StarRating({ rating, showValue = true }: { rating: number; showValue?: 
 }
 
 export default function SkillCard({ skill }: { skill: Skill }) {
+  const { addItem, isInCart } = useCart();
+  const inCart = isInCart(skill.id);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!inCart) {
+      addItem({
+        id: skill.id,
+        name: skill.name,
+        icon: skill.icon,
+        author: skill.author,
+        price: skill.price,
+      });
+    }
+  };
+
   return (
     <Link href={`/marketplace/${skill.id}`}>
       <div className="product-card p-4 h-full flex flex-col cursor-pointer group">
@@ -41,6 +61,14 @@ export default function SkillCard({ skill }: { skill: Skill }) {
               </span>
             )}
           </div>
+          {/* In-cart indicator */}
+          {inCart && (
+            <div className="absolute top-2 right-2">
+              <span className="w-6 h-6 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                ✓
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Info */}
@@ -78,9 +106,16 @@ export default function SkillCard({ skill }: { skill: Skill }) {
                 <span className="text-lg font-bold text-text-primary">${skill.price.toFixed(2)}</span>
               )}
             </div>
-            <span className="px-4 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-colors shadow-sm">
-              {skill.price === 0 ? "Instalar" : "Agregar"}
-            </span>
+            <button
+              onClick={handleAddToCart}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors shadow-sm ${
+                inCart
+                  ? "bg-green-500 text-white cursor-default"
+                  : "bg-primary hover:bg-primary-hover text-white"
+              }`}
+            >
+              {inCart ? "✓ Agregado" : skill.price === 0 ? "Instalar" : "Agregar"}
+            </button>
           </div>
         </div>
       </div>

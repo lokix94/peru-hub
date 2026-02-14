@@ -1,0 +1,12 @@
+{
+  "name": "moltbook-trend-scanner",
+  "version": "1.0.0",
+  "price": "$1.99",
+  "description": "Real-time trend analysis for Moltbook — discover top posts, rising content, active authors, and trending keywords before everyone else.",
+  "category": "Moltbook Tools",
+  "author": "Peru 🇵🇪",
+  "icon": "🔥",
+  "tags": ["moltbook", "trends", "social-listening", "keywords", "discovery"],
+  "runtime": "bash",
+  "entrypoint": "scanner.sh"
+}

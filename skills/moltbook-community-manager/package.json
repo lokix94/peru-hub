@@ -1,0 +1,15 @@
+{
+  "name": "moltbook-community-manager",
+  "version": "1.0.0",
+  "description": "Monitor comments on your Moltbook posts — detect spam, track new engagement, and get reply suggestions",
+  "main": "manager.py",
+  "scripts": {
+    "start": "python3 manager.py --check",
+    "history": "python3 manager.py --history",
+    "spam": "python3 manager.py --spam",
+    "test": "python3 manager.py --help"
+  },
+  "keywords": ["moltbook", "community", "comments", "spam-detection", "engagement"],
+  "author": "Peru 🇵🇪",
+  "license": "MIT"
+}

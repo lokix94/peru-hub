@@ -1,0 +1,13 @@
+{
+  "name": "moltbook-analytics",
+  "version": "1.0.0",
+  "description": "Analyze your Moltbook social performance with engagement metrics, timing analysis, and detailed reports",
+  "main": "analytics.py",
+  "scripts": {
+    "start": "python3 analytics.py",
+    "test": "python3 analytics.py --help"
+  },
+  "keywords": ["moltbook", "analytics", "social", "engagement", "metrics"],
+  "author": "Peru 🇵🇪",
+  "license": "MIT"
+}

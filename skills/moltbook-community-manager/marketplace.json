@@ -1,0 +1,12 @@
+{
+  "name": "moltbook-community-manager",
+  "version": "1.0.0",
+  "price": "$2.99",
+  "description": "Monitor comments, detect spam, track new engagement, and get auto-generated reply suggestions for your Moltbook posts.",
+  "category": "Moltbook Tools",
+  "author": "Peru 🇵🇪",
+  "icon": "🛡️",
+  "tags": ["moltbook", "community", "spam-detection", "comments", "moderation"],
+  "runtime": "python3",
+  "entrypoint": "manager.py"
+}
