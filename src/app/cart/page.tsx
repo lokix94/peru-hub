@@ -1,0 +1,343 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+
+interface CartItem {
+  id: string;
+  name: string;
+  icon: string;
+  author: string;
+  price: number;
+  originalPrice?: number;
+  quantity: number;
+}
+
+const initialCartItems: CartItem[] = [
+  {
+    id: "web-research-pro",
+    name: "Web Research Pro",
+    icon: "🌐",
+    author: "SearchCraft",
+    price: 4.99,
+    originalPrice: 9.99,
+    quantity: 1,
+  },
+  {
+    id: "code-review-assistant",
+    name: "Code Review Assistant",
+    icon: "💻",
+    author: "DevTools Inc",
+    price: 9.99,
+    quantity: 1,
+  },
+  {
+    id: "email-composer",
+    name: "Email Composer Pro",
+    icon: "📧",
+    author: "WriteWell",
+    price: 3.99,
+    originalPrice: 5.99,
+    quantity: 1,
+  },
+];
+
+export default function CartPage() {
+  const [items, setItems] = useState<CartItem[]>(initialCartItems);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [txId, setTxId] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+
+  const walletAddress = "0xcbc14706f7f8167505de1690e1e8419399f9506d";
+
+  const updateQuantity = (id: string, delta: number) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
+    );
+  };
+
+  const removeItem = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const originalTotal = items.reduce(
+    (sum, item) => sum + (item.originalPrice || item.price) * item.quantity,
+    0
+  );
+  const savings = originalTotal - subtotal;
+  const couponDiscount = couponApplied ? subtotal * 0.1 : 0;
+  const total = subtotal - couponDiscount;
+
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText(walletAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleApplyCoupon = () => {
+    if (couponCode.trim().length > 0) {
+      setCouponApplied(true);
+    }
+  };
+
+  if (items.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <span className="text-6xl mb-6 block">🛒</span>
+        <h1 className="text-2xl font-bold text-text-primary mb-3">Tu carrito está vacío</h1>
+        <p className="text-text-secondary mb-8">Explora el marketplace y encuentra herramientas para tu agente</p>
+        <Link
+          href="/marketplace"
+          className="px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-colors"
+        >
+          Ir al Marketplace →
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-text-primary">
+            🛒 Mi Carrito <span className="text-lg text-text-muted font-normal">({items.reduce((s, i) => s + i.quantity, 0)} items)</span>
+          </h1>
+        </div>
+        <Link
+          href="/marketplace"
+          className="text-sm text-primary hover:text-primary-hover transition-colors"
+        >
+          ← Seguir comprando
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left: Cart Items */}
+        <div className="lg:col-span-2">
+          {/* Table Header */}
+          <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider border-b border-border">
+            <div className="col-span-5">Producto</div>
+            <div className="col-span-2 text-center">Precio</div>
+            <div className="col-span-2 text-center">Cantidad</div>
+            <div className="col-span-2 text-right">Total</div>
+            <div className="col-span-1"></div>
+          </div>
+
+          {/* Cart Items */}
+          <div className="divide-y divide-border">
+            {items.map((item) => (
+              <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center px-4 py-5">
+                {/* Product */}
+                <div className="md:col-span-5 flex items-center gap-3">
+                  <span className="text-3xl">{item.icon}</span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-text-primary">{item.name}</h3>
+                    <p className="text-xs text-text-muted">by {item.author}</p>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="md:col-span-2 text-center">
+                  <span className="text-sm font-semibold text-text-primary">${item.price.toFixed(2)}</span>
+                  {item.originalPrice && (
+                    <span className="text-xs text-text-muted line-through ml-2">
+                      ${item.originalPrice.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Quantity */}
+                <div className="md:col-span-2 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => updateQuantity(item.id, -1)}
+                    className="w-8 h-8 rounded-lg bg-surface border border-border text-text-primary hover:bg-surface-hover transition-colors text-sm font-bold"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center text-sm font-semibold text-text-primary">
+                    {item.quantity}
+                  </span>
+                  <button
+                    onClick={() => updateQuantity(item.id, 1)}
+                    className="w-8 h-8 rounded-lg bg-surface border border-border text-text-primary hover:bg-surface-hover transition-colors text-sm font-bold"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* Total */}
+                <div className="md:col-span-2 text-right">
+                  <span className="text-sm font-bold text-text-primary">
+                    ${(item.price * item.quantity).toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Remove */}
+                <div className="md:col-span-1 text-right">
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="text-text-muted hover:text-red-400 transition-colors text-lg"
+                    title="Eliminar"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Order Summary + Payment */}
+        <div className="space-y-6">
+          {/* Coupon */}
+          <div className="glass-card p-5">
+            <h3 className="text-sm font-semibold text-text-primary mb-3">🎟️ ¿Tienes un cupón de descuento?</h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Código"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                disabled={couponApplied}
+                className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+              />
+              <button
+                onClick={handleApplyCoupon}
+                disabled={couponApplied}
+                className="px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 transition-colors disabled:opacity-50"
+              >
+                {couponApplied ? "✓ Aplicado" : "Aplicar"}
+              </button>
+            </div>
+            {couponApplied && (
+              <p className="text-xs text-success mt-2">¡Cupón aplicado! 10% de descuento</p>
+            )}
+          </div>
+
+          {/* Order Summary */}
+          <div className="glass-card p-5">
+            <h3 className="text-sm font-semibold text-text-primary mb-4">Resumen del pedido</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Subtotal</span>
+                <span className="text-text-primary">${subtotal.toFixed(2)}</span>
+              </div>
+              {savings > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-success">Descuentos</span>
+                  <span className="text-success">-${savings.toFixed(2)}</span>
+                </div>
+              )}
+              {couponApplied && (
+                <div className="flex justify-between">
+                  <span className="text-success">Cupón (10%)</span>
+                  <span className="text-success">-${couponDiscount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="border-t border-border pt-2 mt-2">
+                <div className="flex justify-between">
+                  <span className="font-bold text-text-primary text-base">Total</span>
+                  <span className="font-bold text-accent text-xl">${total.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Crypto Payment */}
+          <div className="glass-card p-5">
+            <h3 className="text-sm font-semibold text-text-primary mb-4 text-center">💳 Pago con Criptomonedas</h3>
+            
+            {/* QR Code */}
+            <div className="flex justify-center mb-4">
+              <div className="bg-white rounded-xl p-3">
+                <Image
+                  src="/qr-usdt-bep20.jpg"
+                  alt="QR Code - USDT BEP20 Payment"
+                  width={200}
+                  height={200}
+                  className="rounded-lg"
+                />
+              </div>
+            </div>
+
+            <p className="text-center text-xs text-text-muted mb-3">Escanea para pagar con USDT (BEP20)</p>
+
+            {/* Network Badge */}
+            <div className="flex justify-center mb-4">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                Red: BSC (BEP20) · USDT
+              </span>
+            </div>
+
+            {/* Wallet Address */}
+            <div className="mb-4">
+              <label className="text-xs text-text-muted mb-1 block">Dirección de wallet:</label>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-[10px] font-mono break-all">
+                  {walletAddress}
+                </code>
+                <button
+                  onClick={handleCopyAddress}
+                  className="px-3 py-2 rounded-lg bg-surface border border-border text-text-muted hover:text-text-primary transition-colors text-xs whitespace-nowrap"
+                >
+                  {copied ? "✓ Copiado" : "📋 Copiar"}
+                </button>
+              </div>
+            </div>
+
+            {/* Accepted Cryptos */}
+            <div className="flex items-center justify-center gap-3 mb-4 py-2 rounded-lg bg-background/50">
+              <span className="text-xs text-text-muted">Aceptamos:</span>
+              <span className="text-xs font-semibold text-text-secondary">USDT</span>
+              <span className="text-text-muted">·</span>
+              <span className="text-xs font-semibold text-text-secondary">BNB</span>
+              <span className="text-text-muted">·</span>
+              <span className="text-xs font-semibold text-text-secondary">BUSD</span>
+            </div>
+
+            {/* Transaction ID */}
+            <div className="mb-4">
+              <label className="text-xs text-text-muted mb-1 block">ID de Transacción (TxHash):</label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={txId}
+                onChange={(e) => setTxId(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-sm font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+              />
+            </div>
+
+            {/* Confirm Button */}
+            <button
+              onClick={() => setPaymentConfirmed(true)}
+              className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-base transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl"
+            >
+              {paymentConfirmed ? "✅ PAGO ENVIADO — VERIFICANDO..." : "CONFIRMAR PAGO"}
+            </button>
+
+            {paymentConfirmed && (
+              <p className="text-center text-xs text-success mt-3 animate-pulse">
+                Verificando transacción... Recibirás confirmación por email.
+              </p>
+            )}
+
+            <p className="text-center text-[10px] text-text-muted mt-3">
+              Envía exactamente <strong>${total.toFixed(2)} USDT</strong> a la dirección indicada.
+              <br />La verificación puede tomar de 1 a 5 minutos.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
