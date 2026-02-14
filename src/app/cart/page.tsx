@@ -1186,10 +1186,88 @@ function DemoResultView({ result }: { result: any }) {
         </div>
       )}
 
+      {/* ── Agent Face Creator ── */}
+      {skill === "agent-face-creator" && data.generatedAvatar && (
+        <div className="space-y-3">
+          <div className="p-3 rounded-lg bg-white border border-gray-200">
+            <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">🎨 Avatar Generado</p>
+            <div className="flex gap-3">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-4xl border-2 border-white shadow-lg">
+                🤖
+              </div>
+              <div className="flex-1 space-y-1">
+                <p className="text-xs font-semibold text-gray-800">Estilo: {data.generatedAvatar.style}</p>
+                {Object.entries(data.generatedAvatar.features).map(([key, val]) => (
+                  <div key={key} className="flex items-center gap-2 text-[10px]">
+                    <span className="text-gray-400 capitalize w-16">{key}:</span>
+                    <span className="text-gray-700">{val as string}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="text-[10px] text-violet-600 mt-2 italic">Basado en: {data.generatedAvatar.basedOn}</p>
+          </div>
+          <div className="flex gap-1.5">
+            {data.stylesAvailable.map((s: string) => (
+              <span key={s} className="px-2 py-1 rounded-full bg-violet-50 border border-violet-200 text-[9px] font-medium text-violet-700">{s}</span>
+            ))}
+          </div>
+          <p className="text-xs text-violet-700 font-medium p-2 bg-violet-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
+      {/* ── Agent Live Monitor ── */}
+      {skill === "agent-live-monitor" && data.animationStates && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-white border border-gray-200">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-3xl animate-pulse">
+              ⚡
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-800">{data.statusLabel}</p>
+              <p className="text-[10px] text-gray-500">{data.currentTask}</p>
+              <p className="text-[10px] text-gray-400">Uptime: {data.uptime}</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {data.animationStates.map((s: any) => (
+              <div key={s.state} className={`p-2 rounded-lg text-center ${s.active ? "bg-green-50 border border-green-300" : "bg-gray-50 border border-gray-100"}`}>
+                <p className="text-xs font-medium">{s.state}</p>
+              </div>
+            ))}
+          </div>
+          {data.recentActivity && (
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">📋 Actividad Reciente</p>
+              <div className="space-y-1">
+                {data.recentActivity.map((a: any, i: number) => (
+                  <div key={i} className="flex items-center gap-2 p-1.5 rounded bg-white border border-gray-100 text-[11px]">
+                    <span className="text-gray-400 font-mono w-10">{a.time}</span>
+                    <span className="flex-1 text-gray-700">{a.action}</span>
+                    <span>{a.status}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <p className="text-xs text-green-700 font-medium p-2 bg-green-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
       {/* ── Generic fallback ── */}
-      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro"].includes(skill) && (
+      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro", "agent-face-creator", "agent-live-monitor"].includes(skill) && data && (
         <div className="p-3 rounded-lg bg-green-50 border border-green-200">
-          <p className="text-xs text-green-700">✅ {data.message || "Skill funcionando correctamente"}</p>
+          {data.message && <p className="text-xs text-green-700">✅ {data.message}</p>}
+          {!data.message && Object.keys(data).length > 0 && (
+            <div className="space-y-1">
+              {Object.entries(data).filter(([k]) => k !== "status").map(([key, val]) => (
+                <div key={key} className="text-[11px]">
+                  <span className="text-gray-500 capitalize">{key.replace(/_/g, " ")}:</span>{" "}
+                  <span className="text-gray-800 font-medium">{typeof val === "object" ? JSON.stringify(val) : String(val)}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

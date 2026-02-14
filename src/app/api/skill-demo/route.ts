@@ -546,6 +546,59 @@ export async function GET(request: NextRequest) {
     case "social-media-manager":
       result = await runSocialMediaDemo();
       break;
+    case "agent-face-creator":
+      result = {
+        skill: "agent-face-creator",
+        title: "🎨 Agent Face Creator — Demo de Generación",
+        timestamp: new Date().toISOString(),
+        data: {
+          stylesAvailable: ["Anime", "Pixel Art", "Profesional", "Cartoon", "Minimalista"],
+          generatedAvatar: {
+            style: "Profesional",
+            features: {
+              hair: "Corto, negro",
+              eyes: "Marrones, expresivos",
+              skin: "Moreno",
+              accessories: "Lentes redondos, auriculares",
+              expression: "Sonrisa confiada",
+              background: "Gradiente púrpura/azul",
+            },
+            basedOn: "Palabras clave: 'inteligente, amigable, tecnología, Perú'",
+            exportFormats: ["PNG 512x512", "PNG 1024x1024", "SVG vectorial"],
+          },
+          customizationOptions: 47,
+          insight: "Avatar generado en base a las palabras clave de personalidad del agente. Puedes personalizar 47 opciones diferentes o usar el resultado auto-generado.",
+        },
+      };
+      break;
+    case "agent-live-monitor":
+      result = {
+        skill: "agent-live-monitor",
+        title: "👁️ Agent Live Monitor — Estado en Tiempo Real",
+        timestamp: new Date().toISOString(),
+        data: {
+          agentStatus: "working",
+          statusLabel: "⚡ Trabajando",
+          uptime: "4h 23m",
+          currentTask: "Analizando datos del marketplace",
+          animationStates: [
+            { state: "🤔 Pensando", description: "Ojos moviéndose, ceño ligeramente fruncido", active: false },
+            { state: "⚡ Trabajando", description: "Tecleando rápidamente, expresión concentrada", active: true },
+            { state: "🔍 Investigando", description: "Lupa animada, ojos enfocados", active: false },
+            { state: "😊 Tarea completada", description: "Sonrisa amplia, confeti animado", active: false },
+            { state: "😴 Inactivo", description: "Ojos cerrados, respiración suave", active: false },
+            { state: "❌ Error", description: "Expresión preocupada, alerta roja", active: false },
+          ],
+          recentActivity: [
+            { time: "14:23", action: "Completó análisis de 15 posts", status: "✅" },
+            { time: "14:20", action: "Iniciando investigación web", status: "⚡" },
+            { time: "14:15", action: "Optimización de memoria completada", status: "✅" },
+            { time: "14:10", action: "Backup automático ejecutado", status: "✅" },
+          ],
+          insight: "Tu agente lleva 4h 23m activo hoy. Ha completado 12 tareas y está trabajando en la actual. Estado de ánimo: concentrado y productivo.",
+        },
+      };
+      break;
     default:
       result = {
         skill: skillId,
