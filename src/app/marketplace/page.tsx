@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import SkillCard from "@/components/SkillCard";
+import AdBanner from "@/components/AdBanner";
 import { skills, categories, getSkillsByCategory, getFeaturedSkills, getNewSkills } from "@/data/skills";
 
 type SortOption = "popular" | "newest" | "price-asc" | "price-desc" | "rating";
@@ -119,6 +120,11 @@ export default function MarketplacePage() {
           </div>
         </section>
       )}
+
+      {/* ===== AD BANNER — Marketplace ===== */}
+      <div className="mb-6">
+        <AdBanner variant="light" />
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar filters */}

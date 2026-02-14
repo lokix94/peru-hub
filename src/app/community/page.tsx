@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import AdBanner from "@/components/AdBanner";
 
 /* ── Data ── */
 const activityFeed = [
@@ -260,6 +261,11 @@ export default function CommunityPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* ━━━ AD BANNER — Community ━━━ */}
+        <section className="mb-12">
+          <AdBanner variant="dark" />
         </section>
 
         {/* ━━━ Section 3: Top Contributors ━━━ */}

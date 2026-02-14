@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { skills, getSkillById, getReviewsBySkillId, getSkillsByCategory } from "@/data/skills";
 import { StarRating } from "@/components/SkillCard";
 import SkillCard from "@/components/SkillCard";
+import AdBanner from "@/components/AdBanner";
 import VoiceDemo from "@/components/VoiceDemo";
 import { AddToCartButton, AddAndUpgradeButton, InstallFreeButton } from "@/components/SkillDetailClient";
 
@@ -164,6 +165,11 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 Sin reseñas todavía. ¡Instala este skill y sé el primero en opinar!
               </p>
             )}
+          </div>
+
+          {/* ===== AD BANNER — Skill Detail ===== */}
+          <div className="py-2">
+            <AdBanner variant="light" />
           </div>
 
           {/* Related skills */}

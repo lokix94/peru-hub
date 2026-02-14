@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import SkillCard from "@/components/SkillCard";
+import AdBanner from "@/components/AdBanner";
 import { skills, getFeaturedSkills, getNewSkills } from "@/data/skills";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -173,6 +174,11 @@ export default function HomePage() {
             <SkillCard key={skill.id} skill={skill} />
           ))}
         </div>
+      </section>
+
+      {/* ===== AD BANNER — Landing Page ===== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <AdBanner variant="light" />
       </section>
 
       {/* ===== FREE SKILLS BANNER ===== */}
