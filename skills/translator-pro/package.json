@@ -1,0 +1,30 @@
+{
+  "name": "translator-pro",
+  "version": "1.0.0",
+  "description": "High-quality multi-language translator using free APIs (MyMemory, LibreTranslate). Features auto-detect, batch translation, formal/informal modes, and glossary management.",
+  "author": "Peru 🇵🇪",
+  "price": "$2.99",
+  "main": "translate.sh",
+  "scripts": {
+    "translate": "./translate.sh",
+    "glossary": "python3 glossary.py"
+  },
+  "keywords": [
+    "translation",
+    "language",
+    "translator",
+    "mymemory",
+    "libretranslate",
+    "multilingual",
+    "glossary",
+    "batch"
+  ],
+  "license": "MIT",
+  "engines": {
+    "bash": ">=4.0",
+    "python": ">=3.8"
+  },
+  "dependencies": {
+    "system": ["curl", "jq", "python3"]
+  }
+}

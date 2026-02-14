@@ -1,0 +1,13 @@
+{
+  "name": "Multi-Language Translator Pro",
+  "price": 2.99,
+  "category": "language",
+  "description": "High-quality translation between 10+ languages using free APIs. Features auto-detect language, batch translation, formal/informal modes, and domain-specific glossary management.",
+  "version": "1.0.0",
+  "author": "Peru 🇵🇪",
+  "tags": ["translation", "language", "multilingual", "glossary", "mymemory", "libretranslate", "i18n"],
+  "requirements": ["bash 4.0+", "curl", "jq", "python3"],
+  "license": "MIT",
+  "files": ["SKILL.md", "translate.sh", "glossary.py", "marketplace.json"],
+  "entrypoint": "translate.sh"
+}

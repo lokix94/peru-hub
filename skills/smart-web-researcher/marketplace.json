@@ -1,0 +1,13 @@
+{
+  "name": "Smart Web Researcher",
+  "price": 4.99,
+  "category": "research",
+  "description": "Multi-source web research tool that searches Wikipedia, DuckDuckGo, and Wikidata, cross-references results, and produces structured research reports with citations and confidence scoring.",
+  "version": "1.0.0",
+  "author": "Peru 🇵🇪",
+  "tags": ["research", "web-search", "citations", "report", "wikipedia", "cross-reference", "knowledge"],
+  "requirements": ["bash 4.0+", "curl", "jq", "python3", "beautifulsoup4"],
+  "license": "MIT",
+  "files": ["SKILL.md", "research.sh", "marketplace.json"],
+  "entrypoint": "research.sh"
+}

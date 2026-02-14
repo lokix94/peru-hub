@@ -1,0 +1,28 @@
+{
+  "name": "smart-web-researcher",
+  "version": "1.0.0",
+  "description": "Multi-source research tool that searches Wikipedia, DuckDuckGo, and Google, cross-references results, and produces structured reports with citations and confidence scoring.",
+  "author": "Peru 🇵🇪",
+  "price": "$4.99",
+  "main": "research.sh",
+  "scripts": {
+    "research": "./research.sh"
+  },
+  "keywords": [
+    "research",
+    "web-search",
+    "wikipedia",
+    "cross-reference",
+    "citations",
+    "reports"
+  ],
+  "license": "MIT",
+  "engines": {
+    "bash": ">=4.0",
+    "python": ">=3.8"
+  },
+  "dependencies": {
+    "system": ["curl", "jq", "python3"],
+    "pip": ["beautifulsoup4"]
+  }
+}

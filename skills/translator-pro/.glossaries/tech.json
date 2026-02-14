@@ -1,0 +1,28 @@
+{
+  "domain": "tech",
+  "created": "2026-02-14T03:06:03.097266",
+  "updated": "2026-02-14T03:06:03.177058",
+  "entries": [
+    {
+      "source": "machine learning",
+      "target": "aprendizaje automático",
+      "from_lang": "en",
+      "to_lang": "es",
+      "added": "2026-02-14T03:06:03.097319"
+    },
+    {
+      "source": "API",
+      "target": "API",
+      "from_lang": "en",
+      "to_lang": "es",
+      "added": "2026-02-14T03:06:03.138728"
+    },
+    {
+      "source": "cloud computing",
+      "target": "computación en la nube",
+      "from_lang": "en",
+      "to_lang": "es",
+      "added": "2026-02-14T03:06:03.177016"
+    }
+  ]
+}
