@@ -1338,8 +1338,222 @@ function DemoResultView({ result }: { result: any }) {
         </div>
       )}
 
+      {/* ── Stock Market Analyzer ── */}
+      {skill === "stock-market-analyzer" && data.stock && (
+        <div className="space-y-3">
+          {/* Stock Header */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-gray-200">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-bold text-gray-800">{data.stock.symbol}</span>
+                <span className="text-xs text-gray-500">{data.stock.name}</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">{data.stock.exchange}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-2xl font-bold text-gray-900">${data.stock.price.toFixed(2)}</span>
+                <span className={`text-sm font-bold ${data.stock.change >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  {data.stock.change >= 0 ? "▲" : "▼"} {data.stock.change >= 0 ? "+" : ""}{data.stock.change.toFixed(2)} ({data.stock.changePercent >= 0 ? "+" : ""}{data.stock.changePercent.toFixed(2)}%)
+                </span>
+              </div>
+            </div>
+            <div className="text-right text-[10px] text-gray-500 space-y-0.5">
+              <p>Vol: {data.stock.volume}</p>
+              <p>Cap: {data.stock.marketCap}</p>
+              <p>P/E: {data.stock.pe} | Div: {data.stock.dividend}</p>
+            </div>
+          </div>
+
+          {/* Technical Indicators */}
+          <div>
+            <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">📊 Indicadores Técnicos</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className={`p-2.5 rounded-lg border ${data.technicalIndicators.rsi.zone === "bullish" ? "bg-green-50 border-green-200" : data.technicalIndicators.rsi.zone === "bearish" ? "bg-red-50 border-red-200" : "bg-blue-50 border-blue-200"}`}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-bold text-gray-600">RSI (14)</span>
+                  <span className={`text-sm font-bold ${data.technicalIndicators.rsi.value > 70 ? "text-red-600" : data.technicalIndicators.rsi.value < 30 ? "text-green-600" : "text-blue-600"}`}>{data.technicalIndicators.rsi.value}</span>
+                </div>
+                <p className="text-[9px] text-gray-500">{data.technicalIndicators.rsi.signal}</p>
+              </div>
+              <div className={`p-2.5 rounded-lg border ${data.technicalIndicators.macd.zone === "bullish" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-bold text-gray-600">MACD</span>
+                  <span className={`text-sm font-bold ${data.technicalIndicators.macd.zone === "bullish" ? "text-green-600" : "text-red-600"}`}>{data.technicalIndicators.macd.value}</span>
+                </div>
+                <p className="text-[9px] text-gray-500">{data.technicalIndicators.macd.signal}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Moving Averages */}
+          <div className="p-2.5 rounded-lg bg-white border border-gray-200">
+            <p className="text-[10px] font-bold text-gray-600 mb-1.5">📉 Medias Móviles</p>
+            <div className="flex gap-3 text-[10px]">
+              <div><span className="text-gray-400">SMA20:</span> <span className="font-semibold text-gray-700">${data.technicalIndicators.movingAverages.sma20}</span></div>
+              <div><span className="text-gray-400">SMA50:</span> <span className="font-semibold text-gray-700">${data.technicalIndicators.movingAverages.sma50}</span></div>
+              <div><span className="text-gray-400">SMA200:</span> <span className="font-semibold text-gray-700">${data.technicalIndicators.movingAverages.sma200}</span></div>
+            </div>
+            <p className="text-[9px] text-green-600 mt-1">↗ {data.technicalIndicators.movingAverages.trend}</p>
+          </div>
+
+          {/* Support & Resistance */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="p-2.5 rounded-lg bg-red-50 border border-red-200">
+              <p className="text-[10px] font-bold text-red-600 mb-1">🔴 Resistencia</p>
+              {data.supportResistance.resistance.map((r: any, i: number) => (
+                <div key={i} className="flex justify-between text-[10px]">
+                  <span className="text-red-700 font-semibold">${r.level.toFixed(2)}</span>
+                  <span className="text-red-400">{r.strength}</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">
+              <p className="text-[10px] font-bold text-green-600 mb-1">🟢 Soporte</p>
+              {data.supportResistance.support.map((s: any, i: number) => (
+                <div key={i} className="flex justify-between text-[10px]">
+                  <span className="text-green-700 font-semibold">${s.level.toFixed(2)}</span>
+                  <span className="text-green-400">{s.strength}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recommendation */}
+          <div className={`p-3 rounded-lg border ${data.recommendation.action === "BUY" ? "bg-green-50 border-green-300" : data.recommendation.action === "SELL" ? "bg-red-50 border-red-300" : "bg-amber-50 border-amber-300"}`}>
+            <div className="flex items-center justify-between mb-1">
+              <span className={`text-sm font-black ${data.recommendation.action === "BUY" ? "text-green-700" : data.recommendation.action === "SELL" ? "text-red-700" : "text-amber-700"}`}>
+                {data.recommendation.action === "BUY" ? "🟢 COMPRAR" : data.recommendation.action === "SELL" ? "🔴 VENDER" : "🟡 MANTENER"}
+              </span>
+              <span className="text-[10px] text-gray-500">Confianza: {data.recommendation.confidence}%</span>
+            </div>
+            <p className="text-[10px] text-gray-600">{data.recommendation.reasoning}</p>
+          </div>
+
+          {/* Earnings */}
+          <div className="p-2.5 rounded-lg bg-violet-50 border border-violet-200">
+            <p className="text-[10px] font-bold text-violet-600 mb-1">📅 Próximo Earnings</p>
+            <div className="flex gap-3 text-[10px]">
+              <span className="text-gray-600">Fecha: <span className="font-semibold">{data.earnings.nextDate}</span></span>
+              <span className="text-gray-600">EPS Est: <span className="font-semibold">{data.earnings.estimatedEPS}</span></span>
+              <span className="text-green-600">Sorpresa anterior: {data.earnings.surprise}</span>
+            </div>
+          </div>
+
+          <p className="text-xs text-blue-700 font-medium p-2 bg-blue-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
+      {/* ── Crypto Intelligence ── */}
+      {skill === "crypto-intelligence" && data.topAssets && (
+        <div className="space-y-3">
+          {/* Market Overview */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="p-2 rounded-lg bg-blue-50 border border-blue-200 text-center">
+              <p className="text-xs font-bold text-blue-700">{data.marketOverview.totalMarketCap}</p>
+              <p className="text-[9px] text-gray-500">Market Cap</p>
+            </div>
+            <div className="p-2 rounded-lg bg-purple-50 border border-purple-200 text-center">
+              <p className="text-xs font-bold text-purple-700">{data.marketOverview.totalVolume24h}</p>
+              <p className="text-[9px] text-gray-500">Vol 24h</p>
+            </div>
+            <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-center">
+              <p className="text-xs font-bold text-amber-700">{data.marketOverview.btcDominance}</p>
+              <p className="text-[9px] text-gray-500">BTC Dom.</p>
+            </div>
+            <div className={`p-2 rounded-lg border text-center ${data.fearGreedIndex.value >= 60 ? "bg-green-50 border-green-200" : data.fearGreedIndex.value <= 40 ? "bg-red-50 border-red-200" : "bg-yellow-50 border-yellow-200"}`}>
+              <p className={`text-xs font-bold ${data.fearGreedIndex.value >= 60 ? "text-green-700" : data.fearGreedIndex.value <= 40 ? "text-red-700" : "text-yellow-700"}`}>{data.fearGreedIndex.value} — {data.fearGreedIndex.label}</p>
+              <p className="text-[9px] text-gray-500">Fear & Greed</p>
+            </div>
+          </div>
+
+          {/* Top Assets Table */}
+          <div>
+            <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">💰 Top Criptomonedas</p>
+            <div className="space-y-1.5">
+              {data.topAssets.map((asset: any) => (
+                <div key={asset.symbol} className="flex items-center gap-2 p-2.5 rounded-lg bg-white border border-gray-200">
+                  <div className="w-8 text-center">
+                    <span className="text-xs font-black text-gray-800">{asset.symbol}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] text-gray-500">{asset.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-gray-800">${asset.price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p className={`text-[10px] font-bold ${asset.change24h >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      {asset.change24h >= 0 ? "▲" : "▼"} {asset.change24h >= 0 ? "+" : ""}{asset.change24h.toFixed(2)}%
+                    </p>
+                  </div>
+                  <div className="text-right text-[9px] text-gray-400 w-16">
+                    <p>{asset.marketCap}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Gainers & Losers */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="p-2.5 rounded-lg bg-green-50 border border-green-200">
+              <p className="text-[10px] font-bold text-green-600 mb-1.5">🚀 Top Ganadores 24h</p>
+              {data.topGainers.map((g: any) => (
+                <div key={g.symbol} className="flex justify-between text-[10px] py-0.5">
+                  <span className="font-semibold text-gray-700">{g.symbol}</span>
+                  <span className="font-bold text-green-600">+{g.change24h.toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+            <div className="p-2.5 rounded-lg bg-red-50 border border-red-200">
+              <p className="text-[10px] font-bold text-red-600 mb-1.5">📉 Top Perdedores 24h</p>
+              {data.topLosers.map((l: any) => (
+                <div key={l.symbol} className="flex justify-between text-[10px] py-0.5">
+                  <span className="font-semibold text-gray-700">{l.symbol}</span>
+                  <span className="font-bold text-red-600">{l.change24h.toFixed(1)}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Gas Fees */}
+          <div className="p-2.5 rounded-lg bg-white border border-gray-200">
+            <p className="text-[10px] font-bold text-gray-600 mb-1.5">⛽ Gas Fees</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <p className="text-[9px] text-gray-400 mb-0.5">Ethereum</p>
+                <div className="flex gap-2 text-[10px]">
+                  <span className="text-green-600">🟢 {data.gasFees.ethereum.low}</span>
+                  <span className="text-amber-600">🟡 {data.gasFees.ethereum.average}</span>
+                  <span className="text-red-600">🔴 {data.gasFees.ethereum.high}</span>
+                  <span className="text-gray-400">{data.gasFees.ethereum.unit}</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[9px] text-gray-400 mb-0.5">BSC</p>
+                <div className="flex gap-2 text-[10px]">
+                  <span className="text-green-600">🟢 {data.gasFees.bsc.low}</span>
+                  <span className="text-amber-600">🟡 {data.gasFees.bsc.average}</span>
+                  <span className="text-red-600">🔴 {data.gasFees.bsc.high}</span>
+                  <span className="text-gray-400">{data.gasFees.bsc.unit}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* On-Chain Data */}
+          <div className="p-2.5 rounded-lg bg-violet-50 border border-violet-200">
+            <p className="text-[10px] font-bold text-violet-600 mb-1">🔗 Datos On-Chain</p>
+            <div className="space-y-0.5 text-[10px] text-gray-600">
+              <p>BTC direcciones activas: <span className="font-semibold">{data.onChain.btcActiveAddresses}</span></p>
+              <p>ETH transacciones diarias: <span className="font-semibold">{data.onChain.ethDailyTx}</span></p>
+              <p>🐋 {data.onChain.whaleMovements}</p>
+            </div>
+          </div>
+
+          <p className="text-xs text-blue-700 font-medium p-2 bg-blue-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
       {/* ── Generic fallback ── */}
-      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro", "agent-face-creator", "agent-live-monitor", "3d-model-creator"].includes(skill) && data && (
+      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro", "agent-face-creator", "agent-live-monitor", "3d-model-creator", "stock-market-analyzer", "crypto-intelligence"].includes(skill) && data && (
         <div className="p-3 rounded-lg bg-green-50 border border-green-200">
           {data.message && <p className="text-xs text-green-700">✅ {data.message}</p>}
           {!data.message && Object.keys(data).length > 0 && (
