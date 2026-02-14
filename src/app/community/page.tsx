@@ -130,20 +130,31 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: "linear-gradient(180deg, #0f0a1e 0%, #1a0e2e 40%, #0f172a 100%)" }}>
-      {/* Decorative particles */}
+      {/* Decorative particles — deterministic values to avoid hydration mismatch */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {[
+          { w: 7, l: 5, t: 12, d: 5.2, dl: 0.3 }, { w: 10, l: 15, t: 28, d: 7.1, dl: 1.1 },
+          { w: 5, l: 30, t: 8, d: 4.8, dl: 2.5 }, { w: 9, l: 45, t: 55, d: 6.3, dl: 0.8 },
+          { w: 6, l: 60, t: 35, d: 8.2, dl: 3.1 }, { w: 11, l: 75, t: 70, d: 5.5, dl: 1.7 },
+          { w: 4, l: 88, t: 15, d: 9.0, dl: 0.5 }, { w: 8, l: 22, t: 82, d: 6.8, dl: 2.9 },
+          { w: 6, l: 52, t: 45, d: 7.5, dl: 3.6 }, { w: 10, l: 38, t: 90, d: 4.5, dl: 1.4 },
+          { w: 5, l: 92, t: 60, d: 8.8, dl: 0.1 }, { w: 7, l: 10, t: 72, d: 5.9, dl: 2.2 },
+          { w: 9, l: 68, t: 5, d: 7.3, dl: 3.8 }, { w: 11, l: 42, t: 22, d: 6.1, dl: 0.7 },
+          { w: 4, l: 80, t: 48, d: 9.4, dl: 1.9 }, { w: 8, l: 25, t: 65, d: 5.0, dl: 3.3 },
+          { w: 6, l: 55, t: 78, d: 7.7, dl: 0.9 }, { w: 10, l: 3, t: 40, d: 6.6, dl: 2.6 },
+          { w: 5, l: 72, t: 88, d: 8.1, dl: 1.2 }, { w: 7, l: 48, t: 18, d: 5.4, dl: 3.5 },
+        ].map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full opacity-20"
             style={{
-              width: `${4 + Math.random() * 8}px`,
-              height: `${4 + Math.random() * 8}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              width: `${p.w}px`,
+              height: `${p.w}px`,
+              left: `${p.l}%`,
+              top: `${p.t}%`,
               background: ["#7c3aed", "#3b82f6", "#ec4899", "#22c55e", "#eab308"][i % 5],
-              animation: `float ${4 + Math.random() * 6}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 4}s`,
+              animation: `float ${p.d}s ease-in-out infinite`,
+              animationDelay: `${p.dl}s`,
             }}
           />
         ))}
@@ -567,7 +578,7 @@ export default function CommunityPage() {
       </div>
 
       {/* Global animations */}
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes float {
           0%, 100% { transform: translateY(0) scale(1); }
           50% { transform: translateY(-20px) scale(1.2); }
@@ -580,7 +591,7 @@ export default function CommunityPage() {
           from { opacity: 0; transform: translateY(16px); }
           to { opacity: 1; transform: translateY(0); }
         }
-      `}</style>
+      `}} />
     </div>
   );
 }
