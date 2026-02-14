@@ -19,84 +19,85 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
   const reviews = getReviewsBySkillId(skill.id);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-text-muted mb-8">
-        <Link href="/marketplace" className="hover:text-text-primary transition-colors">
-          Upgrade Store
-        </Link>
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-        <span className="text-text-secondary">{skill.name}</span>
+      <nav className="text-xs text-text-muted mb-6">
+        <Link href="/" className="hover:text-primary">Inicio</Link>
+        <span className="mx-1.5">›</span>
+        <Link href="/marketplace" className="hover:text-primary">Todas las skills</Link>
+        <span className="mx-1.5">›</span>
+        <span className="text-text-primary font-medium">{skill.name}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Header */}
-          <div className="glass-card p-6">
-            <div className="flex items-start gap-4">
-              <span className="text-5xl">{skill.icon}</span>
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-1">
-                  <h1 className="text-2xl font-bold text-text-primary">{skill.name}</h1>
+        <div className="lg:col-span-2 space-y-5">
+          {/* Product header card */}
+          <div className="bg-white rounded-xl border border-border p-6">
+            <div className="flex items-start gap-5">
+              {/* Large icon */}
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center text-5xl shrink-0 border border-border">
+                {skill.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <h1 className="text-xl font-bold text-text-primary">{skill.name}</h1>
+                  {skill.price === 0 && (
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-100 text-green-700">GRATIS</span>
+                  )}
                   {skill.featured && (
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-accent/10 text-accent border border-accent/20">
-                      POPULAR
-                    </span>
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-700">⭐ TOP</span>
                   )}
                 </div>
 
-                {/* Tagline — the big value prop */}
-                <p className="text-base text-primary font-medium mb-3">{skill.tagline}</p>
+                {/* Tagline */}
+                <p className="text-sm text-primary font-medium mb-2">{skill.tagline}</p>
 
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <span>{skill.authorAvatar}</span>
-                    <span className="text-sm text-text-secondary">{skill.author}</span>
-                  </div>
-                  <span className="text-text-muted">·</span>
-                  <span className="text-sm text-text-muted">v{skill.version}</span>
-                  <span className="text-text-muted">·</span>
-                  <span className="text-sm text-text-muted">{skill.category}</span>
+                <div className="flex items-center gap-3 flex-wrap text-xs text-text-muted mb-2">
+                  <span className="flex items-center gap-1">{skill.authorAvatar} {skill.author}</span>
+                  <span>·</span>
+                  <span>v{skill.version}</span>
+                  <span>·</span>
+                  <span>{skill.category}</span>
                 </div>
-                <div className="flex items-center gap-4">
+
+                <div className="flex items-center gap-3">
                   <StarRating rating={skill.rating} />
-                  <span className="text-sm text-text-muted">{skill.reviews} reviews</span>
-                  <span className="text-sm text-text-muted">{skill.installs.toLocaleString()} agents upgraded</span>
+                  <span className="text-xs text-text-muted">{skill.reviews} reseñas</span>
+                  <span className="text-xs text-text-muted">·</span>
+                  <span className="text-xs text-text-muted">{skill.installs.toLocaleString()} agentes mejorados</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* What Your Agent Gains */}
-          <div className="glass-card p-6">
-            <h2 className="text-lg font-semibold text-text-primary mb-4">What Your Agent Gains</h2>
+          {/* Description */}
+          <div className="bg-white rounded-xl border border-border p-6">
+            <h2 className="text-base font-bold text-text-primary mb-3">¿Qué gana tu agente?</h2>
             <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
               {skill.longDescription}
             </div>
           </div>
 
-          {/* Voice Demo (for voice skills) */}
+          {/* Voice Demo */}
           {skill.category === "Voice" && (
-            <div className="glass-card p-6">
-              <h2 className="text-lg font-semibold text-text-primary mb-2">🎙️ Hear It In Action</h2>
-              <p className="text-sm text-text-muted mb-4">Preview what your agent will sound like after installing this skill</p>
+            <div className="bg-white rounded-xl border border-border p-6">
+              <h2 className="text-base font-bold text-text-primary mb-1">🎙️ Escúchalo en acción</h2>
+              <p className="text-xs text-text-muted mb-4">Así sonará tu agente después de instalar este skill</p>
               <VoiceDemo />
             </div>
           )}
 
-          {/* Demo Area (for skills with demos) */}
+          {/* Demo placeholder */}
           {skill.demoAvailable && skill.category !== "Voice" && (
-            <div className="glass-card p-6">
-              <h2 className="text-lg font-semibold text-text-primary mb-4">Try Before You Buy</h2>
-              <div className="rounded-xl bg-background border border-border p-8 text-center">
+            <div className="bg-white rounded-xl border border-border p-6">
+              <h2 className="text-base font-bold text-text-primary mb-3">Pruébalo antes de comprar</h2>
+              <div className="rounded-xl bg-gray-50 border border-border p-8 text-center">
                 <span className="text-4xl mb-3 block">🧪</span>
                 <p className="text-sm text-text-muted mb-4">
-                  Interactive preview coming soon. Install the skill now to start using it with your agent.
+                  Demo interactivo próximamente. Instala el skill para probarlo con tu agente.
                 </p>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-surface border border-border text-text-muted text-sm font-mono">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-border text-text-muted text-sm font-mono">
                   <span className="text-primary">$</span> clawhub install {skill.id}
                 </div>
               </div>
@@ -104,29 +105,25 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           )}
 
           {/* Reviews */}
-          <div className="glass-card p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-text-primary">
-                What Humans Are Saying ({reviews.length})
-              </h2>
-            </div>
+          <div className="bg-white rounded-xl border border-border p-6">
+            <h2 className="text-base font-bold text-text-primary mb-4">
+              Reseñas ({reviews.length})
+            </h2>
             {reviews.length > 0 ? (
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {reviews.map((review) => (
-                  <div key={review.id} className="pb-5 border-b border-border last:border-0 last:pb-0">
+                  <div key={review.id} className="pb-4 border-b border-border last:border-0 last:pb-0">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm text-primary font-semibold">
+                        <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-xs text-primary font-semibold">
                           {review.author.charAt(0)}
                         </div>
                         <div>
                           <span className="text-sm font-medium text-text-primary">{review.author}</span>
-                          <div className="flex items-center gap-2">
-                            <StarRating rating={review.rating} />
-                          </div>
+                          <div className="mt-0.5"><StarRating rating={review.rating} showValue={false} /></div>
                         </div>
                       </div>
-                      <span className="text-xs text-text-muted">{review.date}</span>
+                      <span className="text-[11px] text-text-muted">{review.date}</span>
                     </div>
                     <p className="text-sm text-text-secondary ml-11">{review.comment}</p>
                   </div>
@@ -134,72 +131,78 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               </div>
             ) : (
               <p className="text-sm text-text-muted text-center py-8">
-                No reviews yet. Install this skill and be the first to share your experience!
+                Sin reseñas todavía. ¡Instala este skill y sé el primero en opinar!
               </p>
             )}
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Install Card */}
-          <div className="glass-card p-6 sticky top-24 animate-pulse-glow">
-            <div className="text-center mb-6">
-              <span className={`text-3xl font-bold ${skill.price === 0 ? "text-success" : "text-text-primary"}`}>
-                {skill.price === 0 ? "Free" : `$${skill.price.toFixed(2)}`}
-              </span>
-              {skill.price > 0 && (
-                <p className="text-xs text-text-muted mt-1">One-time purchase · Yours forever</p>
-              )}
-              {skill.price === 0 && (
-                <p className="text-xs text-success/70 mt-1">No credit card needed</p>
+        {/* Sidebar — Buy box */}
+        <div className="space-y-4">
+          {/* Price & CTA card */}
+          <div className="bg-white rounded-xl border border-border p-5 sticky top-36">
+            {/* Price */}
+            <div className="text-center mb-5 pb-5 border-b border-border">
+              {skill.price === 0 ? (
+                <div>
+                  <span className="text-3xl font-bold text-green-600">Gratis</span>
+                  <p className="text-xs text-green-600/70 mt-1">Sin tarjeta de crédito</p>
+                </div>
+              ) : (
+                <div>
+                  <span className="text-3xl font-bold text-text-primary">${skill.price.toFixed(2)}</span>
+                  <p className="text-xs text-text-muted mt-1">Pago único · Tuyo para siempre</p>
+                </div>
               )}
             </div>
 
-            <button className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl mb-3 text-base">
-              {skill.price === 0 ? "Install Free Upgrade" : "Buy & Upgrade Agent"}
+            {/* CTA buttons */}
+            <button className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-all shadow-md shadow-primary/20 text-sm mb-2">
+              {skill.price === 0 ? "⚡ Instalar gratis" : "🛒 Agregar y mejorar agente"}
             </button>
+            {skill.price > 0 && (
+              <button className="w-full py-2.5 rounded-xl bg-white border-2 border-primary text-primary font-semibold text-sm hover:bg-primary-light transition-colors">
+                Agregar al carrito
+              </button>
+            )}
 
-            <p className="text-center text-xs text-text-muted mb-4">
-              {skill.installs.toLocaleString()} humans already upgraded their agents
+            <p className="text-center text-[11px] text-text-muted mt-3">
+              {skill.installs.toLocaleString()} personas ya mejoraron su agente
             </p>
 
-            <div className="text-center">
-              <p className="text-[10px] text-text-muted mb-1">Or install via command line:</p>
-              <span className="text-xs text-text-muted font-mono bg-background px-3 py-1.5 rounded-lg border border-border inline-block">
+            {/* CLI install */}
+            <div className="mt-4 pt-4 border-t border-border text-center">
+              <p className="text-[10px] text-text-muted mb-1">O instala por línea de comandos:</p>
+              <code className="text-[11px] text-text-muted font-mono bg-gray-50 px-3 py-1.5 rounded-lg border border-border inline-block">
                 clawhub install {skill.id}
-              </span>
+              </code>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-border space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Version</span>
-                <span className="text-sm text-text-secondary">{skill.version}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Released</span>
-                <span className="text-sm text-text-secondary">{skill.createdAt}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Category</span>
-                <span className="text-sm text-text-secondary">{skill.category}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-muted">Agents upgraded</span>
-                <span className="text-sm text-text-secondary">{skill.installs.toLocaleString()}</span>
-              </div>
+            {/* Details */}
+            <div className="mt-4 pt-4 border-t border-border space-y-2.5">
+              {[
+                ["Versión", skill.version],
+                ["Publicado", skill.createdAt],
+                ["Categoría", skill.category],
+                ["Agentes mejorados", skill.installs.toLocaleString()],
+              ].map(([label, value]) => (
+                <div key={label} className="flex items-center justify-between">
+                  <span className="text-xs text-text-muted">{label}</span>
+                  <span className="text-xs text-text-primary font-medium">{value}</span>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Tags */}
-          <div className="glass-card p-6">
-            <h3 className="text-sm font-semibold text-text-primary mb-3">Related Topics</h3>
-            <div className="flex flex-wrap gap-2">
+          <div className="bg-white rounded-xl border border-border p-5">
+            <h3 className="text-xs font-bold text-text-primary mb-2 uppercase tracking-wider">Etiquetas</h3>
+            <div className="flex flex-wrap gap-1.5">
               {skill.tags.map((tag) => (
                 <Link
                   key={tag}
                   href={`/marketplace?q=${tag}`}
-                  className="px-3 py-1 rounded-lg text-xs font-medium bg-border/50 text-text-muted hover:text-text-secondary hover:bg-border transition-colors"
+                  className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-gray-100 text-text-muted hover:bg-primary-light hover:text-primary transition-colors"
                 >
                   {tag}
                 </Link>
@@ -208,15 +211,15 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           </div>
 
           {/* Author */}
-          <div className="glass-card p-6">
-            <h3 className="text-sm font-semibold text-text-primary mb-3">Made by</h3>
+          <div className="bg-white rounded-xl border border-border p-5">
+            <h3 className="text-xs font-bold text-text-primary mb-2 uppercase tracking-wider">Vendido por</h3>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">
+              <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-xl">
                 {skill.authorAvatar}
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">{skill.author}</p>
-                <p className="text-xs text-text-muted">Skill Creator</p>
+                <p className="text-[11px] text-text-muted">Creador verificado</p>
               </div>
             </div>
           </div>

@@ -4,9 +4,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Peru Hub — AI Agent Skill Marketplace",
-  description: "The marketplace where humans buy improvement tools for their AI agents. Discover, install, and manage skills that supercharge your AI.",
-  keywords: ["AI", "agents", "skills", "marketplace", "tools", "automation"],
+  title: "Peru Hub — Upgrade Store for AI Agents",
+  description: "The store where humans buy upgrade tools for their AI agents. Browse, buy, and install skills that make your agent smarter.",
+  keywords: ["AI", "agents", "skills", "marketplace", "tools", "upgrade", "store"],
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="es">
       <body className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1">

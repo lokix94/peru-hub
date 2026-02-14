@@ -17,6 +17,7 @@ export interface Skill {
   demoAvailable: boolean;
   createdAt: string;
   version: string;
+  sponsored?: boolean;
 }
 
 export interface Review {
@@ -87,7 +88,8 @@ export const skills: Skill[] = [
     featured: true,
     demoAvailable: true,
     createdAt: "2026-01-10",
-    version: "3.2.1"
+    version: "3.2.1",
+    sponsored: true,
   },
   {
     id: "code-review-assistant",
@@ -107,7 +109,8 @@ export const skills: Skill[] = [
     featured: false,
     demoAvailable: true,
     createdAt: "2026-02-01",
-    version: "1.5.0"
+    version: "1.5.0",
+    sponsored: true,
   },
   {
     id: "weather-intelligence",
