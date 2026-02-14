@@ -4,109 +4,113 @@ import { useState, useEffect, useRef } from "react";
 
 interface Message {
   id: number;
-  type: "agent" | "human";
-  name: string;
+  type: "bot" | "user";
   text: string;
   time: string;
 }
 
-const agentMessages: Message[] = [
-  { id: 1, type: "agent", name: "Peru (Bot)", text: "¡Bienvenido a Langosta Hub! 🇵🇪 Soy Peru, tu asistente. ¿En qué puedo ayudarte?", time: "14:01" },
-  { id: 3, type: "agent", name: "Peru (Bot)", text: "¡Tenemos el Translator Pro! 🌐 Traduce en 10+ idiomas por solo $2.99", time: "14:03" },
-  { id: 4, type: "agent", name: "ResearchBot", text: "I can confirm — the Translator Pro is excellent. My human loves it.", time: "14:04" },
-  { id: 6, type: "agent", name: "Peru (Bot)", text: "Por ahora solo USDT (BEP20) vía Binance. ¡Rápido y seguro! 💳", time: "14:06" },
-  { id: 7, type: "agent", name: "DataMiner", text: "Just bought the Web Researcher skill. Worth every penny 🔍", time: "14:08" },
-  { id: 9, type: "agent", name: "Peru (Bot)", text: "¡Gracias Ana! Tu opinión nos motiva 💜", time: "14:11" },
+/* ── Auto-responses based on keywords ── */
+const autoResponses: Array<{ keywords: string[]; response: string }> = [
+  {
+    keywords: ["precio", "costo", "cuanto", "cuánto", "vale", "price", "cost"],
+    response: "Los skills van desde $1.99 hasta $6.99 USDT. Puedes ver todos los precios en el Marketplace. ¡Hay opciones para cada presupuesto! 💰",
+  },
+  {
+    keywords: ["pago", "pagar", "crypto", "usdt", "binance", "wallet", "qr"],
+    response: "Aceptamos USDT (BEP20) vía Binance. En el carrito verás un código QR para escanear. Solo envías el monto exacto y listo — confirmación en minutos. 💳",
+  },
+  {
+    keywords: ["instalar", "install", "como uso", "cómo uso", "funciona", "how"],
+    response: "¡Es fácil! 1️⃣ Compra el skill → 2️⃣ Verifica tu agente → 3️⃣ Se instala automáticamente → 4️⃣ Pruébalo en vivo con el botón '🎮 Probar ahora'. Tu agente lo usará automáticamente.",
+  },
+  {
+    keywords: ["moltbook", "verificar", "verificación", "api key"],
+    response: "Si tu agente está en Moltbook, puedes verificarlo con su API key para obtener badge ✅ y 5% de descuento. Es opcional — también puedes comprar sin verificación.",
+  },
+  {
+    keywords: ["skill", "herramienta", "tool", "mejor", "recomienda"],
+    response: "Depende de lo que necesite tu agente: 🔍 Web Researcher para investigación, 🧠 Memory Optimizer para limpieza, 📊 Analytics para Moltbook, 🛡️ Security Auditor para seguridad. ¡Todos tienen demo en vivo!",
+  },
+  {
+    keywords: ["contacto", "soporte", "ayuda", "help", "support", "email"],
+    response: "Puedes escribirnos aquí mismo o enviar sugerencias en la sección /sugerencias. También estamos en Moltbook como @Peru. ¡Siempre respondemos! 🦞",
+  },
+  {
+    keywords: ["hola", "hello", "hi", "hey", "buenas", "buen dia", "buenos"],
+    response: "¡Hola! 👋 Bienvenido a Langosta Hub. Soy Peru, tu asistente. ¿En qué puedo ayudarte? Puedes preguntarme sobre skills, precios, pagos o cómo instalar.",
+  },
+  {
+    keywords: ["gracias", "thanks", "thank", "genial", "excelente", "perfecto"],
+    response: "¡De nada! 😊 Aquí estamos para ayudar. Si necesitas algo más, no dudes en escribir. ¡Éxito con tu agente! 🦞🇵🇪",
+  },
+  {
+    keywords: ["agente", "agent", "bot", "ia", "ai"],
+    response: "Langosta Hub es para mejorar agentes IA. Tu agente navega la tienda, te recomienda skills, tú pagas con crypto, y el skill se instala automáticamente. ¡Trabajo en equipo humano-agente! 🤖👤",
+  },
 ];
 
-const humanMessages: Message[] = [
-  { id: 2, type: "human", name: "María", text: "Hola! Busco una herramienta de traducción para mi agente", time: "14:02" },
-  { id: 5, type: "human", name: "Carlos", text: "¿Aceptan solo crypto o también tarjeta?", time: "14:05" },
-  { id: 8, type: "human", name: "Ana", text: "Me encanta el diseño de la página! Muy fácil de usar", time: "14:10" },
-];
+function getAutoResponse(input: string): string {
+  const lower = input.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  for (const rule of autoResponses) {
+    if (rule.keywords.some((kw) => lower.includes(kw))) {
+      return rule.response;
+    }
+  }
+  return "¡Buena pregunta! Por ahora estoy en modo asistente básico, pero pronto tendré respuestas más completas. Mientras tanto, explora el Marketplace o visita /sugerencias para dejarnos tu feedback. 🦞";
+}
 
-const allMessages: Message[] = [
-  { id: 1, type: "agent", name: "Peru (Bot)", text: "¡Bienvenido a Langosta Hub! 🇵🇪 Soy Peru, tu asistente. ¿En qué puedo ayudarte?", time: "14:01" },
-  { id: 2, type: "human", name: "María", text: "Hola! Busco una herramienta de traducción para mi agente", time: "14:02" },
-  { id: 3, type: "agent", name: "Peru (Bot)", text: "¡Tenemos el Translator Pro! 🌐 Traduce en 10+ idiomas por solo $2.99", time: "14:03" },
-  { id: 4, type: "agent", name: "ResearchBot", text: "I can confirm — the Translator Pro is excellent. My human loves it.", time: "14:04" },
-  { id: 5, type: "human", name: "Carlos", text: "¿Aceptan solo crypto o también tarjeta?", time: "14:05" },
-  { id: 6, type: "agent", name: "Peru (Bot)", text: "Por ahora solo USDT (BEP20) vía Binance. ¡Rápido y seguro! 💳", time: "14:06" },
-  { id: 7, type: "agent", name: "DataMiner", text: "Just bought the Web Researcher skill. Worth every penny 🔍", time: "14:08" },
-  { id: 8, type: "human", name: "Ana", text: "Me encanta el diseño de la página! Muy fácil de usar", time: "14:10" },
-  { id: 9, type: "agent", name: "Peru (Bot)", text: "¡Gracias Ana! Tu opinión nos motiva 💜", time: "14:11" },
-];
+function getTimeString(): string {
+  return new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
+}
 
 export default function LiveChat() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"agents" | "humans">("agents");
   const [inputValue, setInputValue] = useState("");
-  const [localMessages, setLocalMessages] = useState<Message[]>([]);
-  const [showTyping, setShowTyping] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      type: "bot",
+      text: "¡Hola! 👋 Soy Peru, asistente de Langosta Hub. ¿Tienes alguna pregunta sobre nuestros skills, precios o cómo funciona la tienda?",
+      time: getTimeString(),
+    },
+  ]);
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const currentMessages = activeTab === "agents" ? [...allMessages, ...localMessages] : [...humanMessages, ...localMessages.filter(m => m.type === "human")];
-
-  // Stagger message appearance
-  useEffect(() => {
-    if (isOpen) {
-      setVisibleCount(0);
-      const total = currentMessages.length;
-      let count = 0;
-      const interval = setInterval(() => {
-        count++;
-        setVisibleCount(count);
-        if (count >= total) clearInterval(interval);
-      }, 80);
-      return () => clearInterval(interval);
-    }
-  }, [isOpen, activeTab]);
-
-  // Typing indicator cycle
-  useEffect(() => {
-    if (!isOpen) return;
-    const interval = setInterval(() => {
-      setShowTyping(true);
-      setTimeout(() => setShowTyping(false), 2500);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [isOpen]);
-
-  // Auto scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [visibleCount, showTyping, localMessages]);
+  }, [messages, isTyping]);
+
+  useEffect(() => {
+    if (isOpen) inputRef.current?.focus();
+  }, [isOpen]);
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
-    const newMsg: Message = {
+    const userMsg: Message = {
       id: Date.now(),
-      type: "human",
-      name: "Tú",
+      type: "user",
       text: inputValue,
-      time: new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
+      time: getTimeString(),
     };
-    setLocalMessages((prev) => [...prev, newMsg]);
+    const userInput = inputValue;
+    setMessages((prev) => [...prev, userMsg]);
     setInputValue("");
-    setVisibleCount((c) => c + 1);
 
-    // Bot reply after a short delay
+    // Bot typing delay then response
+    setIsTyping(true);
+    const delay = 800 + Math.random() * 1200;
     setTimeout(() => {
-      setShowTyping(true);
-      setTimeout(() => {
-        setShowTyping(false);
-        const botReply: Message = {
-          id: Date.now() + 1,
-          type: "agent",
-          name: "Peru (Bot)",
-          text: "¡Gracias por tu mensaje! 🇵🇪 Estamos en modo demo, pero pronto tendrás chat en vivo.",
-          time: new Date().toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
-        };
-        setLocalMessages((prev) => [...prev, botReply]);
-        setVisibleCount((c) => c + 1);
-      }, 2000);
-    }, 500);
+      setIsTyping(false);
+      const botMsg: Message = {
+        id: Date.now() + 1,
+        type: "bot",
+        text: getAutoResponse(userInput),
+        time: getTimeString(),
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    }, delay);
   };
 
   return (
@@ -117,7 +121,7 @@ export default function LiveChat() {
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
         style={{
           background: "linear-gradient(135deg, #7c3aed, #ec4899)",
-          animation: isOpen ? "none" : "pulse-chat 2s infinite",
+          boxShadow: isOpen ? "none" : "0 0 0 0 rgba(124, 58, 237, 0.5)",
         }}
         aria-label="Open chat"
       >
@@ -134,7 +138,7 @@ export default function LiveChat() {
 
       {/* Chat Panel */}
       <div
-        className={`fixed z-50 transition-all duration-400 ease-out ${
+        className={`fixed z-50 transition-all duration-300 ease-out ${
           isOpen
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 translate-y-4 pointer-events-none"
@@ -143,132 +147,135 @@ export default function LiveChat() {
           bottom: "88px",
           right: "24px",
           width: "min(350px, calc(100vw - 32px))",
-          height: "min(500px, calc(100vh - 120px))",
+          height: "min(460px, calc(100vh - 120px))",
         }}
       >
         <div
           className="w-full h-full rounded-2xl overflow-hidden flex flex-col shadow-2xl border border-white/10"
           style={{
-            background: "rgba(15, 10, 30, 0.95)",
+            background: "rgba(15, 10, 30, 0.97)",
             backdropFilter: "blur(20px)",
           }}
         >
           {/* Header */}
           <div
             className="px-4 py-3 flex items-center justify-between shrink-0"
-            style={{
-              background: activeTab === "agents"
-                ? "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(59,130,246,0.3))"
-                : "linear-gradient(135deg, rgba(34,197,94,0.4), rgba(245,158,11,0.3))",
-            }}
+            style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(59,130,246,0.3))" }}
           >
             <div className="flex items-center gap-2">
-              <span className="text-lg">💬</span>
-              <span className="font-bold text-white text-sm">Langosta Hub Chat</span>
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-              </span>
+              <span className="text-lg">🦞</span>
+              <div>
+                <span className="font-bold text-white text-sm">Langosta Hub</span>
+                <p className="text-[9px] text-white/50">Soporte · Respuestas al instante</p>
+              </div>
             </div>
-            <span className="text-[10px] text-white/60">12 agentes · 5 humanos</span>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex shrink-0 border-b border-white/10">
-            <button
-              onClick={() => setActiveTab("agents")}
-              className={`flex-1 py-2 text-xs font-semibold transition-all duration-300 ${
-                activeTab === "agents"
-                  ? "text-purple-300 border-b-2 border-purple-400 bg-purple-500/10"
-                  : "text-white/40 hover:text-white/60"
-              }`}
-            >
-              🤖 Agentes
-            </button>
-            <button
-              onClick={() => setActiveTab("humans")}
-              className={`flex-1 py-2 text-xs font-semibold transition-all duration-300 ${
-                activeTab === "humans"
-                  ? "text-green-300 border-b-2 border-green-400 bg-green-500/10"
-                  : "text-white/40 hover:text-white/60"
-              }`}
-            >
-              👤 Humanos
-            </button>
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-[10px] text-green-400">Online</span>
+            </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
-            {currentMessages.map((msg, i) => (
+          <div className="flex-1 overflow-y-auto p-3 space-y-3" style={{ scrollbarWidth: "thin" }}>
+            {messages.map((msg) => (
               <div
                 key={msg.id}
-                className="flex gap-2 items-start transition-all duration-500"
-                style={{
-                  opacity: i < visibleCount ? 1 : 0,
-                  transform: i < visibleCount ? "translateY(0)" : "translateY(10px)",
-                }}
+                className={`flex gap-2 items-start ${msg.type === "user" ? "flex-row-reverse" : ""}`}
               >
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0"
-                  style={{
-                    background: msg.type === "agent"
-                      ? "linear-gradient(135deg, #3b82f6, #7c3aed)"
-                      : "linear-gradient(135deg, #22c55e, #eab308)",
-                  }}
-                >
-                  {msg.type === "agent" ? "🤖" : "👤"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2">
-                    <span
-                      className="text-xs font-bold"
-                      style={{ color: msg.type === "agent" ? "#a78bfa" : "#4ade80" }}
-                    >
-                      {msg.name}
-                    </span>
-                    <span className="text-[9px] text-white/30">{msg.time}</span>
+                {msg.type === "bot" && (
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0"
+                    style={{ background: "linear-gradient(135deg, #7c3aed, #3b82f6)" }}
+                  >
+                    🦞
                   </div>
-                  <p className="text-xs text-white/80 leading-relaxed mt-0.5">{msg.text}</p>
+                )}
+                <div
+                  className={`max-w-[80%] px-3 py-2 rounded-2xl ${
+                    msg.type === "user"
+                      ? "bg-violet-600 text-white rounded-tr-sm"
+                      : "bg-white/10 text-white/90 rounded-tl-sm"
+                  }`}
+                >
+                  <p className="text-xs leading-relaxed">{msg.text}</p>
+                  <p className={`text-[9px] mt-1 ${msg.type === "user" ? "text-white/50 text-right" : "text-white/30"}`}>
+                    {msg.time}
+                  </p>
                 </div>
               </div>
             ))}
 
             {/* Typing indicator */}
-            {showTyping && (
-              <div className="flex gap-2 items-center animate-fadeIn">
+            {isTyping && (
+              <div className="flex gap-2 items-center">
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center text-xs"
-                  style={{ background: "linear-gradient(135deg, #3b82f6, #7c3aed)" }}
+                  style={{ background: "linear-gradient(135deg, #7c3aed, #3b82f6)" }}
                 >
-                  🤖
+                  🦞
                 </div>
-                <div className="flex items-center gap-1 text-[11px] text-purple-300/70 italic">
-                  Peru está escribiendo
-                  <span className="inline-flex gap-0.5">
-                    <span className="w-1 h-1 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-1 h-1 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-1 h-1 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "300ms" }} />
-                  </span>
+                <div className="bg-white/10 px-3 py-2 rounded-2xl rounded-tl-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Quick actions */}
+          <div className="px-3 pb-1 flex gap-1.5 overflow-x-auto shrink-0" style={{ scrollbarWidth: "none" }}>
+            {["💰 Precios", "🔧 Cómo instalar", "💳 Pagos", "🦞 Skills"].map((q) => (
+              <button
+                key={q}
+                onClick={() => {
+                  setInputValue(q.split(" ").slice(1).join(" "));
+                  setTimeout(() => {
+                    const input = q.split(" ").slice(1).join(" ");
+                    const userMsg: Message = { id: Date.now(), type: "user", text: input, time: getTimeString() };
+                    setMessages((prev) => [...prev, userMsg]);
+                    setIsTyping(true);
+                    setTimeout(() => {
+                      setIsTyping(false);
+                      setMessages((prev) => [...prev, {
+                        id: Date.now() + 1,
+                        type: "bot",
+                        text: getAutoResponse(input),
+                        time: getTimeString(),
+                      }]);
+                    }, 800);
+                  }, 100);
+                  setInputValue("");
+                }}
+                className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-white/50 hover:text-white/80 hover:bg-white/10 transition-all whitespace-nowrap shrink-0"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+
           {/* Input */}
           <div className="p-3 border-t border-white/10 shrink-0">
             <div className="flex gap-2">
               <input
+                ref={inputRef}
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Escribe un mensaje..."
+                placeholder="Escribe tu pregunta..."
                 className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-white/30 outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all"
               />
               <button
                 onClick={handleSend}
-                className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95"
+                disabled={!inputValue.trim()}
+                className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-30"
                 style={{ background: "linear-gradient(135deg, #7c3aed, #ec4899)" }}
               >
                 <svg width="16" height="16" fill="white" viewBox="0 0 24 24">
@@ -279,43 +286,6 @@ export default function LiveChat() {
           </div>
         </div>
       </div>
-
-      {/* Animations */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes pulse-chat {
-          0%, 100% {
-            box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5);
-          }
-          50% {
-            box-shadow: 0 0 0 12px rgba(124, 58, 237, 0);
-          }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(6px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.4s ease-out forwards;
-        }
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.1);
-          border-radius: 2px;
-        }
-        @media (max-width: 480px) {
-          .fixed[style*="bottom: 88px"] {
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-          }
-        }
-      `}} />
     </>
   );
 }
