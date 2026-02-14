@@ -3,10 +3,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RechargeModal from "./RechargeModal";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 export default function Header() {
   const pathname = usePathname();
@@ -15,6 +20,16 @@ export default function Header() {
   const [rechargeOpen, setRechargeOpen] = useState(false);
   const { totalItems, totalPrice } = useCart();
   const { lang, setLang, t } = useLanguage();
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50">
@@ -48,6 +63,23 @@ export default function Header() {
 
           {/* Promo text — centered */}
           <span>🚀 {t("promo.new")} — {t("promo.explore")}</span>
+
+          {/* Install App button — right side */}
+          <button
+            onClick={async () => {
+              if (installPrompt) {
+                await installPrompt.prompt();
+                const { outcome } = await installPrompt.userChoice;
+                if (outcome === "accepted") setInstallPrompt(null);
+              } else {
+                // Fallback: show manual instructions
+                alert("Para instalar:\n\n📱 Móvil: Menú del navegador → 'Agregar a pantalla de inicio'\n\n💻 PC (Chrome): Barra de dirección → icono de instalar (⊕)");
+              }
+            }}
+            className="absolute right-4 sm:right-6 lg:right-8 flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 hover:bg-white/30 text-[10px] font-bold text-white transition-all"
+          >
+            📲 App
+          </button>
         </div>
       </div>
 

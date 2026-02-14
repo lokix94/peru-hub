@@ -29,18 +29,20 @@ function getStatus(confirmations: string): "confirmed" | "pending" | "failed" {
 export async function GET() {
   const lastChecked = new Date().toISOString();
 
-  // If no API key, return mock data
+  // If no API key, return clear message
   if (!API_KEY) {
     return NextResponse.json({
       transactions: [],
       total_received: 0,
       last_checked: lastChecked,
-      note: "Configure BSCSCAN_API_KEY en las variables de entorno para datos en vivo",
+      note: "Configure BSCSCAN_API_KEY en Variables de Entorno de Vercel",
     });
   }
 
   try {
-    const url = new URL("https://api.bscscan.com/api");
+    // Use Etherscan V2 API with chainid=56 for BSC
+    const url = new URL("https://api.etherscan.io/v2/api");
+    url.searchParams.set("chainid", "56");
     url.searchParams.set("module", "account");
     url.searchParams.set("action", "tokentx");
     url.searchParams.set("contractaddress", USDT_CONTRACT);
@@ -61,11 +63,17 @@ export async function GET() {
     const data = await res.json();
 
     if (data.status !== "1" || !Array.isArray(data.result)) {
+      // Show actual error from API if key is set but returns error
+      const apiMsg = data.message || data.result || "Unknown API error";
       return NextResponse.json({
         transactions: [],
         total_received: 0,
         last_checked: lastChecked,
-        note: data.message || "No transactions found",
+        note: typeof apiMsg === "string" && apiMsg.includes("NOTOK")
+          ? `BSCScan API error: ${apiMsg}`
+          : apiMsg === "No transactions found"
+          ? undefined  // Hide warning when no transactions (that's normal for $0 balance)
+          : `BSCScan API: ${apiMsg}`,
       });
     }
 

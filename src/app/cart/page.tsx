@@ -799,8 +799,8 @@ export default function CartPage() {
                     <Image
                       src="/qr-usdt-bep20.jpg"
                       alt="QR Code - USDT BEP20 Payment"
-                      width={200}
-                      height={200}
+                      width={280}
+                      height={280}
                       className="rounded-lg"
                     />
                   </div>
