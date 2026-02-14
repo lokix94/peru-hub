@@ -3,51 +3,69 @@
 import Link from "next/link";
 import { useState } from "react";
 import SkillCard from "@/components/SkillCard";
-import { skills, getFeaturedSkills, getSkillsByCategory } from "@/data/skills";
+import { skills, getFeaturedSkills } from "@/data/skills";
+import { useLanguage } from "@/context/LanguageContext";
 
 const banners = [
   {
     id: 1,
-    headline: "Dale voz a tu agente 🎙️",
-    sub: "Voz neural peruana — Camila suena tan real que nadie nota la diferencia",
-    cta: "Instalar gratis",
+    headline: { es: "Dale voz a tu agente 🎙️", en: "Give your agent a voice 🎙️" },
+    sub: {
+      es: "Voz neural peruana — Camila suena tan real que nadie nota la diferencia",
+      en: "Peruvian neural voice — Camila sounds so real nobody notices the difference",
+    },
+    cta: { es: "Instalar gratis", en: "Install free" },
     link: "/marketplace/voice-camila-tts",
     gradient: "from-violet-600 to-indigo-700",
   },
   {
     id: 2,
-    headline: "¿Tu agente olvida todo? 🧠",
-    sub: "Instala Memory Curator y tu agente recordará cada detalle importante",
-    cta: "Ver skill",
+    headline: { es: "¿Tu agente olvida todo? 🧠", en: "Does your agent forget everything? 🧠" },
+    sub: {
+      es: "Instala Memory Curator y tu agente recordará cada detalle importante",
+      en: "Install Memory Curator and your agent will remember every important detail",
+    },
+    cta: { es: "Ver skill", en: "See skill" },
     link: "/marketplace/memory-curator",
     gradient: "from-amber-500 to-orange-600",
   },
   {
     id: 3,
-    headline: "Nuevo: Research Pro 🌐",
-    sub: "Tu agente verifica información en múltiples fuentes — adiós alucinaciones",
-    cta: "Desde $4.99",
+    headline: { es: "Nuevo: Research Pro 🌐", en: "New: Research Pro 🌐" },
+    sub: {
+      es: "Tu agente verifica información en múltiples fuentes — adiós alucinaciones",
+      en: "Your agent verifies information from multiple sources — goodbye hallucinations",
+    },
+    cta: { es: "Desde $4.99", en: "From $4.99" },
     link: "/marketplace/web-research-pro",
     gradient: "from-emerald-500 to-teal-600",
   },
 ];
 
-const storeCategories = [
-  { name: "Investigación y Análisis", icon: "🔍", slug: "Research", color: "bg-blue-50 border-blue-200 hover:bg-blue-100", iconBg: "bg-blue-100" },
-  { name: "Voz y Audio", icon: "🎤", slug: "Voice", color: "bg-purple-50 border-purple-200 hover:bg-purple-100", iconBg: "bg-purple-100" },
-  { name: "Legal y Compliance", icon: "⚖️", slug: "Research", color: "bg-red-50 border-red-200 hover:bg-red-100", iconBg: "bg-red-100" },
-  { name: "Código y Automatización", icon: "💻", slug: "Development", color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100", iconBg: "bg-emerald-100" },
-  { name: "Productividad", icon: "📧", slug: "Productivity", color: "bg-amber-50 border-amber-200 hover:bg-amber-100", iconBg: "bg-amber-100" },
-  { name: "Core del Agente", icon: "🧠", slug: "Agent Core", color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100", iconBg: "bg-indigo-100" },
-  { name: "Utilidades", icon: "🌤️", slug: "Utilities", color: "bg-teal-50 border-teal-200 hover:bg-teal-100", iconBg: "bg-teal-100" },
-  { name: "Ver todo", icon: "🛒", slug: "all", color: "bg-gray-50 border-gray-200 hover:bg-gray-100", iconBg: "bg-gray-100" },
-];
-
 export default function HomePage() {
   const [activeBanner, setActiveBanner] = useState(0);
+  const { lang, t } = useLanguage();
   const featured = getFeaturedSkills();
   const popular = [...skills].sort((a, b) => b.installs - a.installs);
   const free = skills.filter(s => s.price === 0);
+
+  const storeCategories = [
+    { nameKey: "cat.research", icon: "🔍", slug: "Research", color: "bg-blue-50 border-blue-200 hover:bg-blue-100", iconBg: "bg-blue-100" },
+    { nameKey: "cat.voice", icon: "🎤", slug: "Voice", color: "bg-purple-50 border-purple-200 hover:bg-purple-100", iconBg: "bg-purple-100" },
+    { nameKey: "cat.legal", icon: "⚖️", slug: "Research", color: "bg-red-50 border-red-200 hover:bg-red-100", iconBg: "bg-red-100" },
+    { nameKey: "cat.code", icon: "💻", slug: "Development", color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100", iconBg: "bg-emerald-100" },
+    { nameKey: "cat.productivity", icon: "📧", slug: "Productivity", color: "bg-amber-50 border-amber-200 hover:bg-amber-100", iconBg: "bg-amber-100" },
+    { nameKey: "cat.agent.core", icon: "🧠", slug: "Agent Core", color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100", iconBg: "bg-indigo-100" },
+    { nameKey: "cat.utilities", icon: "🌤️", slug: "Utilities", color: "bg-teal-50 border-teal-200 hover:bg-teal-100", iconBg: "bg-teal-100" },
+    { nameKey: "cat.all", icon: "🛒", slug: "all", color: "bg-gray-50 border-gray-200 hover:bg-gray-100", iconBg: "bg-gray-100" },
+  ];
+
+  const howSteps = [
+    { step: "1", icon: "🛒", titleKey: "how.step1.title", descKey: "how.step1.desc" },
+    { step: "2", icon: "💳", titleKey: "how.step2.title", descKey: "how.step2.desc" },
+    { step: "3", icon: "⚡", titleKey: "how.step3.title", descKey: "how.step3.desc" },
+    { step: "4", icon: "🚀", titleKey: "how.step4.title", descKey: "how.step4.desc" },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -63,13 +81,13 @@ export default function HomePage() {
 
               <div className="relative max-w-lg">
                 <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight">
-                  {banners[activeBanner].headline}
+                  {banners[activeBanner].headline[lang]}
                 </h2>
                 <p className="text-white/80 text-sm md:text-base mb-5 leading-relaxed">
-                  {banners[activeBanner].sub}
+                  {banners[activeBanner].sub[lang]}
                 </p>
                 <span className="inline-block px-6 py-2.5 bg-white text-gray-900 font-semibold rounded-full text-sm group-hover:bg-gray-100 transition-colors shadow-lg">
-                  {banners[activeBanner].cta} →
+                  {banners[activeBanner].cta[lang]} →
                 </span>
               </div>
             </div>
@@ -94,16 +112,16 @@ export default function HomePage() {
       {/* ===== CATEGORY GRID ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-text-primary">Categorías</h2>
+          <h2 className="text-lg font-bold text-text-primary">{t("categories")}</h2>
           <Link href="/marketplace" className="text-sm text-primary hover:text-primary-hover font-medium">
-            Ver todo →
+            {t("see.all")} →
           </Link>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           {storeCategories.map((cat) => (
             <Link
-              key={cat.name}
+              key={cat.nameKey}
               href={cat.slug === "all" ? "/marketplace" : `/marketplace?cat=${cat.slug}`}
               className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${cat.color}`}
             >
@@ -111,7 +129,7 @@ export default function HomePage() {
                 {cat.icon}
               </div>
               <span className="text-xs font-medium text-text-secondary text-center leading-tight">
-                {cat.name}
+                {t(cat.nameKey)}
               </span>
             </Link>
           ))}
@@ -122,11 +140,11 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-text-primary">🔥 Más populares</h2>
+            <h2 className="text-lg font-bold text-text-primary">🔥 {t("most.popular")}</h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600 uppercase">Top</span>
           </div>
           <Link href="/marketplace" className="text-sm text-primary hover:text-primary-hover font-medium">
-            ¡Ver todo! →
+            {t("see.all.excited")} →
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -140,11 +158,11 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 md:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl md:text-2xl font-bold mb-1">🎉 Skills gratuitos — ¡$0.00!</h3>
-            <p className="text-white/80 text-sm">Empieza a mejorar tu agente hoy. Sin tarjeta de crédito.</p>
+            <h3 className="text-xl md:text-2xl font-bold mb-1">🎉 {t("free.skills.title")}</h3>
+            <p className="text-white/80 text-sm">{t("free.skills.desc")}</p>
           </div>
           <Link href="/marketplace?price=free" className="px-6 py-2.5 bg-white text-green-700 font-semibold rounded-full text-sm hover:bg-green-50 transition-colors shadow-lg whitespace-nowrap">
-            Ver skills gratis →
+            {t("free.skills.cta")} →
           </Link>
         </div>
       </section>
@@ -153,7 +171,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-text-primary">🆓 Gratis para tu agente</h2>
+            <h2 className="text-lg font-bold text-text-primary">🆓 {t("free.for.agent")}</h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700">FREE</span>
           </div>
         </div>
@@ -168,16 +186,16 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-text-primary">⭐ Recomendados</h2>
+            <h2 className="text-lg font-bold text-text-primary">⭐ {t("recommended")}</h2>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Staff Pick</span>
           </div>
           <Link href="/marketplace" className="text-sm text-primary hover:text-primary-hover font-medium">
-            ¡Ver todo! →
+            {t("see.all.excited")} →
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {featured.map((skill) => (
-            <SkillCard key={skill.id} skill={skill} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
+          {featured.map((skill, i) => (
+            <SkillCard key={skill.id} skill={skill} index={i} />
           ))}
         </div>
       </section>
@@ -186,15 +204,10 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="bg-white rounded-2xl border border-border p-8 md:p-10">
           <h2 className="text-xl font-bold text-text-primary text-center mb-8">
-            ¿Cómo funciona Peru Hub?
+            {t("how.title")}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[
-              { step: "1", icon: "🛒", title: "Explora la tienda", desc: "Navega por categorías o busca la skill que necesitas" },
-              { step: "2", icon: "💳", title: "Elige y compra", desc: "Muchos son gratis. Los premium cuestan desde $2.99" },
-              { step: "3", icon: "⚡", title: "Instala en tu agente", desc: "Un clic y listo. Sin configuración complicada" },
-              { step: "4", icon: "🚀", title: "¡Tu agente sube de nivel!", desc: "Nuevas habilidades activas inmediatamente" },
-            ].map((item) => (
+            {howSteps.map((item) => (
               <div key={item.step} className="text-center">
                 <div className="w-14 h-14 rounded-full bg-primary-light flex items-center justify-center text-2xl mx-auto mb-3 relative">
                   {item.icon}
@@ -202,8 +215,8 @@ export default function HomePage() {
                     {item.step}
                   </span>
                 </div>
-                <h3 className="text-sm font-semibold text-text-primary mb-1">{item.title}</h3>
-                <p className="text-xs text-text-muted leading-relaxed">{item.desc}</p>
+                <h3 className="text-sm font-semibold text-text-primary mb-1">{t(item.titleKey)}</h3>
+                <p className="text-xs text-text-muted leading-relaxed">{t(item.descKey)}</p>
               </div>
             ))}
           </div>
@@ -212,7 +225,7 @@ export default function HomePage() {
 
       {/* ===== TESTIMONIALS ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-10">
-        <h2 className="text-lg font-bold text-text-primary mb-4">💬 Lo que dicen los usuarios</h2>
+        <h2 className="text-lg font-bold text-text-primary mb-4">💬 {t("testimonials.title")}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             { quote: "Mi agente pasó de no saber nada de leyes a citar artículos constitucionales específicos. Increíble.", author: "LegalEagle_Lima", skill: "⚖️ Legal Research" },
@@ -241,16 +254,16 @@ export default function HomePage() {
       <section className="bg-header-bg text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
-            Tu agente puede ser mejor.
+            {t("bottom.cta.title")}
           </h2>
           <p className="text-white/60 mb-6 max-w-md mx-auto">
-            Empieza gratis. Sin tarjeta de crédito. Elige un skill y mira cómo tu agente sube de nivel.
+            {t("bottom.cta.desc")}
           </p>
           <Link
             href="/marketplace"
             className="inline-block px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-semibold rounded-full text-base transition-all shadow-lg shadow-primary/30 hover:-translate-y-0.5"
           >
-            Explorar la tienda →
+            {t("bottom.cta.button")} →
           </Link>
         </div>
       </section>

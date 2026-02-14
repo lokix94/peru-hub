@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Skill } from "@/data/skills";
 import { useCart } from "@/context/CartContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 function StarRating({ rating, showValue = true }: { rating: number; showValue?: boolean }) {
   return (
@@ -26,6 +27,7 @@ function StarRating({ rating, showValue = true }: { rating: number; showValue?: 
 
 export default function SkillCard({ skill }: { skill: Skill }) {
   const { addItem, isInCart } = useCart();
+  const { t } = useLanguage();
   const inCart = isInCart(skill.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -93,7 +95,7 @@ export default function SkillCard({ skill }: { skill: Skill }) {
           <div className="flex items-center gap-2 mb-3">
             <StarRating rating={skill.rating} />
             <span className="text-[10px] text-text-muted">
-              {skill.installs.toLocaleString()} agentes
+              {skill.installs.toLocaleString()} {t("agents")}
             </span>
           </div>
 
@@ -101,7 +103,7 @@ export default function SkillCard({ skill }: { skill: Skill }) {
           <div className="flex items-center justify-between pt-3 border-t border-border">
             <div>
               {skill.price === 0 ? (
-                <span className="text-lg font-bold text-green-600">Gratis</span>
+                <span className="text-lg font-bold text-green-600">{t("free")}</span>
               ) : (
                 <span className="text-lg font-bold text-text-primary">${skill.price.toFixed(2)}</span>
               )}
@@ -114,7 +116,7 @@ export default function SkillCard({ skill }: { skill: Skill }) {
                   : "bg-primary hover:bg-primary-hover text-white"
               }`}
             >
-              {inCart ? "✓ Agregado" : skill.price === 0 ? "Instalar" : "Agregar"}
+              {inCart ? `✓ ${t("added.short")}` : skill.price === 0 ? t("install") : t("add.short")}
             </button>
           </div>
         </div>
