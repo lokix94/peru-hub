@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, FormEvent } from "react";
 import SkillTester from "./SkillTester";
+
+/* ───────────────────────────── Types ───────────────────────────── */
 
 interface Transaction {
   date: string;
@@ -12,6 +14,9 @@ interface Transaction {
   isDemo?: boolean;
 }
 
+/* ───────────────────────────── Constants ───────────────────────── */
+
+const AUTH_KEY = "langosta_admin_auth";
 const WALLET = "0xcbc14706f7f8167505de1690e1e8419399f9506d";
 const BSCSCAN_WALLET_URL = `https://bscscan.com/address/${WALLET}`;
 
@@ -42,6 +47,8 @@ const DEMO_TRANSACTIONS: Transaction[] = [
   },
 ];
 
+/* ───────────────────────────── Helpers ─────────────────────────── */
+
 function formatHash(hash: string): string {
   return hash.slice(0, 10) + "..." + hash.slice(-6);
 }
@@ -60,11 +67,109 @@ function StatusBadge({ status }: { status: Transaction["status"] }) {
   );
 }
 
-export default function AdminPage() {
+/* ═══════════════════════════════════════════════════════════════════
+   LOGIN FORM
+   ═══════════════════════════════════════════════════════════════════ */
+
+function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/admin-auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        sessionStorage.setItem(AUTH_KEY, "true");
+        onSuccess();
+      } else {
+        setError(data.error || "Contraseña incorrecta");
+      }
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        {/* Logo / Title */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/20 mb-4">
+            <span className="text-3xl">🦞</span>
+          </div>
+          <h1 className="text-2xl font-bold text-white">Langosta Hub</h1>
+          <p className="text-slate-500 text-sm mt-1">Panel de Administración</p>
+        </div>
+
+        {/* Login Card */}
+        <div className="rounded-2xl border border-white/10 bg-[#13131d] p-8">
+          <h2 className="text-xl font-semibold text-white text-center mb-6">
+            🔐 Acceso Administrador
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="admin-password" className="block text-sm font-medium text-slate-400 mb-2">
+                Contraseña
+              </label>
+              <input
+                id="admin-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Ingresa la contraseña de admin"
+                required
+                autoFocus
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50 transition-colors"
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-400 text-center">
+                ❌ {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !password}
+              className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-red-600 to-orange-600 text-white font-semibold hover:from-red-500 hover:to-orange-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {loading ? "Verificando..." : "Ingresar"}
+            </button>
+          </form>
+        </div>
+
+        <p className="text-center text-xs text-slate-600 mt-6">
+          Acceso restringido — Solo personal autorizado
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN DASHBOARD (original page content)
+   ═══════════════════════════════════════════════════════════════════ */
+
+function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [totalReceived, setTotalReceived] = useState(0);
   const [transactionCount, setTransactionCount] = useState(0);
-  const [registeredUsers, setRegisteredUsers] = useState(0);
-  const [verifiedAgents, setVerifiedAgents] = useState(0);
+  const [registeredUsers] = useState(0);
+  const [verifiedAgents] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>(DEMO_TRANSACTIONS);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -174,8 +279,14 @@ export default function AdminPage() {
                 Monitoreo de ingresos y transacciones
               </p>
             </div>
-            <div className="hidden sm:flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onLogout}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 text-sm font-medium transition-colors"
+              >
+                🔒 Cerrar sesión Admin
+              </button>
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 En línea
               </span>
@@ -371,4 +482,38 @@ export default function AdminPage() {
       </div>
     </div>
   );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MAIN PAGE — Auth Gate
+   ═══════════════════════════════════════════════════════════════════ */
+
+export default function AdminPage() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(AUTH_KEY);
+    setAuthenticated(stored === "true");
+    setChecking(false);
+  }, []);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem(AUTH_KEY);
+    setAuthenticated(false);
+  };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="text-slate-500 text-sm animate-pulse">Cargando...</div>
+      </div>
+    );
+  }
+
+  if (!authenticated) {
+    return <AdminLogin onSuccess={() => setAuthenticated(true)} />;
+  }
+
+  return <AdminDashboard onLogout={handleLogout} />;
 }
