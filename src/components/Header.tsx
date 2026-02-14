@@ -4,11 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import RechargeModal from "./RechargeModal";
 
 export default function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [rechargeOpen, setRechargeOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50">
@@ -90,16 +92,17 @@ export default function Header() {
                 </div>
               </Link>
 
-              {/* Cart / Balance */}
-              <Link
-                href="/account"
-                className="flex items-center gap-2 px-3 py-2 ml-1 rounded-lg bg-accent/10 hover:bg-accent/20 transition-colors"
+              {/* Cart / Balance — opens recharge modal */}
+              <button
+                onClick={() => setRechargeOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 ml-1 rounded-lg bg-accent/10 hover:bg-accent/20 transition-colors group cursor-pointer"
               >
                 <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                 </svg>
-                <span className="text-sm font-bold text-accent">$9.46</span>
-              </Link>
+                <span className="text-sm font-bold text-accent">$0.00</span>
+                <span className="text-[10px] text-accent/60 group-hover:text-accent font-medium transition-colors">+ Recargar</span>
+              </button>
             </div>
 
             {/* Mobile hamburger */}
@@ -172,15 +175,21 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
-            <div className="pt-2 mt-2 border-t border-white/10 flex items-center gap-2 px-3">
+            <button
+              onClick={() => { setMobileOpen(false); setRechargeOpen(true); }}
+              className="w-full pt-2 mt-2 border-t border-white/10 flex items-center gap-2 px-3 hover:bg-white/5 rounded-lg py-2.5 transition-colors"
+            >
               <svg className="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
               </svg>
-              <span className="text-sm font-bold text-accent">Saldo: $9.46</span>
-            </div>
+              <span className="text-sm font-bold text-accent">Saldo: $0.00</span>
+              <span className="text-[10px] text-accent/60 ml-1">+ Recargar</span>
+            </button>
           </div>
         </div>
       )}
+      {/* Recharge Modal */}
+      <RechargeModal isOpen={rechargeOpen} onClose={() => setRechargeOpen(false)} />
     </header>
   );
 }

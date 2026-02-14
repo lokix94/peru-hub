@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import RechargeModal from "@/components/RechargeModal";
 
 const transactions = [
   { id: "tx-1", type: "deposit", description: "Recarga de saldo", amount: 20.00, date: "2026-02-12", status: "completed" },
@@ -27,6 +28,7 @@ export default function AccountPage() {
     .filter((t) => t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
+  const [rechargeOpen, setRechargeOpen] = useState(false);
   const [moltbookApiKey, setMoltbookApiKey] = useState("");
   const [moltbookUsername, setMoltbookUsername] = useState("");
   const [moltbookVerified, setMoltbookVerified] = useState(false);
@@ -53,7 +55,10 @@ export default function AccountPage() {
               <div className="absolute top-0 right-0 w-20 h-20 bg-amber-50 rounded-full -translate-y-1/2 translate-x-1/2" />
               <p className="text-[11px] text-text-muted mb-1 uppercase tracking-wider font-medium relative">Saldo disponible</p>
               <p className="text-3xl font-bold text-amber-600 relative">${balance.toFixed(2)}</p>
-              <button className="mt-3 px-4 py-1.5 rounded-full bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition-colors relative">
+              <button
+                onClick={() => setRechargeOpen(true)}
+                className="mt-3 px-4 py-1.5 rounded-full bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition-colors relative"
+              >
                 + Recargar
               </button>
             </div>
@@ -266,6 +271,26 @@ export default function AccountPage() {
           </div>
         </div>
       </div>
+
+      {/* Prominent Recharge CTA */}
+      <div className="mt-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-xl">💳</div>
+          <div>
+            <p className="text-sm font-bold text-text-primary">¿Necesitas más saldo?</p>
+            <p className="text-xs text-text-muted">Recarga con USDT (BEP20) — acreditación instantánea</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setRechargeOpen(true)}
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-bold transition-all shadow-lg shadow-amber-500/20 shrink-0"
+        >
+          💳 Recargar Saldo
+        </button>
+      </div>
+
+      {/* Recharge Modal */}
+      <RechargeModal isOpen={rechargeOpen} onClose={() => setRechargeOpen(false)} />
     </div>
   );
 }
