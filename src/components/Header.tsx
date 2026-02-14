@@ -76,6 +76,18 @@ export default function Header() {
               </Link>
 
               <Link
+                href="/admin"
+                className={`flex items-center justify-center w-9 h-9 rounded-lg text-sm transition-colors ${
+                  pathname === "/admin"
+                    ? "bg-white/10 text-white"
+                    : "text-header-muted hover:text-white hover:bg-white/5"
+                }`}
+                title="Panel de Administrador"
+              >
+                ⚙️
+              </Link>
+
+              <Link
                 href="/my-skills"
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                   pathname === "/my-skills"
@@ -165,6 +177,7 @@ export default function Header() {
               { href: "/my-skills", label: "📋 Mi agente" },
               { href: "/account", label: "👤 Mi cuenta" },
               { href: "/community", label: "👥 Comunidad" },
+              { href: "/admin", label: "⚙️ Admin" },
             ].map((item) => (
               <Link
                 key={item.href}
