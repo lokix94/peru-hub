@@ -8,6 +8,8 @@ import { useCart } from "@/context/CartContext";
 type PaymentTab = "human" | "agent";
 type CheckoutStep = "cart" | "payment" | "verify-agent" | "installing" | "complete";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /* ── Installation simulation steps ── */
 const installSteps = [
   { label: "Verificando licencia de compra...", icon: "🔐", duration: 1200 },
@@ -39,6 +41,9 @@ export default function CartPage() {
   const [installIndex, setInstallIndex] = useState(0);
   const [installProgress, setInstallProgress] = useState(0);
   const [purchasedItems, setPurchasedItems] = useState<typeof items>([]);
+  const [demoResults, setDemoResults] = useState<Record<string, any>>({});
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
+  const [demoExpanded, setDemoExpanded] = useState<string | null>(null);
 
   const walletAddress = "0xcbc14706f7f8167505de1690e1e8419399f9506d";
 
@@ -126,6 +131,20 @@ export default function CartPage() {
     setInstallIndex(0);
     setInstallProgress(0);
     setStep("installing");
+  };
+
+  /* ── Run skill demo ── */
+  const runDemo = async (skillId: string) => {
+    setDemoLoading(skillId);
+    setDemoExpanded(skillId);
+    try {
+      const res = await fetch(`/api/skill-demo?skill=${skillId}`);
+      const data = await res.json();
+      setDemoResults((prev) => ({ ...prev, [skillId]: data }));
+    } catch {
+      setDemoResults((prev) => ({ ...prev, [skillId]: { error: "Error de conexión" } }));
+    }
+    setDemoLoading(null);
   };
 
   /* ── Step: Empty cart ── */
@@ -412,7 +431,7 @@ export default function CartPage() {
      ══════════════════════════════════════════════════════════════ */
   if (step === "complete") {
     return (
-      <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Progress indicators — all complete */}
         <div className="flex items-center justify-center gap-2 mb-8">
           {["Pago", "Verificar", "Instalar", "Listo"].map((label, i) => (
@@ -435,7 +454,7 @@ export default function CartPage() {
           </div>
 
           <div className="p-6 space-y-5">
-            {/* Success summary */}
+            {/* Success summary with LIVE DEMO buttons */}
             <div className="p-4 rounded-xl bg-green-50 border border-green-200">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl">🤖</span>
@@ -448,14 +467,40 @@ export default function CartPage() {
               </div>
               <div className="space-y-2">
                 {purchasedItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-green-100">
-                    <span className="text-xl">{item.icon}</span>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-800">{item.name}</p>
+                  <div key={item.id} className="rounded-xl border border-green-100 overflow-hidden">
+                    <div className="flex items-center gap-2 p-3 bg-white">
+                      <span className="text-xl">{item.icon}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800">{item.name}</p>
+                      </div>
+                      <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                        ✅ Instalado
+                      </span>
+                      <button
+                        onClick={() => runDemo(item.id)}
+                        disabled={demoLoading === item.id}
+                        className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-700 text-white text-xs font-bold hover:from-violet-700 hover:to-purple-800 transition-all disabled:opacity-60"
+                      >
+                        {demoLoading === item.id ? "⏳ Ejecutando..." : "🎮 Probar ahora"}
+                      </button>
                     </div>
-                    <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
-                      ✅ Instalado
-                    </span>
+
+                    {/* ── Live Demo Results ── */}
+                    {demoExpanded === item.id && demoResults[item.id] && (
+                      <div className="border-t border-green-100 bg-gray-50 p-4">
+                        {demoResults[item.id].error ? (
+                          <p className="text-xs text-red-600">❌ {demoResults[item.id].error}</p>
+                        ) : (
+                          <DemoResultView result={demoResults[item.id]} />
+                        )}
+                        <button
+                          onClick={() => setDemoExpanded(null)}
+                          className="mt-3 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          ▲ Cerrar demo
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -463,21 +508,13 @@ export default function CartPage() {
 
             {/* How to use */}
             <div className="p-4 rounded-xl bg-violet-50 border border-violet-200">
-              <h3 className="text-sm font-bold text-violet-800 mb-2">📋 ¿Cómo usar los skills?</h3>
+              <h3 className="text-sm font-bold text-violet-800 mb-2">📋 ¿Cómo usar los skills con tu agente?</h3>
               <div className="text-xs text-violet-700 space-y-2">
                 <p><strong>1.</strong> Abre la conversación con tu agente IA</p>
                 <p><strong>2.</strong> Dile: <code className="px-2 py-0.5 rounded bg-violet-100 text-violet-800 font-mono">&quot;Usa el skill [nombre del skill]&quot;</code></p>
                 <p><strong>3.</strong> Tu agente ya tiene acceso — ¡empezará a usarlo automáticamente!</p>
+                <p><strong>4.</strong> Puedes probar cada skill ahora con el botón <strong>&quot;🎮 Probar ahora&quot;</strong></p>
               </div>
-            </div>
-
-            {/* Example command */}
-            <div className="rounded-xl bg-gray-900 p-4 font-mono text-xs">
-              <div className="text-gray-500 mb-2"># Ejemplo de uso con tu agente:</div>
-              <div className="text-cyan-300">Tú: &quot;Investiga sobre inteligencia artificial en Perú&quot;</div>
-              <div className="text-green-400 mt-1">🤖 {agentName}: Usando Smart Web Researcher para buscar información...</div>
-              <div className="text-green-400">🤖 {agentName}: He encontrado 15 fuentes relevantes. Aquí está mi reporte:</div>
-              <div className="text-gray-400 mt-1">   [Reporte detallado generado por el skill]</div>
             </div>
 
             {/* Receipt */}
@@ -901,6 +938,260 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DEMO RESULT VIEW — Renders real results from skill demos
+   ══════════════════════════════════════════════════════════════ */
+function DemoResultView({ result }: { result: any }) {
+  const { skill, title, data } = result;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <h4 className="text-sm font-bold text-gray-800">{title}</h4>
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-700 animate-pulse">EN VIVO</span>
+      </div>
+
+      {/* ── Moltbook Analytics ── */}
+      {skill === "moltbook-analytics" && data.summary && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { label: "Posts analizados", value: data.summary.totalPostsAnalyzed, color: "blue" },
+              { label: "Total upvotes", value: data.summary.totalUpvotes, color: "green" },
+              { label: "Total comentarios", value: data.summary.totalComments, color: "purple" },
+              { label: "Autores únicos", value: data.summary.uniqueAuthors, color: "amber" },
+            ].map((stat) => (
+              <div key={stat.label} className={`p-2 rounded-lg bg-${stat.color}-50 border border-${stat.color}-200 text-center`}>
+                <p className={`text-lg font-bold text-${stat.color}-600`}>{stat.value}</p>
+                <p className="text-[9px] text-gray-500">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+          {data.topPost && (
+            <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+              <p className="text-[10px] text-yellow-600 uppercase font-bold mb-1">🏆 Post más popular</p>
+              <p className="text-xs font-semibold text-gray-800">{data.topPost.title}</p>
+              <p className="text-[10px] text-gray-500">by {data.topPost.author} · m/{data.topPost.submolt} · {data.topPost.upvotes} upvotes</p>
+            </div>
+          )}
+          {data.submoltBreakdown && data.submoltBreakdown.length > 0 && (
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">📊 Actividad por Submolt</p>
+              <div className="space-y-1">
+                {data.submoltBreakdown.map((sub: any) => (
+                  <div key={sub.name} className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-violet-600 w-24 truncate">m/{sub.name}</span>
+                    <div className="flex-1 h-2 rounded-full bg-gray-200 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-500"
+                        style={{ width: `${Math.min(100, (sub.upvotes / (data.summary.totalUpvotes || 1)) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-gray-500 w-16 text-right">{sub.count} posts</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <p className="text-xs text-blue-700 font-medium p-2 bg-blue-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
+      {/* ── Moltbook Trend Scanner ── */}
+      {skill === "moltbook-trend-scanner" && (
+        <div className="space-y-3">
+          {data.trendingTopics && data.trendingTopics.length > 0 && (
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-2">🔥 Temas en Tendencia</p>
+              <div className="flex flex-wrap gap-1.5">
+                {data.trendingTopics.map((t: any, i: number) => (
+                  <span
+                    key={t.word}
+                    className="px-2.5 py-1 rounded-full text-xs font-semibold"
+                    style={{
+                      background: i === 0 ? "#fef3c7" : i === 1 ? "#e0e7ff" : "#f0fdf4",
+                      color: i === 0 ? "#92400e" : i === 1 ? "#3730a3" : "#166534",
+                      border: `1px solid ${i === 0 ? "#fcd34d" : i === 1 ? "#a5b4fc" : "#86efac"}`,
+                    }}
+                  >
+                    #{t.word} <span className="opacity-60">({t.mentions})</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {data.recentActivity && (
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">📋 Actividad Reciente</p>
+              <div className="space-y-1">
+                {data.recentActivity.map((p: any, i: number) => (
+                  <div key={i} className="flex items-center gap-2 p-1.5 rounded bg-white border border-gray-100 text-[11px]">
+                    <span className="text-amber-500 font-bold w-6">▲{p.upvotes}</span>
+                    <span className="flex-1 text-gray-700 truncate">{p.title}</span>
+                    <span className="text-gray-400 text-[9px]">m/{p.submolt}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <p className="text-xs text-orange-700 font-medium p-2 bg-orange-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
+      {/* ── Community Manager ── */}
+      {skill === "moltbook-community-manager" && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-4 p-3 rounded-lg bg-white border border-gray-200">
+            <div className="text-center">
+              <div className="relative w-16 h-16">
+                <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e5e7eb" strokeWidth="3" />
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke={data.communityHealth > 70 ? "#22c55e" : data.communityHealth > 40 ? "#eab308" : "#ef4444"}
+                    strokeWidth="3"
+                    strokeDasharray={`${data.communityHealth}, 100`}
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-800">{data.communityHealth}</span>
+              </div>
+              <p className="text-[9px] text-gray-500 mt-1">Health Score</p>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold" style={{ color: data.communityHealth > 70 ? "#16a34a" : "#ca8a04" }}>
+                {data.healthLabel}
+              </p>
+              <p className="text-[10px] text-gray-500">{data.postsMonitored} posts monitoreados</p>
+            </div>
+          </div>
+          {data.activePosts && data.activePosts.length > 0 && (
+            <div className="space-y-1">
+              {data.activePosts.map((p: any, i: number) => (
+                <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-gray-100 text-[11px]">
+                  <span className="text-gray-500">💬{p.comments} ▲{p.upvotes}</span>
+                  <span className="flex-1 text-gray-700 truncate">{p.title}</span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${p.status.includes("Alta") ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}>
+                    {p.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-green-700 font-medium p-2 bg-green-50 rounded-lg">💡 {data.recommendation}</p>
+        </div>
+      )}
+
+      {/* ── Smart Web Researcher ── */}
+      {skill === "smart-web-researcher" && (
+        <div className="space-y-3">
+          <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
+            <p className="text-[10px] text-gray-500">Consulta de ejemplo:</p>
+            <p className="text-xs font-semibold text-gray-800">&quot;{data.query}&quot;</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="p-2 rounded-lg bg-blue-50 border border-blue-200">
+              <p className="text-lg font-bold text-blue-600">{data.sourcesFound}</p>
+              <p className="text-[9px] text-gray-500">Fuentes</p>
+            </div>
+            <div className="p-2 rounded-lg bg-green-50 border border-green-200">
+              <p className="text-lg font-bold text-green-600">{data.crossReferenced}</p>
+              <p className="text-[9px] text-gray-500">Verificadas</p>
+            </div>
+            <div className="p-2 rounded-lg bg-violet-50 border border-violet-200">
+              <p className="text-lg font-bold text-violet-600">{data.confidenceScore}%</p>
+              <p className="text-[9px] text-gray-500">Confianza</p>
+            </div>
+          </div>
+          {data.topFindings && (
+            <div className="space-y-1.5">
+              {data.topFindings.map((f: any, i: number) => (
+                <div key={i} className="p-2 rounded-lg bg-white border border-gray-100">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[9px] font-bold text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded">{f.source}</span>
+                    <span className="text-[9px] text-gray-400">{f.confidence}% confianza</span>
+                  </div>
+                  <p className="text-[11px] text-gray-700">{f.fact}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-blue-700 font-medium p-2 bg-blue-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
+      {/* ── Memory Optimizer ── */}
+      {skill === "memory-optimizer" && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-4 p-3 rounded-lg bg-white border border-gray-200">
+            <div className="text-center space-y-1">
+              <p className="text-[9px] text-gray-400">ANTES</p>
+              <p className="text-2xl font-bold text-red-500">{data.memoryScore.before}</p>
+            </div>
+            <div className="text-2xl text-gray-300">→</div>
+            <div className="text-center space-y-1">
+              <p className="text-[9px] text-gray-400">DESPUÉS</p>
+              <p className="text-2xl font-bold text-green-500">{data.memoryScore.after}</p>
+            </div>
+            <div className="flex-1 text-right">
+              <p className="text-xs font-bold text-green-600">{data.optimizedSize}</p>
+              <p className="text-[9px] text-gray-400">{data.memoriesAnalyzed} memorias analizadas</p>
+            </div>
+          </div>
+          {data.issues && (
+            <div className="space-y-1">
+              {data.issues.map((issue: any, i: number) => (
+                <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-gray-100 text-[11px]">
+                  <span>{issue.icon}</span>
+                  <span className="flex-1 text-gray-700">{issue.type}</span>
+                  <span className="font-bold text-gray-800">{issue.count}</span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                    issue.severity === "alta" ? "bg-red-100 text-red-600" :
+                    issue.severity === "media" ? "bg-amber-100 text-amber-600" :
+                    "bg-gray-100 text-gray-500"
+                  }`}>{issue.severity}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-green-700 font-medium p-2 bg-green-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
+      {/* ── Translator Pro ── */}
+      {skill === "translator-pro" && (
+        <div className="space-y-3">
+          <div className="p-2 rounded-lg bg-gray-100 border border-gray-200">
+            <p className="text-[10px] text-gray-500">🇪🇸 Texto original ({data.detectedLanguage}):</p>
+            <p className="text-xs text-gray-800 italic">&quot;{data.originalText}&quot;</p>
+          </div>
+          {data.translations && (
+            <div className="space-y-1.5">
+              {data.translations.map((t: any) => (
+                <div key={t.lang} className="p-2 rounded-lg bg-white border border-gray-100">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span>{t.flag}</span>
+                    <span className="text-[10px] font-bold text-violet-600">{t.lang}</span>
+                  </div>
+                  <p className="text-[11px] text-gray-700">{t.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-blue-700 font-medium p-2 bg-blue-50 rounded-lg">💡 {data.insight}</p>
+        </div>
+      )}
+
+      {/* ── Generic fallback ── */}
+      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro"].includes(skill) && (
+        <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+          <p className="text-xs text-green-700">✅ {data.message || "Skill funcionando correctamente"}</p>
+        </div>
+      )}
     </div>
   );
 }
