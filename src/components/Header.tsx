@@ -225,6 +225,7 @@ export default function Header() {
               { href: "/marketplace#dev", label: `💻 ${t("nav.code")}`, icon: "" },
               { href: "/marketplace#productivity", label: `📧 ${t("nav.productivity")}`, icon: "" },
               { href: "/community", label: `👥 ${t("nav.community")}`, icon: "" },
+              { href: "/developers", label: "🛠️ Developers", icon: "" },
               { href: "/sugerencias", label: `📬 ${t("nav.suggestions")}`, icon: "" },
             ].map((item) => {
               const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href.split("#")[0]) && item.href !== "/";
@@ -256,6 +257,7 @@ export default function Header() {
               { href: "/my-skills", label: `📋 ${t("agent.label")}` },
               { href: "/account", label: `👤 ${t("account.label")}` },
               { href: "/community", label: `👥 ${t("nav.community")}` },
+              { href: "/developers", label: "🛠️ Developers" },
               { href: "/sugerencias", label: `📬 ${t("nav.suggestions")}` },
               { href: "/admin", label: `⚙️ ${t("nav.admin")}` },
             ].map((item) => (
