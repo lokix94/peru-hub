@@ -1653,8 +1653,114 @@ function DemoResultView({ result }: { result: any }) {
         </div>
       )}
 
+      {/* ── News Verifier ── */}
+      {skill === "news-verifier" && data.headline && (
+        <div className="space-y-3">
+          {/* Headline being analyzed */}
+          <div className="p-3 rounded-lg bg-gray-100 border border-gray-200">
+            <p className="text-[10px] text-gray-500 uppercase font-bold mb-1">📰 Noticia analizada</p>
+            <p className="text-xs font-semibold text-gray-800 italic">&quot;{data.headline}&quot;</p>
+            {data.sourceUrl && <p className="text-[9px] text-gray-400 mt-1 truncate">{data.sourceUrl}</p>}
+          </div>
+
+          {/* Veracity Score Circle */}
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-white border border-gray-200">
+            <div className="text-center">
+              <div className="relative w-20 h-20">
+                <svg className="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e5e7eb" strokeWidth="3" />
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke={data.veracityScore <= 30 ? "#ef4444" : data.veracityScore <= 60 ? "#f59e0b" : "#22c55e"}
+                    strokeWidth="3"
+                    strokeDasharray={`${data.veracityScore}, 100`}
+                  />
+                </svg>
+                <span className={`absolute inset-0 flex items-center justify-center text-lg font-black ${data.veracityScore <= 30 ? "text-red-600" : data.veracityScore <= 60 ? "text-amber-600" : "text-green-600"}`}>{data.veracityScore}%</span>
+              </div>
+              <p className="text-[9px] text-gray-500 mt-1">Veracidad</p>
+            </div>
+            <div className="flex-1">
+              <p className={`text-base font-black ${data.veracityScore <= 30 ? "text-red-600" : data.veracityScore <= 60 ? "text-amber-600" : "text-green-600"}`}>
+                {data.verdict}
+              </p>
+              <p className="text-[10px] text-gray-500 mt-0.5">{data.sourcesChecked} fuentes consultadas</p>
+              <div className="flex items-center gap-1 mt-1">
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${data.shareVerdict ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                  Compartir: {data.shareVerdict ? "✅ SÍ" : "❌ NO"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Red Flags */}
+          {data.redFlags && data.redFlags.length > 0 && (
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-1.5">🚩 Red Flags Detectados</p>
+              <div className="flex flex-wrap gap-1.5">
+                {data.redFlags.map((flag: string) => (
+                  <span key={flag} className="px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-[10px] font-semibold text-red-700">
+                    ⚠️ {flag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Fact-Checker Results Table */}
+          {data.factCheckerResults && (
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-1.5">✅ Resultados de Fact-Checkers</p>
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
+                <div className="grid grid-cols-3 gap-0 text-[9px] font-bold text-gray-500 uppercase bg-gray-50 px-3 py-1.5 border-b border-gray-200">
+                  <span>Fuente</span>
+                  <span>Resultado</span>
+                  <span className="text-center">Estado</span>
+                </div>
+                {data.factCheckerResults.map((fc: any) => (
+                  <div key={fc.name} className="grid grid-cols-3 gap-0 px-3 py-2 border-b border-gray-100 last:border-0 text-[11px]">
+                    <span className="font-semibold text-gray-800">{fc.name}</span>
+                    <span className="text-gray-600">{fc.result}</span>
+                    <span className="text-center">{fc.icon}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Source Credibility */}
+          <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200">
+            <p className="text-[10px] font-bold text-amber-700 mb-0.5">📊 Credibilidad de la Fuente</p>
+            <p className="text-[11px] text-amber-800">{data.sourceCredibility}</p>
+          </div>
+
+          {/* Bias Analysis */}
+          <div className="p-2.5 rounded-lg bg-purple-50 border border-purple-200">
+            <p className="text-[10px] font-bold text-purple-700 mb-0.5">🎭 Análisis de Sesgo</p>
+            <p className="text-[11px] text-purple-800">{data.biasAnalysis}</p>
+          </div>
+
+          {/* Agent Recommendation (highlighted box) */}
+          <div className={`p-4 rounded-xl border-2 ${data.shareVerdict ? "bg-green-50 border-green-400" : "bg-red-50 border-red-400"}`}>
+            <p className="text-[10px] font-bold text-gray-600 uppercase mb-1">🤖 Recomendación del Agente</p>
+            <p className={`text-xs font-bold leading-relaxed ${data.shareVerdict ? "text-green-800" : "text-red-800"}`}>
+              {data.recommendation}
+            </p>
+          </div>
+
+          {/* Agent Note */}
+          <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+            <p className="text-[10px] font-bold text-blue-700 mb-0.5">💡 Nota del Agente</p>
+            <p className="text-[11px] text-blue-800">{data.agentNote}</p>
+          </div>
+
+          <p className="text-xs text-gray-600 font-medium p-2 bg-gray-50 rounded-lg">📋 {data.insight}</p>
+        </div>
+      )}
+
       {/* ── Generic fallback ── */}
-      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro", "agent-face-creator", "agent-live-monitor", "3d-model-creator", "stock-market-analyzer", "crypto-intelligence"].includes(skill) && data && (
+      {!["moltbook-analytics", "moltbook-trend-scanner", "moltbook-community-manager", "smart-web-researcher", "memory-optimizer", "translator-pro", "agent-face-creator", "agent-live-monitor", "3d-model-creator", "stock-market-analyzer", "crypto-intelligence", "news-verifier"].includes(skill) && data && (
         <div className="p-3 rounded-lg bg-green-50 border border-green-200">
           {data.message && <p className="text-xs text-green-700">✅ {data.message}</p>}
           {!data.message && Object.keys(data).length > 0 && (

@@ -799,6 +799,40 @@ export async function GET(request: NextRequest) {
         },
       };
       break;
+    case "news-verifier":
+      result = {
+        skill: "news-verifier",
+        title: "🔍 News Verifier — Análisis de Veracidad",
+        timestamp: new Date().toISOString(),
+        data: {
+          headline: "Científicos descubren que el café cura el cáncer",
+          sourceUrl: "https://saludnatural-blog.example.com/cafe-cura-cancer",
+          veracityScore: 23,
+          verdict: "PROBABLEMENTE FALSO",
+          sourcesChecked: 5,
+          sourcesList: ["AFP Factual", "Snopes", "WHO", "PubMed", "Reuters"],
+          sourceCredibility: "Bajo - blog sin autor identificado",
+          redFlags: [
+            "Título sensacionalista",
+            "Sin citas científicas verificables",
+            "Fuente no reconocida",
+            "Generalización extrema",
+          ],
+          factCheckerResults: [
+            { name: "AFP Factual", result: "Sin evidencia", icon: "🔴" },
+            { name: "Snopes", result: "Misleading", icon: "🟡" },
+            { name: "WHO", result: "No respalda esta afirmación", icon: "🔴" },
+            { name: "PubMed", result: "Correlaciones limitadas, no causales", icon: "🟡" },
+            { name: "Reuters", result: "Sin cobertura", icon: "⚪" },
+          ],
+          biasAnalysis: "Sesgo pro-naturismo, sin base científica",
+          recommendation: "❌ NO COMPARTIR — La noticia carece de respaldo científico. Los estudios reales sobre café y cáncer muestran correlaciones limitadas, no curas.",
+          agentNote: "Te recomiendo buscar esta información directamente en PubMed o la OMS antes de creerla.",
+          shareVerdict: false,
+          insight: "Veracidad: 23% (PROBABLEMENTE FALSO). 5 fuentes consultadas. 4 red flags detectados. 2 fact-checkers contradicen la noticia. Recomendación: NO compartir.",
+        },
+      };
+      break;
     case "stock-market-analyzer":
       result = await runStockMarketAnalyzerDemo();
       break;
