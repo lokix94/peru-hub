@@ -87,9 +87,10 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
 
       {/* Modal */}
       <div
-        className={`relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#1a1a2e]/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ${
+        className={`relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border shadow-2xl transition-all duration-300 ${
           visible ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
         }`}
+        style={{ background: '#181A20', borderColor: '#2B3139' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -106,13 +107,9 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
         <div className="p-6">
           {!submitted ? (
             <>
-              {/* Title */}
-              <h2 className="text-xl font-bold text-white mb-1">💰 Recargar Saldo — USDT (BNB Smart Chain)</h2>
-              <p className="text-xs text-white/50 mb-5">Envía USDT por la red BNB Smart Chain (BEP20)</p>
-
               {/* Amount selection */}
-              <div className="mb-4">
-                <label className="block text-[11px] text-white/40 mb-2 uppercase tracking-wider font-medium">
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '11px', color: '#848E9C', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>
                   {t("recharge.how.much")}
                 </label>
                 <div className="grid grid-cols-4 gap-2 mb-2.5">
@@ -120,11 +117,17 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                     <button
                       key={preset}
                       onClick={() => setAmount(String(preset))}
-                      className={`py-2 rounded-lg text-sm font-bold transition-all ${
-                        amount === String(preset)
-                          ? "bg-primary text-white shadow-lg shadow-primary/25"
-                          : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10"
-                      }`}
+                      style={{
+                        padding: '8px 0',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        transition: 'all 0.2s',
+                        background: amount === String(preset) ? '#FCD535' : '#2B3139',
+                        color: amount === String(preset) ? '#1E2329' : '#848E9C',
+                        border: amount === String(preset) ? 'none' : '1px solid #3C4043',
+                        cursor: 'pointer',
+                      }}
                     >
                       ${preset}
                     </button>
@@ -137,71 +140,86 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
                   placeholder={t("recharge.other")}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/25"
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: '#2B3139', border: '1px solid #3C4043', color: '#EAECEF', fontSize: '14px', outline: 'none' }}
                 />
               </div>
 
-              {/* QR Code */}
-              <div className="flex justify-center mb-4">
-                <div className="bg-white rounded-xl p-3">
-                  <Image
-                    src="/qr-usdt-bep20.jpg"
-                    alt="QR USDT BEP20"
-                    width={200}
-                    height={200}
-                    className="rounded-lg"
-                    priority
-                  />
+              {/* Binance-style dark card */}
+              <div style={{ background: '#1E2329', borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
+                {/* USDT Icon + Label */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
+                  <div style={{ background: '#26A17B', borderRadius: '50%', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>₮</div>
+                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#EAECEF' }}>USDT</span>
+                  <span style={{ marginTop: '6px', fontSize: '11px', color: '#B7BDC6', border: '1px solid #2B3139', borderRadius: '999px', padding: '3px 12px' }}>BNB Smart Chain</span>
                 </div>
-              </div>
 
-              <p className="text-center text-base font-bold text-amber-400 mb-1">
-                USDT — BNB Smart Chain (BEP20)
-              </p>
-              <p className="text-center text-xs text-white/50 mb-4">
-                Escanea el QR o copia la dirección
-              </p>
+                {/* QR Code */}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                  <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '12px' }}>
+                    <Image
+                      src="/qr-usdt-bep20.jpg"
+                      alt="QR USDT BEP20"
+                      width={200}
+                      height={200}
+                      style={{ borderRadius: '8px', display: 'block' }}
+                      priority
+                    />
+                  </div>
+                </div>
 
-              {/* Wallet address */}
-              <div className="mb-4">
-                <label className="block text-[11px] text-white/40 mb-1.5 uppercase tracking-wider font-medium">
-                  Dirección de wallet
-                </label>
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2.5">
-                  <code className="flex-1 text-[11px] text-white/80 font-mono break-all select-all leading-relaxed">
+                {/* Wallet Label */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span style={{ display: 'inline-block', width: '10px', height: '10px', background: '#0ECB81', borderRadius: '2px' }}></span>
+                  <span style={{ fontSize: '13px', color: '#B7BDC6' }}>Wallet1</span>
+                </div>
+
+                {/* Wallet Address */}
+                <div style={{ background: '#2B3139', borderRadius: '8px', padding: '12px 14px', marginBottom: '16px' }}>
+                  <code style={{ fontSize: '11px', color: '#EAECEF', fontFamily: 'monospace', wordBreak: 'break-all', lineHeight: '1.5' }}>
                     {WALLET_ADDRESS}
                   </code>
-                  <button
-                    onClick={copyAddress}
-                    className={`shrink-0 px-2.5 py-1.5 rounded-md text-[10px] font-bold transition-all ${
-                      copied
-                        ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                        : "bg-white/10 text-white/60 hover:text-white hover:bg-white/20 border border-white/10"
-                    }`}
-                  >
-                    {copied ? "✓ Copiado" : "📋 Copiar"}
-                  </button>
+                </div>
+
+                {/* Warning */}
+                <div style={{ background: 'rgba(255, 200, 0, 0.1)', borderRadius: '8px', padding: '12px 14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '18px', lineHeight: '1', flexShrink: 0, marginTop: '1px' }}>⚠️</span>
+                  <p style={{ fontSize: '11px', color: '#F0B90B', lineHeight: '1.5', margin: 0 }}>
+                    Solo envía activos de la red de BNB Smart Chain a esta dirección. Activos de otra red se perderán para siempre.
+                  </p>
                 </div>
               </div>
 
-              {/* Warning */}
-              <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
-                <p className="text-[11px] text-amber-400 font-medium text-center">
-                  ⚠️ Solo envía activos de la red de BNB Smart Chain a esta dirección. Activos de otra red se perderán para siempre.
-                </p>
-              </div>
+              {/* Copy address button */}
+              <button
+                onClick={copyAddress}
+                style={{
+                  width: '100%',
+                  padding: '12px 0',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  background: '#2B3139',
+                  color: copied ? '#0ECB81' : '#EAECEF',
+                  border: '1px solid #3C4043',
+                  cursor: 'pointer',
+                  marginBottom: '16px',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {copied ? "✓ Dirección copiada" : "📋 Copiar dirección"}
+              </button>
 
               {/* Transaction hash */}
-              <div className="mb-5">
-                <label className="block text-[11px] text-white/40 mb-1.5 uppercase tracking-wider font-medium">
-                  TxHash (ID de transacción)
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#848E9C', marginBottom: '6px' }}>
+                  ID de transacción (TxHash)
                 </label>
                 <input
                   type="text"
                   placeholder="0x..."
                   value={txHash}
                   onChange={(e) => setTxHash(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm font-mono placeholder:text-white/30 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/25"
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', background: '#2B3139', border: '1px solid #3C4043', color: '#EAECEF', fontSize: '14px', fontFamily: 'monospace', outline: 'none' }}
                 />
               </div>
 
@@ -209,7 +227,18 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
               <button
                 onClick={handleSubmit}
                 disabled={!amount || !txHash.trim()}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-violet-500 hover:from-primary-hover hover:to-violet-600 text-white text-sm font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+                style={{
+                  width: '100%',
+                  padding: '14px 0',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  background: (!amount || !txHash.trim()) ? '#3C4043' : 'linear-gradient(135deg, #7B61FF 0%, #6C5CE7 100%)',
+                  color: (!amount || !txHash.trim()) ? '#5E6673' : '#fff',
+                  border: 'none',
+                  cursor: (!amount || !txHash.trim()) ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                }}
               >
                 CONFIRMAR RECARGA →
               </button>

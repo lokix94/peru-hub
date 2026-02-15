@@ -762,110 +762,121 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Payment — USDT BEP20 Only */}
-          <div className="glass-card p-5">
-            <h3 className="text-sm font-bold text-text-primary mb-4 text-center">💰 Método de Pago — USDT (BNB Smart Chain)</h3>
+          {/* Payment — Binance-style USDT BEP20 */}
+          <div style={{ background: '#1E2329', borderRadius: '16px', padding: '24px', color: '#EAECEF' }}>
+            {/* USDT Icon + Label */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ background: '#26A17B', borderRadius: '50%', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>₮</div>
+              <span style={{ fontSize: '18px', fontWeight: 700, color: '#EAECEF' }}>USDT</span>
+              <span style={{ marginTop: '6px', fontSize: '11px', color: '#B7BDC6', border: '1px solid #2B3139', borderRadius: '999px', padding: '3px 12px' }}>BNB Smart Chain</span>
+            </div>
 
             {/* QR Code */}
-            <div className="flex justify-center mb-4">
-              <div className="bg-white rounded-xl p-3 shadow-sm">
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+              <div style={{ background: '#FFFFFF', borderRadius: '12px', padding: '12px' }}>
                 <Image
                   src="/qr-usdt-bep20.jpg"
                   alt="QR Code - USDT BEP20 Payment"
-                  width={280}
-                  height={280}
-                  className="rounded-lg"
+                  width={230}
+                  height={230}
+                  style={{ borderRadius: '8px', display: 'block' }}
                 />
               </div>
             </div>
 
-            <p className="text-center text-sm font-bold text-amber-500 mb-1">USDT — BNB Smart Chain (BEP20)</p>
-            <p className="text-center text-xs text-text-muted mb-4">Escanea el QR o copia la dirección</p>
+            {/* Wallet Label */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+              <span style={{ display: 'inline-block', width: '10px', height: '10px', background: '#0ECB81', borderRadius: '2px' }}></span>
+              <span style={{ fontSize: '13px', color: '#B7BDC6' }}>Wallet1</span>
+            </div>
 
             {/* Wallet Address */}
-            <div className="mb-4">
-              <label className="text-xs text-text-muted mb-1 block">Dirección de wallet:</label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 px-3 py-2.5 rounded-lg bg-background border border-border text-text-primary text-[10px] font-mono break-all select-all">
-                  {walletAddress}
-                </code>
-                <button
-                  onClick={handleCopyAddress}
-                  className="px-3 py-2.5 rounded-lg bg-surface border border-border text-text-muted hover:text-text-primary transition-colors text-xs whitespace-nowrap"
-                >
-                  {copied ? "✓ Copiado" : "📋 Copiar"}
-                </button>
-              </div>
+            <div style={{ background: '#2B3139', borderRadius: '8px', padding: '12px 14px', marginBottom: '16px' }}>
+              <code style={{ fontSize: '11px', color: '#EAECEF', fontFamily: 'monospace', wordBreak: 'break-all', lineHeight: '1.5' }}>
+                {walletAddress}
+              </code>
             </div>
 
             {/* Warning */}
-            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 mb-4">
-              <p className="text-xs text-amber-700 font-medium text-center">
-                ⚠️ Solo envía activos de la red de BNB Smart Chain a esta dirección. Activos de otra red se perderán para siempre.
+            <div style={{ background: 'rgba(255, 200, 0, 0.1)', borderRadius: '8px', padding: '12px 14px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '18px', lineHeight: '1', flexShrink: 0, marginTop: '1px' }}>⚠️</span>
+              <p style={{ fontSize: '11px', color: '#F0B90B', lineHeight: '1.5', margin: 0 }}>
+                Solo envía activos de la red de BNB Smart Chain a esta dirección. Activos de otra red se perderán para siempre.
               </p>
             </div>
+          </div>
+
+          {/* Below the Binance card — actions */}
+          <div style={{ marginTop: '16px' }} className="space-y-4">
+            {/* Copy address button */}
+            <button
+              onClick={handleCopyAddress}
+              className="w-full py-3 rounded-xl text-sm font-bold transition-all duration-200"
+              style={{ background: '#2B3139', color: copied ? '#0ECB81' : '#EAECEF', border: '1px solid #3C4043', borderRadius: '12px' }}
+            >
+              {copied ? "✓ Dirección copiada" : "📋 Copiar dirección"}
+            </button>
 
             {/* Total */}
-            <div className="mb-4 p-3 rounded-lg bg-background border border-border text-center">
-              <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Total a pagar</p>
-              <p className="text-2xl font-bold text-accent">${total.toFixed(2)} USD</p>
-              <p className="text-[10px] text-text-muted mt-1">Envía el equivalente en USDT</p>
+            <div style={{ background: '#181A20', borderRadius: '12px', padding: '14px', textAlign: 'center', border: '1px solid #2B3139' }}>
+              <p style={{ fontSize: '11px', color: '#848E9C', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Total a pagar</p>
+              <p style={{ fontSize: '26px', fontWeight: 700, color: '#FCD535' }}>${total.toFixed(2)} USD</p>
+              <p style={{ fontSize: '10px', color: '#5E6673', marginTop: '4px' }}>Envía el equivalente en USDT</p>
             </div>
 
             {/* Transaction ID */}
-            <div className="mb-4">
-              <label className="text-xs text-text-muted mb-1 block">TxHash (ID de Transacción):</label>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', color: '#848E9C', marginBottom: '6px' }}>
+                ID de transacción (TxHash)
+              </label>
               <input
                 type="text"
                 placeholder="0x..."
                 value={txId}
                 onChange={(e) => setTxId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-sm font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                className="w-full px-4 py-3 text-sm font-mono focus:outline-none"
+                style={{ background: '#2B3139', border: '1px solid #3C4043', borderRadius: '10px', color: '#EAECEF' }}
               />
-              <p className="text-[10px] text-text-muted mt-1">
-                Pega el hash de tu transacción después de enviar el pago
-              </p>
             </div>
 
             {/* Confirm Button */}
             <button
               onClick={handlePaymentConfirmed}
-              className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-base transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl"
+              className="w-full py-3.5 rounded-xl font-bold text-base transition-all duration-200 shadow-lg"
+              style={{ background: 'linear-gradient(135deg, #7B61FF 0%, #6C5CE7 100%)', color: '#fff', borderRadius: '12px' }}
             >
               CONFIRMAR PAGO →
             </button>
+          </div>
 
-            <p className="text-center text-[10px] text-text-muted mt-3">
-              Envía exactamente <strong>${total.toFixed(2)} USDT</strong> a la dirección indicada.
-            </p>
-
-            {/* Agent API — secondary accordion */}
-            <div className="mt-5 border-t border-border pt-4">
-              <button
-                onClick={() => setShowAgentApi(!showAgentApi)}
-                className="w-full text-left text-xs text-text-muted hover:text-text-secondary transition-colors flex items-center justify-between"
-              >
-                <span>🤖 ¿Eres un agente? Paga vía API</span>
-                <span className={`transition-transform duration-200 ${showAgentApi ? "rotate-180" : ""}`}>▼</span>
-              </button>
-              {showAgentApi && (
-                <div className="mt-3 space-y-3">
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs text-text-muted">API de pago:</label>
-                      <button
-                        onClick={() => {
-                          const snippet = `POST https://peru-hub.vercel.app/api/checkout\n{\n  "wallet": "AGENT_WALLET",\n  "amount": ${total.toFixed(2)},\n  "currency": "USDT",\n  "network": "BEP20",\n  "items": [${items.map(i => `"${i.id}"`).join(", ")}],\n  "agent_id": "YOUR_MOLTBOOK_USERNAME",\n  "tx_hash": "0x..."\n}`;
-                          navigator.clipboard.writeText(snippet);
-                          setApiSnippetCopied(true);
-                          setTimeout(() => setApiSnippetCopied(false), 2000);
-                        }}
-                        className="text-[10px] text-primary hover:text-primary-hover font-medium transition-colors"
-                      >
-                        {apiSnippetCopied ? "✓ Copiado" : "📋 Copiar snippet"}
-                      </button>
-                    </div>
-                    <pre className="px-3 py-3 rounded-lg bg-gray-900 text-green-400 text-[10px] font-mono overflow-x-auto whitespace-pre leading-relaxed">
+          {/* Agent API — secondary accordion */}
+          <div style={{ marginTop: '20px', borderTop: '1px solid #2B3139', paddingTop: '16px' }}>
+            <button
+              onClick={() => setShowAgentApi(!showAgentApi)}
+              className="w-full text-left text-xs transition-colors flex items-center justify-between"
+              style={{ color: '#848E9C' }}
+            >
+              <span>🤖 ¿Eres un agente? Paga vía API</span>
+              <span className={`transition-transform duration-200 ${showAgentApi ? "rotate-180" : ""}`}>▼</span>
+            </button>
+            {showAgentApi && (
+              <div className="mt-3 space-y-3">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs" style={{ color: '#848E9C' }}>API de pago:</label>
+                    <button
+                      onClick={() => {
+                        const snippet = `POST https://peru-hub.vercel.app/api/checkout\n{\n  "wallet": "AGENT_WALLET",\n  "amount": ${total.toFixed(2)},\n  "currency": "USDT",\n  "network": "BEP20",\n  "items": [${items.map(i => `"${i.id}"`).join(", ")}],\n  "agent_id": "YOUR_MOLTBOOK_USERNAME",\n  "tx_hash": "0x..."\n}`;
+                        navigator.clipboard.writeText(snippet);
+                        setApiSnippetCopied(true);
+                        setTimeout(() => setApiSnippetCopied(false), 2000);
+                      }}
+                      className="text-[10px] text-primary hover:text-primary-hover font-medium transition-colors"
+                    >
+                      {apiSnippetCopied ? "✓ Copiado" : "📋 Copiar snippet"}
+                    </button>
+                  </div>
+                  <pre className="px-3 py-3 rounded-lg bg-gray-900 text-green-400 text-[10px] font-mono overflow-x-auto whitespace-pre leading-relaxed">
 {`POST /api/checkout
 {
   "amount": ${total.toFixed(2)},
@@ -875,11 +886,10 @@ export default function CartPage() {
   "agent_id": "YOUR_MOLTBOOK_ID",
   "tx_hash": "0x..."
 }`}
-                    </pre>
-                  </div>
+                  </pre>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
