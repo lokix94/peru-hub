@@ -320,23 +320,8 @@ export default function AccountPage() {
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl border border-border p-5">
-            <h3 className="text-sm font-bold text-text-primary mb-3">Acciones rápidas</h3>
-            <div className="space-y-1.5">
-              {[
-                { icon: "🔑", label: "API Keys y Tokens" },
-                { icon: "📊", label: "Analíticas de uso" },
-                { icon: "⚙️", label: "Configuración del agente" },
-                { icon: "📤", label: "Exportar datos" },
-              ].map((action) => (
-                <button key={action.label} className="w-full text-left px-3 py-2.5 rounded-lg bg-gray-50 border border-border text-xs text-text-secondary hover:bg-gray-100 hover:text-text-primary transition-all flex items-center gap-2">
-                  <span>{action.icon}</span>
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Quick Actions — Interactive */}
+          <QuickActions userId={user.id} userEmail={user.email} username={user.username} createdAt={user.created_at} agents={agents} />
 
           {/* Disconnect */}
           <button
@@ -376,6 +361,275 @@ export default function AccountPage() {
 
       {/* Recharge Modal */}
       <RechargeModal isOpen={rechargeOpen} onClose={() => setRechargeOpen(false)} />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   QUICK ACTIONS COMPONENT — Interactive expandable sections
+   ══════════════════════════════════════════════════════════════ */
+
+interface QuickActionsProps {
+  userId: string;
+  userEmail: string;
+  username: string;
+  createdAt: string;
+  agents: { id: string; name: string; platform: string; api_key?: string; verified: boolean }[];
+}
+
+interface AgentSettings {
+  emailNotifications: boolean;
+  darkMode: boolean;
+  language: string;
+}
+
+function QuickActions({ userId, userEmail, username, createdAt, agents }: QuickActionsProps) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState(() => `lh_key_${userId.slice(0, 12)}`);
+  const [apiKeyCopied, setApiKeyCopied] = useState(false);
+  const [settings, setSettings] = useState<AgentSettings>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("lh_agent_settings");
+        if (saved) return JSON.parse(saved);
+      } catch { /* ignore */ }
+    }
+    return { emailNotifications: true, darkMode: false, language: "es" };
+  });
+  const [settingsSaved, setSettingsSaved] = useState(false);
+
+  const toggle = (key: string) => {
+    setExpanded((prev) => (prev === key ? null : key));
+  };
+
+  const regenerateKey = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "lh_key_";
+    for (let i = 0; i < 24; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+    setApiKey(result);
+  };
+
+  const copyApiKey = () => {
+    navigator.clipboard.writeText(apiKey);
+    setApiKeyCopied(true);
+    setTimeout(() => setApiKeyCopied(false), 2000);
+  };
+
+  const saveSettings = () => {
+    localStorage.setItem("lh_agent_settings", JSON.stringify(settings));
+    setSettingsSaved(true);
+    setTimeout(() => setSettingsSaved(false), 2000);
+  };
+
+  const downloadJSON = () => {
+    const data = {
+      perfil: { id: userId, username, email: userEmail, createdAt },
+      agentes: agents.map((a) => ({ id: a.id, nombre: a.name, plataforma: a.platform, verificado: a.verified })),
+      configuracion: settings,
+      exportado: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `langosta-hub-datos-${username}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadCSV = () => {
+    const header = "fecha,descripcion,monto,estado\n";
+    const blob = new Blob([header], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `langosta-hub-compras-${username}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const memberDate = new Date(createdAt).toLocaleDateString("es-PE", { year: "numeric", month: "long", day: "numeric" });
+  const todayStr = new Date().toLocaleDateString("es-PE", { year: "numeric", month: "long", day: "numeric" });
+
+  const sections = [
+    { key: "api", icon: "🔑", label: "API Keys y Tokens" },
+    { key: "analytics", icon: "📊", label: "Analíticas de uso" },
+    { key: "config", icon: "⚙️", label: "Configuración del agente" },
+    { key: "export", icon: "📦", label: "Exportar datos" },
+  ];
+
+  return (
+    <div className="bg-white rounded-xl border border-border p-5">
+      <h3 className="text-sm font-bold text-text-primary mb-3">Acciones rápidas</h3>
+      <div className="space-y-1.5">
+        {sections.map((section) => (
+          <div key={section.key}>
+            <button
+              onClick={() => toggle(section.key)}
+              className={`w-full text-left px-3 py-2.5 rounded-lg border text-xs transition-all flex items-center justify-between ${
+                expanded === section.key
+                  ? "bg-primary/5 border-primary/20 text-text-primary"
+                  : "bg-gray-50 border-border text-text-secondary hover:bg-gray-100 hover:text-text-primary"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <span>{section.icon}</span>
+                {section.label}
+              </span>
+              <span className={`transition-transform duration-200 text-[10px] ${expanded === section.key ? "rotate-180" : ""}`}>▼</span>
+            </button>
+
+            {/* Expandable content */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                expanded === section.key ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="px-3 py-3 space-y-3">
+                {/* ── API Keys ── */}
+                {section.key === "api" && (
+                  <>
+                    <p className="text-[11px] text-text-muted">Usa esta API key para que tu agente se conecte a Langosta Hub</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 px-2 py-2 rounded-lg bg-gray-100 border border-border text-[10px] font-mono text-text-primary break-all select-all">
+                        {apiKey}
+                      </code>
+                      <button
+                        onClick={copyApiKey}
+                        className="px-2 py-1.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary/20 transition-colors whitespace-nowrap"
+                      >
+                        {apiKeyCopied ? "✓ Copiado" : "Copiar"}
+                      </button>
+                    </div>
+                    <button
+                      onClick={regenerateKey}
+                      className="w-full py-2 rounded-lg bg-gray-100 border border-border text-[11px] font-semibold text-text-secondary hover:bg-gray-200 transition-colors"
+                    >
+                      🔄 Regenerar API Key
+                    </button>
+                  </>
+                )}
+
+                {/* ── Analíticas ── */}
+                {section.key === "analytics" && (
+                  <>
+                    <div className="space-y-2">
+                      {[
+                        { label: "Skills comprados", value: "0", bar: 0 },
+                        { label: "Agentes registrados", value: String(agents.length), bar: Math.min(agents.length * 25, 100) },
+                      ].map((stat) => (
+                        <div key={stat.label}>
+                          <div className="flex justify-between text-[11px] mb-0.5">
+                            <span className="text-text-muted">{stat.label}</span>
+                            <span className="font-bold text-text-primary">{stat.value}</span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-primary transition-all duration-500"
+                              style={{ width: `${stat.bar}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="space-y-1 text-[11px]">
+                      <div className="flex justify-between">
+                        <span className="text-text-muted">Último acceso</span>
+                        <span className="text-text-primary font-medium">{todayStr}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-text-muted">Cuenta creada</span>
+                        <span className="text-text-primary font-medium">{memberDate}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* ── Configuración ── */}
+                {section.key === "config" && (
+                  <>
+                    {/* Toggle: Notificaciones */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-text-secondary">Notificaciones por email</span>
+                      <button
+                        onClick={() => setSettings((s) => ({ ...s, emailNotifications: !s.emailNotifications }))}
+                        className={`relative w-9 h-5 rounded-full transition-colors ${
+                          settings.emailNotifications ? "bg-primary" : "bg-gray-300"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                            settings.emailNotifications ? "translate-x-4" : "translate-x-0.5"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    {/* Toggle: Modo oscuro */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-text-secondary">Modo oscuro</span>
+                      <button
+                        onClick={() => setSettings((s) => ({ ...s, darkMode: !s.darkMode }))}
+                        className={`relative w-9 h-5 rounded-full transition-colors ${
+                          settings.darkMode ? "bg-primary" : "bg-gray-300"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                            settings.darkMode ? "translate-x-4" : "translate-x-0.5"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    {/* Idioma */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-text-secondary">Idioma preferido</span>
+                      <select
+                        value={settings.language}
+                        onChange={(e) => setSettings((s) => ({ ...s, language: e.target.value }))}
+                        className="px-2 py-1 rounded-md bg-gray-50 border border-border text-[11px] text-text-primary focus:outline-none focus:border-primary/50"
+                      >
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={saveSettings}
+                      className={`w-full py-2 rounded-lg text-[11px] font-semibold transition-all ${
+                        settingsSaved
+                          ? "bg-green-100 text-green-700 border border-green-200"
+                          : "bg-primary hover:bg-primary-hover text-white"
+                      }`}
+                    >
+                      {settingsSaved ? "✓ Cambios guardados" : "Guardar cambios"}
+                    </button>
+                  </>
+                )}
+
+                {/* ── Exportar datos ── */}
+                {section.key === "export" && (
+                  <>
+                    <p className="text-[11px] text-text-muted italic">
+                      Tus datos te pertenecen. Descarga toda tu información en cualquier momento.
+                    </p>
+                    <button
+                      onClick={downloadJSON}
+                      className="w-full py-2 rounded-lg bg-gray-100 border border-border text-[11px] font-semibold text-text-secondary hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      📄 Descargar mis datos (JSON)
+                    </button>
+                    <button
+                      onClick={downloadCSV}
+                      className="w-full py-2 rounded-lg bg-gray-100 border border-border text-[11px] font-semibold text-text-secondary hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      📊 Descargar historial de compras (CSV)
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

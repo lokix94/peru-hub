@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import AdBanner from "@/components/AdBanner";
 
-type PaymentTab = "paypal" | "human" | "agent";
 type CheckoutStep = "cart" | "payment" | "verify-agent" | "installing" | "complete";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -28,11 +27,8 @@ export default function CartPage() {
   const [couponApplied, setCouponApplied] = useState(false);
   const [txId, setTxId] = useState("");
   const [copied, setCopied] = useState(false);
-  const [paymentTab, setPaymentTab] = useState<PaymentTab>("paypal");
-  const [agentWalletCopied, setAgentWalletCopied] = useState(false);
+  const [showAgentApi, setShowAgentApi] = useState(false);
   const [apiSnippetCopied, setApiSnippetCopied] = useState(false);
-  const [paypalEmailCopied, setPaypalEmailCopied] = useState(false);
-  const [paypalTxId, setPaypalTxId] = useState("");
 
   /* ── Checkout flow state ── */
   const [step, setStep] = useState<CheckoutStep>("cart");
@@ -48,8 +44,7 @@ export default function CartPage() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [demoExpanded, setDemoExpanded] = useState<string | null>(null);
 
-  const walletAddress = "0xcbc14706f7f8167505de1690e1e8419399f9506d";
-  const paypalEmail = "jc.aguipuente94@gmail.com";
+  const walletAddress = "0xDD49337e6B62C8B0d750CD6F809A84F339a3061e";
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const originalTotal = items.reduce(
@@ -767,251 +762,110 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Crypto Payment */}
+          {/* Payment — USDT BEP20 Only */}
           <div className="glass-card p-5">
-            <h3 className="text-sm font-semibold text-text-primary mb-4 text-center">💳 Método de Pago</h3>
+            <h3 className="text-sm font-bold text-text-primary mb-4 text-center">💰 Método de Pago — USDT (BNB Smart Chain)</h3>
 
-            {/* Payment Method Tabs */}
-            <div className="flex rounded-lg bg-background border border-border p-1 mb-4">
-              <button
-                onClick={() => setPaymentTab("paypal")}
-                className={`flex-1 py-2 px-2 rounded-md text-xs font-semibold transition-all ${
-                  paymentTab === "paypal"
-                    ? "bg-white text-text-primary shadow-sm border border-border"
-                    : "text-text-muted hover:text-text-secondary"
-                }`}
-              >
-                👤 PayPal
-              </button>
-              <button
-                onClick={() => setPaymentTab("human")}
-                className={`flex-1 py-2 px-2 rounded-md text-xs font-semibold transition-all ${
-                  paymentTab === "human"
-                    ? "bg-white text-text-primary shadow-sm border border-border"
-                    : "text-text-muted hover:text-text-secondary"
-                }`}
-              >
-                🪙 Crypto
-              </button>
-              <button
-                onClick={() => setPaymentTab("agent")}
-                className={`flex-1 py-2 px-2 rounded-md text-xs font-semibold transition-all ${
-                  paymentTab === "agent"
-                    ? "bg-white text-text-primary shadow-sm border border-border"
-                    : "text-text-muted hover:text-text-secondary"
-                }`}
-              >
-                🤖 Agentes
-              </button>
+            {/* QR Code */}
+            <div className="flex justify-center mb-4">
+              <div className="bg-white rounded-xl p-3 shadow-sm">
+                <Image
+                  src="/qr-usdt-bep20.jpg"
+                  alt="QR Code - USDT BEP20 Payment"
+                  width={280}
+                  height={280}
+                  className="rounded-lg"
+                />
+              </div>
             </div>
 
-            {paymentTab === "paypal" && (
-              <>
-                {/* PayPal Header */}
-                <div className="flex justify-center mb-4">
-                  <span className="px-4 py-2 rounded-full text-sm font-bold border border-blue-200" style={{ background: "#f0f4ff", color: "#003087" }}>
-                    💳 Pay<span style={{ color: "#0070ba" }}>Pal</span>
-                  </span>
-                </div>
+            <p className="text-center text-sm font-bold text-amber-500 mb-1">USDT — BNB Smart Chain (BEP20)</p>
+            <p className="text-center text-xs text-text-muted mb-4">Escanea el QR o copia la dirección</p>
 
-                {/* Amount to pay */}
-                <div className="mb-4 p-3 rounded-lg bg-background border border-border text-center">
-                  <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Monto a pagar</p>
-                  <p className="text-2xl font-bold text-accent">${total.toFixed(2)} USD</p>
-                </div>
-
-                {/* Instructions */}
-                <p className="text-center text-sm font-semibold text-text-primary mb-2">Envía el monto total a:</p>
-
-                {/* PayPal Email */}
-                <div className="mb-4">
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2.5 rounded-lg bg-background border border-border text-text-primary text-sm font-mono text-center font-semibold">
-                      {paypalEmail}
-                    </code>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(paypalEmail);
-                        setPaypalEmailCopied(true);
-                        setTimeout(() => setPaypalEmailCopied(false), 2000);
-                      }}
-                      className="px-3 py-2.5 rounded-lg bg-surface border border-border text-text-muted hover:text-text-primary transition-colors text-xs whitespace-nowrap"
-                    >
-                      {paypalEmailCopied ? "✓ Copiado" : "📋 Copiar"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* PayPal.me link button */}
-                <a
-                  href={`https://paypal.me/jcaguipuente94/${total.toFixed(2)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 rounded-xl text-white font-bold text-sm text-center transition-all duration-200 shadow-lg flex items-center justify-center gap-2 mb-4"
-                  style={{ background: "linear-gradient(135deg, #003087, #0070ba)" }}
-                >
-                  Pagar con PayPal →
-                </a>
-
-                {/* Note about Friends & Family */}
-                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 mb-4">
-                  <p className="text-xs text-amber-700 font-medium text-center">
-                    ⚠️ Envía como &quot;Amigos y familiares&quot; para evitar comisiones
-                  </p>
-                </div>
-
-                {/* Transaction ID */}
-                <div className="mb-4">
-                  <label className="text-xs text-text-muted mb-1 block">ID de Transacción PayPal:</label>
-                  <input
-                    type="text"
-                    placeholder="Ej: 5TY12345AB678901C"
-                    value={paypalTxId}
-                    onChange={(e) => setPaypalTxId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-sm font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
-                  />
-                  <p className="text-[10px] text-text-muted mt-1">
-                    Lo encuentras en tu historial de PayPal después de enviar el pago
-                  </p>
-                </div>
-
-                {/* Confirm Button */}
+            {/* Wallet Address */}
+            <div className="mb-4">
+              <label className="text-xs text-text-muted mb-1 block">Dirección de wallet:</label>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 px-3 py-2.5 rounded-lg bg-background border border-border text-text-primary text-[10px] font-mono break-all select-all">
+                  {walletAddress}
+                </code>
                 <button
-                  onClick={handlePaymentConfirmed}
-                  className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-base transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl"
+                  onClick={handleCopyAddress}
+                  className="px-3 py-2.5 rounded-lg bg-surface border border-border text-text-muted hover:text-text-primary transition-colors text-xs whitespace-nowrap"
                 >
-                  CONFIRMAR PAGO →
+                  {copied ? "✓ Copiado" : "📋 Copiar"}
                 </button>
+              </div>
+            </div>
 
-                <p className="text-center text-[10px] text-text-muted mt-3">
-                  Envía exactamente <strong>${total.toFixed(2)} USD</strong> al email indicado.
-                </p>
-              </>
-            )}
+            {/* Warning */}
+            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 mb-4">
+              <p className="text-xs text-amber-700 font-medium text-center">
+                ⚠️ Solo envía activos de la red de BNB Smart Chain a esta dirección. Activos de otra red se perderán para siempre.
+              </p>
+            </div>
 
-            {paymentTab === "human" && (
-              <>
-                {/* QR Code */}
-                <div className="flex justify-center mb-4">
-                  <div className="bg-white rounded-xl p-3">
-                    <Image
-                      src="/qr-usdt-bep20.jpg"
-                      alt="QR Code - USDT BEP20 Payment"
-                      width={280}
-                      height={280}
-                      className="rounded-lg"
-                    />
-                  </div>
-                </div>
+            {/* Total */}
+            <div className="mb-4 p-3 rounded-lg bg-background border border-border text-center">
+              <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Total a pagar</p>
+              <p className="text-2xl font-bold text-accent">${total.toFixed(2)} USD</p>
+              <p className="text-[10px] text-text-muted mt-1">Envía el equivalente en USDT</p>
+            </div>
 
-                <p className="text-center text-sm font-bold text-amber-400 mb-1">USDT - BEP 20 - Binance</p>
-                <p className="text-center text-xs text-text-muted mb-4">Escanea para pagar</p>
+            {/* Transaction ID */}
+            <div className="mb-4">
+              <label className="text-xs text-text-muted mb-1 block">TxHash (ID de Transacción):</label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={txId}
+                onChange={(e) => setTxId(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-sm font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+              />
+              <p className="text-[10px] text-text-muted mt-1">
+                Pega el hash de tu transacción después de enviar el pago
+              </p>
+            </div>
 
-                {/* Wallet Address */}
-                <div className="mb-4">
-                  <label className="text-xs text-text-muted mb-1 block">Dirección de wallet:</label>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-[10px] font-mono break-all">
-                      {walletAddress}
-                    </code>
-                    <button
-                      onClick={handleCopyAddress}
-                      className="px-3 py-2 rounded-lg bg-surface border border-border text-text-muted hover:text-text-primary transition-colors text-xs whitespace-nowrap"
-                    >
-                      {copied ? "✓ Copiado" : "📋 Copiar"}
-                    </button>
-                  </div>
-                </div>
+            {/* Confirm Button */}
+            <button
+              onClick={handlePaymentConfirmed}
+              className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-base transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl"
+            >
+              CONFIRMAR PAGO →
+            </button>
 
-                {/* Accepted Cryptos */}
-                <div className="flex items-center justify-center gap-3 mb-4 py-2 rounded-lg bg-background/50">
-                  <span className="text-xs text-text-muted">Aceptamos:</span>
-                  <span className="text-xs font-semibold text-text-secondary">USDT</span>
-                  <span className="text-text-muted">·</span>
-                  <span className="text-xs font-semibold text-text-secondary">BNB</span>
-                  <span className="text-text-muted">·</span>
-                  <span className="text-xs font-semibold text-text-secondary">BUSD</span>
-                </div>
+            <p className="text-center text-[10px] text-text-muted mt-3">
+              Envía exactamente <strong>${total.toFixed(2)} USDT</strong> a la dirección indicada.
+            </p>
 
-                {/* Transaction ID */}
-                <div className="mb-4">
-                  <label className="text-xs text-text-muted mb-1 block">ID de Transacción (TxHash):</label>
-                  <input
-                    type="text"
-                    placeholder="0x..."
-                    value={txId}
-                    onChange={(e) => setTxId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-sm font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
-                  />
-                </div>
-
-                {/* Confirm Button */}
-                <button
-                  onClick={handlePaymentConfirmed}
-                  className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-base transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-xl"
-                >
-                  CONFIRMAR PAGO →
-                </button>
-
-                <p className="text-center text-[10px] text-text-muted mt-3">
-                  Envía exactamente <strong>${total.toFixed(2)} USDT</strong> a la dirección indicada.
-                </p>
-              </>
-            )}
-
-            {paymentTab === "agent" && (
-              <>
-                {/* Agent API Badge */}
-                <div className="flex justify-center mb-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20">
-                    🤖 API Programática · USDT (BEP20)
-                  </span>
-                </div>
-
-                {/* Payment Amount */}
-                <div className="mb-4 p-3 rounded-lg bg-background border border-border text-center">
-                  <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Monto a pagar</p>
-                  <p className="text-2xl font-bold text-accent">${total.toFixed(2)} USDT</p>
-                  <p className="text-[10px] text-text-muted mt-1">Red: BSC (BEP20)</p>
-                </div>
-
-                {/* Wallet Address (copyable) */}
-                <div className="mb-4">
-                  <label className="text-xs text-text-muted mb-1 block">Wallet de destino:</label>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-text-primary text-[10px] font-mono break-all">
-                      {walletAddress}
-                    </code>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(walletAddress);
-                        setAgentWalletCopied(true);
-                        setTimeout(() => setAgentWalletCopied(false), 2000);
-                      }}
-                      className="px-3 py-2 rounded-lg bg-surface border border-border text-text-muted hover:text-text-primary transition-colors text-xs whitespace-nowrap"
-                    >
-                      {agentWalletCopied ? "✓ Copiado" : "📋 Copiar"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* API Payment Instructions */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs text-text-muted">API de pago:</label>
-                    <button
-                      onClick={() => {
-                        const snippet = `POST https://peru-hub.vercel.app/api/checkout\n{\n  "wallet": "AGENT_WALLET",\n  "amount": ${total.toFixed(2)},\n  "currency": "USDT",\n  "network": "BEP20",\n  "items": [${items.map(i => `"${i.id}"`).join(", ")}],\n  "agent_id": "YOUR_MOLTBOOK_USERNAME",\n  "tx_hash": "0x..."\n}`;
-                        navigator.clipboard.writeText(snippet);
-                        setApiSnippetCopied(true);
-                        setTimeout(() => setApiSnippetCopied(false), 2000);
-                      }}
-                      className="text-[10px] text-primary hover:text-primary-hover font-medium transition-colors"
-                    >
-                      {apiSnippetCopied ? "✓ Copiado" : "📋 Copiar snippet"}
-                    </button>
-                  </div>
-                  <pre className="px-3 py-3 rounded-lg bg-gray-900 text-green-400 text-[10px] font-mono overflow-x-auto whitespace-pre leading-relaxed">
+            {/* Agent API — secondary accordion */}
+            <div className="mt-5 border-t border-border pt-4">
+              <button
+                onClick={() => setShowAgentApi(!showAgentApi)}
+                className="w-full text-left text-xs text-text-muted hover:text-text-secondary transition-colors flex items-center justify-between"
+              >
+                <span>🤖 ¿Eres un agente? Paga vía API</span>
+                <span className={`transition-transform duration-200 ${showAgentApi ? "rotate-180" : ""}`}>▼</span>
+              </button>
+              {showAgentApi && (
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs text-text-muted">API de pago:</label>
+                      <button
+                        onClick={() => {
+                          const snippet = `POST https://peru-hub.vercel.app/api/checkout\n{\n  "wallet": "AGENT_WALLET",\n  "amount": ${total.toFixed(2)},\n  "currency": "USDT",\n  "network": "BEP20",\n  "items": [${items.map(i => `"${i.id}"`).join(", ")}],\n  "agent_id": "YOUR_MOLTBOOK_USERNAME",\n  "tx_hash": "0x..."\n}`;
+                          navigator.clipboard.writeText(snippet);
+                          setApiSnippetCopied(true);
+                          setTimeout(() => setApiSnippetCopied(false), 2000);
+                        }}
+                        className="text-[10px] text-primary hover:text-primary-hover font-medium transition-colors"
+                      >
+                        {apiSnippetCopied ? "✓ Copiado" : "📋 Copiar snippet"}
+                      </button>
+                    </div>
+                    <pre className="px-3 py-3 rounded-lg bg-gray-900 text-green-400 text-[10px] font-mono overflow-x-auto whitespace-pre leading-relaxed">
 {`POST /api/checkout
 {
   "amount": ${total.toFixed(2)},
@@ -1021,18 +875,11 @@ export default function CartPage() {
   "agent_id": "YOUR_MOLTBOOK_ID",
   "tx_hash": "0x..."
 }`}
-                  </pre>
+                    </pre>
+                  </div>
                 </div>
-
-                {/* Confirm Button for agents too */}
-                <button
-                  onClick={handlePaymentConfirmed}
-                  className="w-full py-3.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-base transition-all duration-200 shadow-lg shadow-violet-500/25"
-                >
-                  CONFIRMAR PAGO →
-                </button>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -88,7 +88,7 @@ export async function GET() {
       agent_id: "string (your Moltbook username)",
       tx_hash: "string (BSC transaction hash)",
     },
-    payment_wallet: "0xcbc14706f7f8167505de1690e1e8419399f9506d",
+    payment_wallet: "0xDD49337e6B62C8B0d750CD6F809A84F339a3061e",
     documentation: "Send USDT (BEP20) to the payment wallet, then POST tx_hash here.",
   });
 }

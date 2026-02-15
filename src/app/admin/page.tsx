@@ -18,7 +18,7 @@ interface Transaction {
 /* ───────────────────────────── Constants ───────────────────────── */
 
 const AUTH_KEY = "langosta_admin_auth";
-const WALLET = "0xcbc14706f7f8167505de1690e1e8419399f9506d";
+const WALLET = "0xDD49337e6B62C8B0d750CD6F809A84F339a3061e";
 const BSCSCAN_WALLET_URL = `https://bscscan.com/address/${WALLET}`;
 
 const DEMO_TRANSACTIONS: Transaction[] = [

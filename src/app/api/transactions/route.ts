@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const WALLET = "0xcbc14706f7f8167505de1690e1e8419399f9506d";
+const WALLET = "0xDD49337e6B62C8B0d750CD6F809A84F339a3061e";
 const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
 const API_KEY = process.env.BSCSCAN_API_KEY || "";
 
