@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, FormEvent } from "react";
 import SkillTester from "./SkillTester";
 import AdBanner from "@/components/AdBanner";
+import SkillReviewQueue from "./SkillReviewQueue";
 
 /* ───────────────────────────── Types ───────────────────────────── */
 
@@ -474,6 +475,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             </p>
           )}
         </div>
+
+        {/* Skill Review Queue */}
+        <SkillReviewQueue />
 
         {/* Skill Tester */}
         <SkillTester />
