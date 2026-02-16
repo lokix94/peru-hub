@@ -90,6 +90,7 @@ export async function GET() {
         user: tx.from.slice(0, 8) + "..." + tx.from.slice(-4),
         amount,
         txHash: tx.hash,
+        confirmations: Number(tx.confirmations) || 0,
         status: getStatus(tx.confirmations),
       };
     });

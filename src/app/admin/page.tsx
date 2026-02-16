@@ -12,6 +12,7 @@ interface Transaction {
   amount: string;
   txHash: string;
   status: "confirmed" | "pending" | "failed";
+  confirmations?: number;
   isDemo?: boolean;
 }
 
@@ -24,25 +25,28 @@ const BSCSCAN_WALLET_URL = `https://bscscan.com/address/${WALLET}`;
 const DEMO_TRANSACTIONS: Transaction[] = [
   {
     date: "2026-02-14 02:30",
-    user: "Demo Agent1",
+    user: "0xA1b2C3...d4E5f6",
     amount: "10.00",
     txHash: "0xabc123456789abcdef0123456789abcdef0123456789abcdef0123456789abcd",
+    confirmations: 847,
     status: "confirmed",
     isDemo: true,
   },
   {
     date: "2026-02-14 01:15",
-    user: "Demo Agent2",
+    user: "0xF6e5D4...c3B2a1",
     amount: "25.00",
     txHash: "0xdef456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0",
+    confirmations: 2,
     status: "pending",
     isDemo: true,
   },
   {
     date: "2026-02-13 22:45",
-    user: "Demo Agent3",
+    user: "0x123456...abcdef",
     amount: "5.00",
     txHash: "0xghi789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123",
+    confirmations: 1203,
     status: "confirmed",
     isDemo: true,
   },
@@ -351,9 +355,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                 <thead>
                   <tr className="text-left text-xs text-slate-500 uppercase tracking-wider border-b border-white/5">
                     <th className="px-6 py-3 font-medium">Fecha</th>
-                    <th className="px-6 py-3 font-medium">Usuario</th>
+                    <th className="px-6 py-3 font-medium">Desde</th>
                     <th className="px-6 py-3 font-medium">Monto (USDT)</th>
                     <th className="px-6 py-3 font-medium">TxHash</th>
+                    <th className="px-6 py-3 font-medium">Confirmaciones</th>
                     <th className="px-6 py-3 font-medium">Estado</th>
                     <th className="px-6 py-3 font-medium">BSCScan</th>
                   </tr>
@@ -363,7 +368,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                     <tr key={i} className="hover:bg-white/[0.02] transition-colors">
                       <td className="px-6 py-4 text-slate-300 whitespace-nowrap">{tx.date}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-slate-200 font-medium">{tx.user}</span>
+                        <span className="text-slate-200 font-medium font-mono text-xs">{tx.user}</span>
                         {tx.isDemo && (
                           <span className="ml-1.5 text-[10px] text-amber-400/50">(demo)</span>
                         )}
@@ -380,6 +385,17 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                         >
                           {formatHash(tx.txHash)}
                         </a>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <span className={`text-xs font-medium ${
+                          (tx.confirmations ?? 0) >= 12
+                            ? "text-emerald-400"
+                            : (tx.confirmations ?? 0) >= 3
+                            ? "text-blue-400"
+                            : "text-amber-400"
+                        }`}>
+                          {tx.confirmations !== undefined ? tx.confirmations.toLocaleString() : "—"}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <StatusBadge status={tx.status} />

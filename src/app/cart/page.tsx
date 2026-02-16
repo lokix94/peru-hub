@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import AdBanner from "@/components/AdBanner";
+import TransactionStatus from "@/components/TransactionStatus";
 
 type CheckoutStep = "cart" | "payment" | "verify-agent" | "installing" | "complete";
 
@@ -43,6 +44,14 @@ export default function CartPage() {
   const [demoResults, setDemoResults] = useState<Record<string, any>>({});
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [demoExpanded, setDemoExpanded] = useState<string | null>(null);
+  const [txVerifyStatus, setTxVerifyStatus] = useState<"idle" | "loading" | "success" | "error" | "pending">("idle");
+  const [txVerifyData, setTxVerifyData] = useState<{
+    amount?: number;
+    from?: string;
+    confirmations?: number;
+    timestamp?: string;
+    error?: string;
+  }>({});
 
   const walletAddress = "0xDD49337e6B62C8B0d750CD6F809A84F339a3061e";
 
@@ -67,10 +76,64 @@ export default function CartPage() {
     }
   };
 
-  /* ── Payment confirmed → go to agent verification ── */
-  const handlePaymentConfirmed = () => {
-    setPurchasedItems([...items]);
-    setStep("verify-agent");
+  /* ── Payment confirmed → verify on blockchain then go to agent verification ── */
+  const handlePaymentConfirmed = async () => {
+    if (!txId.trim()) {
+      setTxVerifyStatus("error");
+      setTxVerifyData({ error: "Ingresa el hash de transacción (TxHash) antes de confirmar." });
+      return;
+    }
+
+    setTxVerifyStatus("loading");
+    setTxVerifyData({});
+
+    try {
+      const res = await fetch("/api/verify-transaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          txHash: txId.trim(),
+          expectedAmount: total,
+          buyerEmail: "",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.verified) {
+        setTxVerifyStatus("success");
+        setTxVerifyData({
+          amount: data.amount,
+          from: data.from,
+          confirmations: data.confirmations,
+          timestamp: data.timestamp,
+        });
+        // After 2.5s success display, proceed to agent verification
+        setTimeout(() => {
+          setPurchasedItems([...items]);
+          setStep("verify-agent");
+        }, 2500);
+      } else if (data.error && data.error.includes("confirmaciones")) {
+        setTxVerifyStatus("pending");
+        setTxVerifyData({
+          amount: data.amount,
+          from: data.from,
+          confirmations: data.confirmations,
+          error: data.error,
+        });
+      } else {
+        setTxVerifyStatus("error");
+        setTxVerifyData({ error: data.error || "No se pudo verificar la transacción." });
+      }
+    } catch {
+      setTxVerifyStatus("error");
+      setTxVerifyData({ error: "Error de conexión. Verifica tu internet e intenta de nuevo." });
+    }
+  };
+
+  const handleRetryVerification = () => {
+    setTxVerifyStatus("idle");
+    setTxVerifyData({});
   };
 
   /* ── Agent verification (simulated) ── */
@@ -839,13 +902,31 @@ export default function CartPage() {
               />
             </div>
 
+            {/* Transaction Verification Status */}
+            {txVerifyStatus !== "idle" && (
+              <TransactionStatus
+                status={txVerifyStatus}
+                amount={txVerifyData.amount}
+                from={txVerifyData.from}
+                confirmations={txVerifyData.confirmations}
+                timestamp={txVerifyData.timestamp}
+                error={txVerifyData.error}
+                onRetry={handleRetryVerification}
+              />
+            )}
+
             {/* Confirm Button */}
             <button
               onClick={handlePaymentConfirmed}
-              className="w-full py-3.5 rounded-xl font-bold text-base transition-all duration-200 shadow-lg"
+              disabled={txVerifyStatus === "loading" || txVerifyStatus === "success"}
+              className="w-full py-3.5 rounded-xl font-bold text-base transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ background: 'linear-gradient(135deg, #7B61FF 0%, #6C5CE7 100%)', color: '#fff', borderRadius: '12px' }}
             >
-              CONFIRMAR PAGO →
+              {txVerifyStatus === "loading"
+                ? "⏳ VERIFICANDO..."
+                : txVerifyStatus === "success"
+                ? "✅ VERIFICADO — REDIRIGIENDO..."
+                : "CONFIRMAR PAGO →"}
             </button>
           </div>
 
