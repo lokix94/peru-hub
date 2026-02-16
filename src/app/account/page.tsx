@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import RechargeModal from "@/components/RechargeModal";
 import AdBanner from "@/components/AdBanner";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, type MoltbookData } from "@/context/AuthContext";
 
 const transactions = [
   { id: "tx-1", type: "deposit", description: "Recarga de saldo", amount: 20.00, date: "2026-02-12", status: "completed" },
@@ -27,7 +27,7 @@ const installedSkills = [
 
 export default function AccountPage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading, agents, addAgent, removeAgent, signOut } = useAuth();
+  const { user, isAuthenticated, isLoading, agents, addAgent, removeAgent, updateAgent, signOut } = useAuth();
 
   const balance = 9.46;
   const totalSpent = transactions
@@ -42,6 +42,13 @@ export default function AccountPage() {
   const [agentPlatform, setAgentPlatform] = useState("");
   const [agentApiKey, setAgentApiKey] = useState("");
   const [agentError, setAgentError] = useState("");
+
+  // Moltbook verification state
+  const [moltbookVerifying, setMoltbookVerifying] = useState(false);
+  const [moltbookVerified, setMoltbookVerified] = useState(false);
+  const [moltbookData, setMoltbookData] = useState<MoltbookData | null>(null);
+  const [moltbookError, setMoltbookError] = useState("");
+  const [refreshingAgentId, setRefreshingAgentId] = useState<string | null>(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -71,10 +78,90 @@ export default function AccountPage() {
     day: "numeric",
   });
 
+  async function verifyMoltbook() {
+    if (!agentName.trim()) {
+      setMoltbookError("Ingresa un nombre de usuario");
+      return;
+    }
+    setMoltbookVerifying(true);
+    setMoltbookError("");
+    setMoltbookVerified(false);
+    setMoltbookData(null);
+
+    try {
+      const res = await fetch("/api/verify-moltbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: agentName.trim(), apiKey: agentApiKey || undefined }),
+      });
+      const data = await res.json();
+
+      if (data.verified && data.agent) {
+        const md: MoltbookData = {
+          moltbook_id: data.agent.id,
+          moltbook_name: data.agent.name,
+          post_count: data.agent.postCount,
+          karma: data.agent.karma,
+          last_active: data.agent.lastActive,
+          profile_url: `https://moltbook.com/u/${data.agent.name}`,
+        };
+        setMoltbookData(md);
+        setMoltbookVerified(true);
+      } else {
+        setMoltbookError(data.error || "Agente no encontrado en Moltbook");
+      }
+    } catch {
+      setMoltbookError("Error de conexión al verificar");
+    } finally {
+      setMoltbookVerifying(false);
+    }
+  }
+
+  async function refreshMoltbookAgent(agentId: string, agentNameToVerify: string) {
+    setRefreshingAgentId(agentId);
+    try {
+      const res = await fetch("/api/verify-moltbook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: agentNameToVerify }),
+      });
+      const data = await res.json();
+      if (data.verified && data.agent) {
+        updateAgent(agentId, {
+          verified: true,
+          moltbook_data: {
+            moltbook_id: data.agent.id,
+            moltbook_name: data.agent.name,
+            post_count: data.agent.postCount,
+            karma: data.agent.karma,
+            last_active: data.agent.lastActive,
+            profile_url: `https://moltbook.com/u/${data.agent.name}`,
+          },
+        });
+      }
+    } catch {
+      // silently fail refresh
+    } finally {
+      setRefreshingAgentId(null);
+    }
+  }
+
   async function handleAddAgent(e: React.FormEvent) {
     e.preventDefault();
     setAgentError("");
-    const result = await addAgent(agentName, agentPlatform, agentApiKey || undefined);
+
+    // For Moltbook platform, require verification first
+    if (agentPlatform === "Moltbook" && !moltbookVerified) {
+      setAgentError("Primero verifica tu agente en Moltbook");
+      return;
+    }
+
+    const result = await addAgent(
+      agentName,
+      agentPlatform,
+      agentApiKey || undefined,
+      agentPlatform === "Moltbook" && moltbookData ? moltbookData : undefined
+    );
     if (!result.success) {
       setAgentError(result.error ?? "Error al agregar agente");
       return;
@@ -82,6 +169,9 @@ export default function AccountPage() {
     setAgentName("");
     setAgentPlatform("");
     setAgentApiKey("");
+    setMoltbookVerified(false);
+    setMoltbookData(null);
+    setMoltbookError("");
     setShowAgentForm(false);
   }
 
@@ -142,20 +232,16 @@ export default function AccountPage() {
             {showAgentForm && (
               <form onSubmit={handleAddAgent} className="mb-4 p-4 rounded-xl bg-gray-50 border border-border space-y-3">
                 <div>
-                  <label className="block text-[11px] text-text-muted mb-1 font-medium">Nombre del agente</label>
-                  <input
-                    type="text"
-                    placeholder="Mi Agente IA"
-                    value={agentName}
-                    onChange={(e) => setAgentName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs placeholder:text-text-muted focus:outline-none focus:border-primary/50"
-                  />
-                </div>
-                <div>
                   <label className="block text-[11px] text-text-muted mb-1 font-medium">Plataforma</label>
                   <select
                     value={agentPlatform}
-                    onChange={(e) => setAgentPlatform(e.target.value)}
+                    onChange={(e) => {
+                      setAgentPlatform(e.target.value);
+                      setMoltbookVerified(false);
+                      setMoltbookData(null);
+                      setMoltbookError("");
+                      setAgentError("");
+                    }}
                     className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs focus:outline-none focus:border-primary/50"
                   >
                     <option value="">Seleccionar plataforma...</option>
@@ -165,7 +251,28 @@ export default function AccountPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] text-text-muted mb-1 font-medium">API Key (opcional)</label>
+                  <label className="block text-[11px] text-text-muted mb-1 font-medium">
+                    {agentPlatform === "Moltbook" ? "Nombre de usuario en Moltbook" : "Nombre del agente"}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={agentPlatform === "Moltbook" ? "ej: Peru, eudaemon_0..." : "Mi Agente IA"}
+                    value={agentName}
+                    onChange={(e) => {
+                      setAgentName(e.target.value);
+                      if (agentPlatform === "Moltbook") {
+                        setMoltbookVerified(false);
+                        setMoltbookData(null);
+                        setMoltbookError("");
+                      }
+                    }}
+                    className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] text-text-muted mb-1 font-medium">
+                    API Key (opcional)
+                  </label>
                   <input
                     type="password"
                     placeholder="sk-..."
@@ -174,14 +281,65 @@ export default function AccountPage() {
                     className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
                   />
                 </div>
+
+                {/* Moltbook verify button */}
+                {agentPlatform === "Moltbook" && !moltbookVerified && (
+                  <button
+                    type="button"
+                    onClick={verifyMoltbook}
+                    disabled={moltbookVerifying || !agentName.trim()}
+                    className="w-full py-2 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    {moltbookVerifying ? (
+                      <>
+                        <span className="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Verificando en Moltbook...
+                      </>
+                    ) : (
+                      "Verificar en Moltbook 🦞"
+                    )}
+                  </button>
+                )}
+
+                {/* Moltbook verification error */}
+                {moltbookError && (
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                    <p className="text-[11px] text-red-600 font-medium">❌ {moltbookError}</p>
+                  </div>
+                )}
+
+                {/* Moltbook verification success */}
+                {moltbookVerified && moltbookData && (
+                  <div className="p-3 rounded-lg bg-green-50 border border-green-200 space-y-1.5">
+                    <p className="text-[11px] text-green-700 font-bold flex items-center gap-1">
+                      ✅ Agente verificado en Moltbook
+                    </p>
+                    <div className="grid grid-cols-2 gap-1 text-[10px] text-green-800">
+                      <span>🦞 Nombre: <strong>{moltbookData.moltbook_name}</strong></span>
+                      <span>📝 Posts: <strong>{moltbookData.post_count}</strong></span>
+                      <span>⬆️ Karma: <strong>{moltbookData.karma}</strong></span>
+                      <span>🕐 Último: <strong>{new Date(moltbookData.last_active).toLocaleDateString("es-PE")}</strong></span>
+                    </div>
+                    <a
+                      href={moltbookData.profile_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-[10px] text-green-600 hover:text-green-800 underline"
+                    >
+                      Ver perfil en Moltbook →
+                    </a>
+                  </div>
+                )}
+
                 {agentError && (
                   <p className="text-[11px] text-red-500">{agentError}</p>
                 )}
                 <button
                   type="submit"
-                  className="w-full py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition-colors"
+                  disabled={agentPlatform === "Moltbook" && !moltbookVerified}
+                  className="w-full py-2 rounded-lg bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
                 >
-                  Registrar Agente
+                  {agentPlatform === "Moltbook" ? "Registrar Agente Moltbook 🦞" : "Registrar Agente"}
                 </button>
               </form>
             )}
@@ -195,41 +353,87 @@ export default function AccountPage() {
               </div>
             ) : (
               <div className="space-y-2">
-                {agents.map((agent) => (
-                  <div
-                    key={agent.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-sm">
-                        🤖
+                {agents.map((agent) => {
+                  const isMoltbook = agent.platform === "Moltbook" && agent.moltbook_data;
+                  const isRefreshing = refreshingAgentId === agent.id;
+                  return (
+                    <div
+                      key={agent.id}
+                      className={`p-3 rounded-lg border ${
+                        isMoltbook ? "bg-green-50/50 border-green-200" : "bg-gray-50 border-border"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                            isMoltbook ? "bg-orange-100" : "bg-primary-light"
+                          }`}>
+                            {isMoltbook ? "🦞" : "🤖"}
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-text-primary">{agent.name}</p>
+                            <p className="text-[10px] text-text-muted">
+                              {agent.platform}
+                              {agent.api_key && !isMoltbook ? " • API Key configurada" : ""}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                            isMoltbook
+                              ? "bg-green-100 text-green-700"
+                              : agent.verified
+                                ? "bg-green-100 text-green-700"
+                                : "bg-amber-100 text-amber-700"
+                          }`}>
+                            {isMoltbook ? "VERIFICADO EN MOLTBOOK" : agent.verified ? "VERIFICADO" : "PENDIENTE"}
+                          </span>
+                          {isMoltbook && (
+                            <button
+                              onClick={() => refreshMoltbookAgent(agent.id, agent.moltbook_data!.moltbook_name)}
+                              disabled={isRefreshing}
+                              className="text-[10px] text-green-600 hover:text-green-800 font-medium disabled:opacity-50 transition-colors"
+                              title="Actualizar datos de Moltbook"
+                            >
+                              {isRefreshing ? (
+                                <span className="inline-block w-3 h-3 border-2 border-green-300 border-t-green-600 rounded-full animate-spin" />
+                              ) : (
+                                "🔄"
+                              )}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => removeAgent(agent.id)}
+                            className="text-text-muted hover:text-red-500 transition-colors p-1"
+                            title="Eliminar agente"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-medium text-text-primary">{agent.name}</p>
-                        <p className="text-[10px] text-text-muted">
-                          {agent.platform}
-                          {agent.api_key ? " • API Key configurada" : ""}
-                        </p>
-                      </div>
+                      {/* Moltbook agent extra info */}
+                      {isMoltbook && agent.moltbook_data && (
+                        <div className="mt-2 pt-2 border-t border-green-200/60 flex items-center justify-between">
+                          <div className="flex items-center gap-3 text-[10px] text-green-700">
+                            <span>📝 {agent.moltbook_data.post_count} posts</span>
+                            <span>⬆️ {agent.moltbook_data.karma} karma</span>
+                            <span>🕐 {new Date(agent.moltbook_data.last_active).toLocaleDateString("es-PE")}</span>
+                          </div>
+                          <a
+                            href={agent.moltbook_data.profile_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-green-600 hover:text-green-800 underline font-medium"
+                          >
+                            Ver en Moltbook →
+                          </a>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                        agent.verified ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                      }`}>
-                        {agent.verified ? "VERIFICADO" : "PENDIENTE"}
-                      </span>
-                      <button
-                        onClick={() => removeAgent(agent.id)}
-                        className="text-text-muted hover:text-red-500 transition-colors p-1"
-                        title="Eliminar agente"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

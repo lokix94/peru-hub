@@ -21,6 +21,15 @@ export interface AuthUser {
   created_at: string;
 }
 
+export interface MoltbookData {
+  moltbook_id: string;
+  moltbook_name: string;
+  post_count: number;
+  karma: number;
+  last_active: string;
+  profile_url: string;
+}
+
 export interface AuthAgent {
   id: string;
   name: string;
@@ -28,6 +37,7 @@ export interface AuthAgent {
   api_key?: string;
   verified: boolean;
   created_at: string;
+  moltbook_data?: MoltbookData;
 }
 
 interface StoredUserLocal {
@@ -62,9 +72,11 @@ interface AuthContextType {
   addAgent: (
     name: string,
     platform: string,
-    apiKey?: string
+    apiKey?: string,
+    moltbookData?: MoltbookData
   ) => Promise<{ success: boolean; error?: string }>;
   removeAgent: (id: string) => void;
+  updateAgent: (id: string, updates: Partial<AuthAgent>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -410,7 +422,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (
       name: string,
       platform: string,
-      apiKey?: string
+      apiKey?: string,
+      moltbookData?: MoltbookData
     ): Promise<{ success: boolean; error?: string }> => {
       if (!name.trim()) return { success: false, error: "El nombre es obligatorio" };
       if (!platform) return { success: false, error: "Selecciona una plataforma" };
@@ -419,8 +432,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: name.trim(),
         platform,
         api_key: apiKey || undefined,
-        verified: false,
+        verified: !!moltbookData,
         created_at: new Date().toISOString(),
+        moltbook_data: moltbookData || undefined,
       };
       setAgents((prev) => {
         const next = [...prev, agent];
@@ -462,6 +476,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const updateAgent = useCallback((id: string, updates: Partial<AuthAgent>) => {
+    setAgents((prev) => {
+      const next = prev.map((a) => (a.id === id ? { ...a, ...updates } : a));
+      if (!isSupabaseConfigured()) {
+        const session = getLocalSession();
+        if (session) {
+          const users = getLocalUsers();
+          const idx = users.findIndex((u) => u.id === session.user.id);
+          if (idx >= 0) {
+            users[idx].agents = next;
+            saveLocalUsers(users);
+          }
+        }
+      }
+      return next;
+    });
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -474,6 +506,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         addAgent,
         removeAgent,
+        updateAgent,
       }}
     >
       {children}
