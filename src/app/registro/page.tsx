@@ -155,7 +155,7 @@ export default function RegistroPage() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-md bg-[#16161d] rounded-2xl border border-white/10 p-8 animate-fade-in">
         {/* Header */}
         <div className="text-center mb-8">
