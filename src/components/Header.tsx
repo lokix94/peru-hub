@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import RechargeModal from "./RechargeModal";
+import DarkModeToggle from "./DarkModeToggle";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -66,22 +67,24 @@ export default function Header() {
           {/* Promo text — centered */}
           <span>🚀 {t("promo.new")} — {t("promo.explore")}</span>
 
-          {/* Install App button — right side */}
-          <button
-            onClick={async () => {
-              if (installPrompt) {
-                await installPrompt.prompt();
-                const { outcome } = await installPrompt.userChoice;
-                if (outcome === "accepted") setInstallPrompt(null);
-              } else {
-                // Fallback: show manual instructions
-                alert("Para instalar:\n\n📱 Móvil: Menú del navegador → 'Agregar a pantalla de inicio'\n\n💻 PC (Chrome): Barra de dirección → icono de instalar (⊕)");
-              }
-            }}
-            className="absolute right-4 sm:right-6 lg:right-8 flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 hover:bg-white/30 text-[10px] font-bold text-white transition-all"
-          >
-            📲 App
-          </button>
+          {/* Right side — dark mode + install */}
+          <div className="absolute right-4 sm:right-6 lg:right-8 flex items-center gap-2">
+            <DarkModeToggle />
+            <button
+              onClick={async () => {
+                if (installPrompt) {
+                  await installPrompt.prompt();
+                  const { outcome } = await installPrompt.userChoice;
+                  if (outcome === "accepted") setInstallPrompt(null);
+                } else {
+                  alert("Para instalar:\n\n📱 Móvil: Menú del navegador → 'Agregar a pantalla de inicio'\n\n💻 PC (Chrome): Barra de dirección → icono de instalar (⊕)");
+                }
+              }}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 hover:bg-white/30 text-[10px] font-bold text-white transition-all"
+            >
+              📲 App
+            </button>
+          </div>
         </div>
       </div>
 
@@ -107,20 +110,23 @@ export default function Header() {
               EN
             </button>
           </div>
-          <button
-            onClick={async () => {
-              if (installPrompt) {
-                await installPrompt.prompt();
-                const { outcome } = await installPrompt.userChoice;
-                if (outcome === "accepted") setInstallPrompt(null);
-              } else {
-                alert("Para instalar:\n\n📱 Menú del navegador → 'Agregar a pantalla de inicio'");
-              }
-            }}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold text-white"
-          >
-            📲 App
-          </button>
+          <div className="flex items-center gap-2">
+            <DarkModeToggle />
+            <button
+              onClick={async () => {
+                if (installPrompt) {
+                  await installPrompt.prompt();
+                  const { outcome } = await installPrompt.userChoice;
+                  if (outcome === "accepted") setInstallPrompt(null);
+                } else {
+                  alert("Para instalar:\n\n📱 Menú del navegador → 'Agregar a pantalla de inicio'");
+                }
+              }}
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold text-white"
+            >
+              📲 App
+            </button>
+          </div>
         </div>
       </div>
 
