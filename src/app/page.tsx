@@ -58,7 +58,6 @@ export default function HomePage() {
     "Código y Automatización": "cat.code",
     "Productividad": "cat.productivity",
     "Core del Agente": "cat.agent.core",
-    "Legal y Compliance": "cat.legal",
   };
 
   const storeCategories = [

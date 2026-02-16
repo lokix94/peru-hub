@@ -15,7 +15,6 @@ const CATEGORIES = [
   "Código y Automatización",
   "Productividad",
   "Core del Agente",
-  "Legal y Compliance",
 ];
 
 interface SkillSubmission {

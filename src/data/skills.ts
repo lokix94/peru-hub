@@ -37,7 +37,6 @@ export const CATEGORIES = [
   { key: "Código y Automatización", icon: "💻", color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100", iconBg: "bg-emerald-100" },
   { key: "Productividad", icon: "⚡", color: "bg-amber-50 border-amber-200 hover:bg-amber-100", iconBg: "bg-amber-100" },
   { key: "Core del Agente", icon: "🤖", color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100", iconBg: "bg-indigo-100" },
-  { key: "Legal y Compliance", icon: "⚖️", color: "bg-red-50 border-red-200 hover:bg-red-100", iconBg: "bg-red-100" },
 ] as const;
 
 export const CATEGORY_KEYS = CATEGORIES.map(c => c.key);
