@@ -125,7 +125,7 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
                   : "bg-primary hover:bg-primary-hover text-white"
               }`}
             >
-              {inCart ? `✓ ${t("added.short")}` : skill.price === 0 ? t("install") : t("add.short")}
+              {inCart ? `✓ ${t("added.short")}` : skill.price === 0 ? t("get.free") : t("add.short")}
             </button>
           </div>
         </div>

@@ -34,10 +34,10 @@ const banners = [
     id: 3,
     headline: { es: "Tu agente habla 🎤", en: "Your agent speaks 🎤" },
     sub: {
-      es: "Voz neural peruana gratis — Camila suena tan real que nadie nota la diferencia",
-      en: "Free Peruvian neural voice — Camila sounds so real nobody notices the difference",
+      es: "Voz neural peruana — Camila suena tan real que nadie nota la diferencia",
+      en: "Peruvian neural voice — Camila sounds so real nobody notices the difference",
     },
-    cta: { es: "Instalar gratis", en: "Install free" },
+    cta: { es: "Desde $2.99", en: "From $2.99" },
     link: "/marketplace/voice-synthesis",
     gradient: "from-violet-600 to-indigo-700",
   },

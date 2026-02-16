@@ -98,6 +98,7 @@ const translations: Record<string, Record<Language, string>> = {
   "add.short": { es: "Agregar", en: "Add" },
   "added.short": { es: "Agregado", en: "Added" },
   "install": { es: "Instalar", en: "Install" },
+  "get.free": { es: "Obtener gratis", en: "Get free" },
   "free": { es: "Gratis", en: "Free" },
 
   // ── Cart ──
