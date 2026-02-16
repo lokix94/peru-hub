@@ -17,6 +17,12 @@ import {
   getNewSkills,
 } from "@/data/skills";
 
+interface WebSearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+}
+
 type SortOption = "popular" | "newest" | "price-asc" | "price-desc" | "rating";
 
 const sortLabels: Record<SortOption, string> = {
@@ -37,6 +43,11 @@ function MarketplaceContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("popular");
   const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all");
+
+  // Web search state
+  const [webResults, setWebResults] = useState<WebSearchResult[]>([]);
+  const [webSearching, setWebSearching] = useState(false);
+  const [webSearchDone, setWebSearchDone] = useState(false);
 
   // Load all skills including developer-submitted ones
   const [allSkills, setAllSkills] = useState<Skill[]>(builtInSkills);
@@ -125,6 +136,39 @@ function MarketplaceContent() {
 
   // Group skills by category for "Todas" view
   const grouped = useMemo(() => groupSkillsByCategory(sortedSkills), [sortedSkills]);
+
+  // Trigger web search when local results are few and there's a search query
+  useEffect(() => {
+    setWebResults([]);
+    setWebSearchDone(false);
+
+    if (!searchQuery || searchQuery.trim().length < 3) return;
+    if (sortedSkills.length > 5) return; // enough local results
+
+    const timer = setTimeout(async () => {
+      setWebSearching(true);
+      try {
+        const res = await fetch("/api/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: searchQuery.trim() }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            setWebResults(data.results || []);
+          }
+        }
+      } catch {
+        // silent fail
+      } finally {
+        setWebSearching(false);
+        setWebSearchDone(true);
+      }
+    }, 800); // debounce
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, sortedSkills.length]);
 
   const showFeaturedSection = activeCategory === "All" && !searchQuery && priceFilter === "all";
   const featured = getFeaturedSkills();
@@ -375,6 +419,83 @@ function MarketplaceContent() {
                     🛠️ Crear herramienta →
                   </Link>
                 </>
+              )}
+            </div>
+          )}
+
+          {/* ===== WEB SEARCH RESULTS ===== */}
+          {searchQuery && searchQuery.trim().length >= 3 && (
+            <div className="mt-8">
+              {webSearching && (
+                <div className="flex items-center gap-3 py-6 justify-center">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm text-text-muted">Buscando en la web...</span>
+                </div>
+              )}
+
+              {webSearchDone && webResults.length > 0 && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-lg">🌐</span>
+                    <h3 className="text-base font-bold text-text-primary">
+                      Resultados web relacionados
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wider">
+                      Google
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-muted mb-4">
+                    No encontramos suficientes herramientas locales para &quot;{searchQuery}&quot;. Estos resultados web podrían ayudarte:
+                  </p>
+                  <div className="space-y-3">
+                    {webResults.map((result, idx) => (
+                      <a
+                        key={idx}
+                        href={result.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block bg-white rounded-lg border border-blue-100 p-4 hover:border-primary hover:shadow-md transition-all group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 text-sm font-bold shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            {idx + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-semibold text-primary group-hover:text-primary-hover transition-colors line-clamp-1">
+                              {result.title}
+                            </h4>
+                            <p className="text-[11px] text-text-muted mt-1 line-clamp-2">
+                              {result.snippet}
+                            </p>
+                            <p className="text-[10px] text-blue-500 mt-1.5 truncate">
+                              {result.url}
+                            </p>
+                          </div>
+                          <svg className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-blue-100 flex items-center justify-between">
+                    <p className="text-[10px] text-text-muted">
+                      Resultados proporcionados por Google vía Serper
+                    </p>
+                    <Link
+                      href="/developers/nueva-skill"
+                      className="text-[11px] text-primary hover:text-primary-hover font-semibold"
+                    >
+                      ¿No encuentras lo que buscas? Créalo →
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {webSearchDone && webResults.length === 0 && !webSearching && sortedSkills.length === 0 && (
+                <p className="text-center text-xs text-text-muted py-4">
+                  Tampoco se encontraron resultados web para esta búsqueda.
+                </p>
               )}
             </div>
           )}
