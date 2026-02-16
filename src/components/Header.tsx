@@ -35,8 +35,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Top bar — promo + language selector */}
-      <div className="bg-primary text-white py-1.5 text-xs font-medium tracking-wide">
+      {/* Top bar — promo + language selector (hidden on mobile, visible md+) */}
+      <div className="hidden md:block bg-primary text-white py-1.5 text-xs font-medium tracking-wide">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
           {/* Language selector — left side */}
           <div className="absolute left-4 sm:left-6 lg:left-8 flex items-center gap-0.5">
@@ -85,10 +85,49 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Mobile-only slim top bar — language + install */}
+      <div className="md:hidden bg-primary text-white py-0.5 text-xs">
+        <div className="flex items-center justify-between px-3">
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={() => setLang("es")}
+              className={`px-1 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                lang === "es" ? "bg-white/25 text-white" : "text-white/50"
+              }`}
+            >
+              ES
+            </button>
+            <span className="text-white/30 mx-0.5">|</span>
+            <button
+              onClick={() => setLang("en")}
+              className={`px-1 py-0.5 rounded text-[10px] font-semibold transition-all ${
+                lang === "en" ? "bg-white/25 text-white" : "text-white/50"
+              }`}
+            >
+              EN
+            </button>
+          </div>
+          <button
+            onClick={async () => {
+              if (installPrompt) {
+                await installPrompt.prompt();
+                const { outcome } = await installPrompt.userChoice;
+                if (outcome === "accepted") setInstallPrompt(null);
+              } else {
+                alert("Para instalar:\n\n📱 Menú del navegador → 'Agregar a pantalla de inicio'");
+              }
+            }}
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold text-white"
+          >
+            📲 App
+          </button>
+        </div>
+      </div>
+
       {/* Main header — dark */}
       <div className="bg-header-bg border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 h-16">
+          <div className="flex items-center gap-2 md:gap-4 h-12 md:h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0 group">
               <Image
@@ -112,9 +151,9 @@ export default function Header() {
                   placeholder={t("search.placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-12 py-2.5 rounded-full bg-white text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full pl-3 pr-10 py-1.5 md:pl-4 md:pr-12 md:py-2.5 rounded-full bg-white text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
-                <button className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-primary hover:bg-primary-hover flex items-center justify-center transition-colors">
+                <button className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 md:w-9 md:h-9 rounded-full bg-primary hover:bg-primary-hover flex items-center justify-center transition-colors">
                   <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -243,10 +282,10 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Navigation bar — secondary */}
-      <nav className="bg-white border-b border-border hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 h-11">
+      {/* Navigation bar — secondary (horizontal scroll on mobile) */}
+      <nav className="bg-white border-b border-border">
+        <div className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-1 h-9 md:h-11 overflow-x-auto whitespace-nowrap scrollbar-hide">
             {[
               { href: "/", label: t("nav.home") },
               { href: "/marketplace", label: `🛒 ${t("nav.all")}` },
@@ -264,7 +303,7 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-2 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium transition-colors shrink-0 ${
                     isActive
                       ? "bg-primary-light text-primary"
                       : "text-text-secondary hover:text-text-primary hover:bg-gray-100"

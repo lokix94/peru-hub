@@ -26,7 +26,7 @@ const banners = [
       es: "Smart Web Researcher verifica en múltiples fuentes y puntúa la confiabilidad",
       en: "Smart Web Researcher verifies across multiple sources and scores reliability",
     },
-    cta: { es: "Desde $4.99", en: "From $4.99" },
+    cta: { es: "Obtener gratis", en: "Get free" },
     link: "/marketplace/smart-web-researcher",
     gradient: "from-emerald-500 to-teal-600",
   },
@@ -82,23 +82,23 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* ===== BANNER CAROUSEL ===== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+      <section className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8 pt-2 md:pt-6 pb-2 md:pb-4">
         <div className="relative">
           {/* Active banner */}
           <Link href={banners[activeBanner].link}>
-            <div className={`banner-slide bg-gradient-to-r ${banners[activeBanner].gradient} p-8 md:p-12 text-white relative overflow-hidden cursor-pointer group`}>
+            <div className={`banner-slide bg-gradient-to-r ${banners[activeBanner].gradient} min-h-[35vh] md:min-h-[auto] flex items-center p-5 md:p-12 text-white relative overflow-hidden cursor-pointer group rounded-xl md:rounded-2xl`}>
               {/* Decorative circles */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
               <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-white/5 rounded-full translate-y-1/2" />
 
               <div className="relative max-w-lg">
-                <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight">
+                <h2 className="text-2xl md:text-4xl font-extrabold mb-2 md:mb-3 leading-tight">
                   {banners[activeBanner].headline[lang]}
                 </h2>
-                <p className="text-white/80 text-sm md:text-base mb-5 leading-relaxed">
+                <p className="text-white/85 text-sm md:text-base mb-4 md:mb-5 leading-relaxed">
                   {banners[activeBanner].sub[lang]}
                 </p>
-                <span className="inline-block px-6 py-2.5 bg-white text-gray-900 font-semibold rounded-full text-sm group-hover:bg-gray-100 transition-colors shadow-lg">
+                <span className="inline-block px-5 py-2 md:px-6 md:py-2.5 bg-white text-gray-900 font-semibold rounded-full text-sm group-hover:bg-gray-100 transition-colors shadow-lg">
                   {banners[activeBanner].cta[lang]} →
                 </span>
               </div>
@@ -106,13 +106,13 @@ export default function HomePage() {
           </Link>
 
           {/* Dots */}
-          <div className="flex items-center justify-center gap-2 mt-4">
+          <div className="flex items-center justify-center gap-2 mt-2 md:mt-4">
             {banners.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setActiveBanner(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${
-                  i === activeBanner ? "bg-primary w-8" : "bg-gray-300 hover:bg-gray-400"
+                className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all ${
+                  i === activeBanner ? "bg-primary w-6 md:w-8" : "bg-gray-300 hover:bg-gray-400"
                 }`}
                 aria-label={`Banner ${i + 1}`}
               />
@@ -122,25 +122,26 @@ export default function HomePage() {
       </section>
 
       {/* ===== CATEGORY GRID ===== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-text-primary">{t("categories")}</h2>
-          <Link href="/marketplace" className="text-sm text-primary hover:text-primary-hover font-medium">
+      <section className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8 py-3 md:py-6">
+        <div className="flex items-center justify-between mb-2 md:mb-4 px-1 md:px-0">
+          <h2 className="text-base md:text-lg font-bold text-text-primary">{t("categories")}</h2>
+          <Link href="/marketplace" className="text-xs md:text-sm text-primary hover:text-primary-hover font-medium">
             {t("see.all")} →
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        {/* Mobile: horizontal scroll / Desktop: grid */}
+        <div className="flex md:grid md:grid-cols-4 lg:grid-cols-8 gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-1 md:pb-0">
           {storeCategories.map((cat) => (
             <Link
               key={cat.nameKey}
               href={cat.categoryKey === "all" ? "/marketplace" : `/marketplace?category=${encodeURIComponent(cat.categoryKey)}`}
-              className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${cat.color}`}
+              className={`flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 rounded-xl border transition-all shrink-0 w-[72px] md:w-auto ${cat.color}`}
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${cat.iconBg}`}>
+              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-xl md:text-2xl ${cat.iconBg}`}>
                 {cat.icon}
               </div>
-              <span className="text-xs font-medium text-text-secondary text-center leading-tight">
+              <span className="text-[10px] md:text-xs font-medium text-text-secondary text-center leading-tight">
                 {t(cat.nameKey)}
               </span>
             </Link>
