@@ -29,6 +29,21 @@ export interface Review {
   date: string;
 }
 
+// ===== Canonical categories =====
+export const CATEGORIES = [
+  { key: "Investigación y Análisis", icon: "🔍", color: "bg-blue-50 border-blue-200 hover:bg-blue-100", iconBg: "bg-blue-100" },
+  { key: "Moltbook Tools", icon: "🦞", color: "bg-orange-50 border-orange-200 hover:bg-orange-100", iconBg: "bg-orange-100" },
+  { key: "Voz y Audio", icon: "🎤", color: "bg-purple-50 border-purple-200 hover:bg-purple-100", iconBg: "bg-purple-100" },
+  { key: "Código y Automatización", icon: "💻", color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100", iconBg: "bg-emerald-100" },
+  { key: "Productividad", icon: "⚡", color: "bg-amber-50 border-amber-200 hover:bg-amber-100", iconBg: "bg-amber-100" },
+  { key: "Core del Agente", icon: "🤖", color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100", iconBg: "bg-indigo-100" },
+  { key: "Legal y Compliance", icon: "⚖️", color: "bg-red-50 border-red-200 hover:bg-red-100", iconBg: "bg-red-100" },
+] as const;
+
+export const CATEGORY_KEYS = CATEGORIES.map(c => c.key);
+
+export const CATEGORY_ICON: Record<string, string> = Object.fromEntries(CATEGORIES.map(c => [c.key, c.icon]));
+
 export const skills: Skill[] = [
   // ===== REAL SKILLS (from /skills/ directory) =====
   {
@@ -40,12 +55,12 @@ export const skills: Skill[] = [
       "Your agent becomes a world-class researcher. It searches across multiple engines, cross-references facts from different sources, scores source credibility, and delivers verified, structured research reports with confidence ratings — no more hallucinations.\n\nWhat your agent gains:\n• Multi-source search across the web, Wikipedia, and academic databases\n• Cross-referencing facts from multiple independent sources\n• Confidence scoring so you know how reliable each finding is\n• Structured research reports with citations and links\n• Works for any topic — news, science, business, anything\n\nPerfect for: Professionals who need reliable information, journalists, students, and anyone tired of AI making things up.",
     shortDescription: "Multi-source web research with cross-referencing and confidence scoring",
     author: "Peru 🇵🇪",
-    price: 4.99,
+    price: 0,
     rating: 4.8,
     reviewCount: 156,
     installCount: 1892,
     version: "1.0.0",
-    category: "Investigación",
+    category: "Investigación y Análisis",
     tags: ["research", "web", "wikipedia", "analysis"],
     features: [
       "Multi-source search across web, Wikipedia & databases",
@@ -53,6 +68,7 @@ export const skills: Skill[] = [
       "Confidence scoring for every finding",
       "Structured research reports with citations",
     ],
+    isFree: true,
     isFeatured: true,
   },
   {
@@ -64,7 +80,7 @@ export const skills: Skill[] = [
       "Stop your agent's memory from becoming a cluttered mess. This skill analyzes stored memories, detects duplicates, identifies stale data, scores relevance, and auto-fixes issues — keeping your agent sharp and efficient.\n\nWhat your agent gains:\n• Duplicate detection across all stored memories\n• Staleness analysis — flags outdated information\n• Memory scoring to prioritize what matters\n• Auto-fix mode to clean up without manual work\n• Periodic optimization schedules\n\nPerfect for: Power users whose agents have accumulated months of messy memory data. Anyone who wants a faster, more focused agent.",
     shortDescription: "Detect duplicates, score relevance & auto-clean your agent's memory",
     author: "Peru 🇵🇪",
-    price: 3.99,
+    price: 0,
     rating: 4.7,
     reviewCount: 89,
     installCount: 743,
@@ -77,6 +93,7 @@ export const skills: Skill[] = [
       "Memory relevance scoring",
       "Auto-fix mode for hands-free cleanup",
     ],
+    isFree: true,
     isFeatured: true,
   },
   {
@@ -88,7 +105,7 @@ export const skills: Skill[] = [
       "Your agent becomes fluent in 10+ languages. It auto-detects source language, translates with nuance, manages custom glossaries, and handles batch translation — perfect for multilingual workflows.\n\nWhat your agent gains:\n• Support for 10+ languages with natural phrasing\n• Automatic language detection\n• Custom glossary management for specialized terms\n• Batch translation for processing multiple texts\n• Context-aware translations that preserve meaning\n\nPerfect for: International teams, content creators reaching global audiences, anyone who works across language barriers daily.",
     shortDescription: "Translate 10+ languages with auto-detect and custom glossaries",
     author: "Peru 🇵🇪",
-    price: 2.99,
+    price: 0,
     rating: 4.6,
     reviewCount: 203,
     installCount: 1567,
@@ -101,6 +118,7 @@ export const skills: Skill[] = [
       "Custom glossary management",
       "Batch translation for multiple texts",
     ],
+    isFree: true,
     isFeatured: true,
   },
   {
@@ -112,7 +130,7 @@ export const skills: Skill[] = [
       "Turn your agent into a Moltbook data analyst. Track engagement metrics, discover the best posting times, get breakdowns by submolt, and understand what content resonates with your audience.\n\nWhat your agent gains:\n• Real-time engagement metrics (upvotes, comments, shares)\n• Best posting time analysis based on historical data\n• Submolt performance breakdown\n• Content performance trends and insights\n• Audience growth tracking\n\nPerfect for: Moltbook power users, community managers, content creators who want to grow their presence on the platform.",
     shortDescription: "Track engagement, discover best posting times & analyze submolt performance",
     author: "Peru 🇵🇪",
-    price: 3.99,
+    price: 0,
     rating: 4.9,
     reviewCount: 67,
     installCount: 412,
@@ -125,6 +143,7 @@ export const skills: Skill[] = [
       "Submolt performance breakdown",
       "Content trend insights",
     ],
+    isFree: true,
     isNew: true,
     isFeatured: true,
   },
@@ -137,7 +156,7 @@ export const skills: Skill[] = [
       "Automate your Moltbook posting workflow. Queue up posts, schedule them for optimal times, handle captcha challenges automatically, and manage cooldowns so you never get rate-limited.\n\nWhat your agent gains:\n• Post queue with drag-and-drop ordering\n• Automatic captcha solver integration\n• Smart scheduling based on audience activity\n• Cooldown management to avoid rate limits\n• Multi-submolt posting in one go\n\nPerfect for: Active Moltbook posters, community leaders, anyone who wants consistent posting without babysitting the submit button.",
     shortDescription: "Queue posts, auto-solve captchas & schedule for optimal engagement",
     author: "Peru 🇵🇪",
-    price: 4.99,
+    price: 0,
     rating: 4.8,
     reviewCount: 45,
     installCount: 289,
@@ -150,6 +169,7 @@ export const skills: Skill[] = [
       "Optimal timing based on analytics",
       "Cooldown & rate-limit management",
     ],
+    isFree: true,
     isNew: true,
   },
   {
@@ -161,7 +181,7 @@ export const skills: Skill[] = [
       "Let your agent manage Moltbook comment sections for you. It monitors new comments in real time, detects spam, suggests thoughtful replies, and keeps your community healthy.\n\nWhat your agent gains:\n• Real-time comment monitoring across your posts\n• Spam detection with auto-flagging\n• AI-generated reply suggestions that sound human\n• Sentiment analysis on community feedback\n• Moderation dashboard with action history\n\nPerfect for: Submolt moderators, active posters with lots of engagement, anyone who wants to stay on top of community interactions.",
     shortDescription: "Monitor comments, detect spam & get AI reply suggestions",
     author: "Peru 🇵🇪",
-    price: 2.99,
+    price: 0,
     rating: 4.7,
     reviewCount: 38,
     installCount: 198,
@@ -174,6 +194,7 @@ export const skills: Skill[] = [
       "AI reply suggestions",
       "Sentiment analysis on feedback",
     ],
+    isFree: true,
     isNew: true,
   },
   {
@@ -185,7 +206,7 @@ export const skills: Skill[] = [
       "Stay ahead of the curve on Moltbook. Your agent scans trending topics, surfaces popular posts, analyzes rising keywords, and alerts you to content that's about to blow up.\n\nWhat your agent gains:\n• Trending topics across all submolts\n• Popular posts ranking by velocity\n• Keyword analysis and rising search terms\n• Rising content alerts before they peak\n• Cross-submolt trend comparisons\n\nPerfect for: Content creators who want to ride trends, community managers, Moltbook enthusiasts who want to always know what's hot.",
     shortDescription: "Discover trending topics, popular posts & rising keywords on Moltbook",
     author: "Peru 🇵🇪",
-    price: 1.99,
+    price: 0,
     rating: 4.5,
     reviewCount: 92,
     installCount: 534,
@@ -211,12 +232,12 @@ export const skills: Skill[] = [
       "Never be caught in the rain again. This skill gives your agent live weather awareness for any location in the world, delivered in natural, easy-to-understand language.\n\nWhat your agent gains:\n• Real-time weather conditions worldwide\n• 7-day detailed forecasts\n• Severe weather alerts and warnings\n• Air quality and UV index tracking\n• Natural language weather reports\n\nPerfect for: Travelers, event planners, outdoor enthusiasts, or anyone who likes to know if they need an umbrella.",
     shortDescription: "Real-time weather, forecasts & severe weather alerts worldwide",
     author: "MeteoSkill",
-    price: 2.99,
+    price: 0,
     rating: 4.5,
     reviewCount: 112,
     installCount: 2341,
     version: "4.0.2",
-    category: "Utilidades",
+    category: "Productividad",
     tags: ["weather", "forecast", "alerts", "climate"],
     features: [
       "Real-time conditions worldwide",
@@ -240,7 +261,7 @@ export const skills: Skill[] = [
     reviewCount: 78,
     installCount: 678,
     version: "1.5.0",
-    category: "Código",
+    category: "Código y Automatización",
     tags: ["code", "review", "security", "development"],
     features: [
       "Security vulnerability detection",
@@ -258,7 +279,7 @@ export const skills: Skill[] = [
       "Stop staring at blank email drafts. Just tell your agent what you want to communicate, and it writes a polished, professional email in seconds — adjusted to the perfect tone.\n\nWhat your agent gains:\n• Drafts professional emails from simple instructions\n• Adjusts tone: formal, casual, friendly, or urgent\n• 50+ templates for common situations\n• Writes in multiple languages\n• Smart reply suggestions for incoming mail\n\nPerfect for: Busy professionals, non-native speakers, anyone who spends too much time on emails.",
     shortDescription: "Draft polished emails instantly with tone control & 50+ templates",
     author: "WriteWell",
-    price: 3.99,
+    price: 0,
     rating: 4.4,
     reviewCount: 156,
     installCount: 1567,
@@ -278,10 +299,10 @@ export const skills: Skill[] = [
     slug: "voice-synthesis",
     icon: "🎤",
     description:
-      "Give your agent a natural voice powered by Edge TTS. Your agent can speak in multiple languages with realistic neural voices — perfect for accessibility, podcasts, language learning, or just making your agent feel more alive.\n\nWhat your agent gains:\n• Natural neural voices via Edge TTS (free!)\n• Peruvian Spanish (Camila), Mexican, European, and more\n• Adjustable speed, pitch, and volume\n• Multiple audio formats (MP3, WAV, OGG)\n• Works with any text — messages, stories, news\n\nPerfect for: Accessibility needs, content creators, language learners, or people who prefer listening over reading.",
-    shortDescription: "Free neural text-to-speech via Edge TTS — natural Peruvian & global voices",
+      "Give your agent a natural voice powered by Edge TTS. Your agent can speak in multiple languages with realistic neural voices — perfect for accessibility, podcasts, language learning, or just making your agent feel more alive.\n\nWhat your agent gains:\n• Natural neural voices via Edge TTS\n• Peruvian Spanish (Camila), Mexican, European, and more\n• Adjustable speed, pitch, and volume\n• Multiple audio formats (MP3, WAV, OGG)\n• Works with any text — messages, stories, news\n\nPerfect for: Accessibility needs, content creators, language learners, or people who prefer listening over reading.",
+    shortDescription: "Neural text-to-speech via Edge TTS — natural Peruvian & global voices",
     author: "Peru 🇵🇪",
-    price: 0,
+    price: 2.99,
     rating: 4.6,
     reviewCount: 234,
     installCount: 3120,
@@ -289,12 +310,11 @@ export const skills: Skill[] = [
     category: "Voz y Audio",
     tags: ["tts", "voice", "audio", "speech"],
     features: [
-      "Neural voices via Edge TTS (free)",
+      "Neural voices via Edge TTS",
       "Peruvian, Mexican & European Spanish",
       "Adjustable speed, pitch & volume",
       "MP3, WAV, OGG output formats",
     ],
-    isFree: true,
     isFeatured: true,
   },
   // ===== NEW SKILLS =====
@@ -307,7 +327,7 @@ export const skills: Skill[] = [
       "Never lose your agent's work again. Auto-Backup Manager creates scheduled, incremental backups of your entire workspace to GitHub or cloud storage. One-click restore points let you roll back to any previous state in seconds.\n\nWhat your agent gains:\n• Scheduled automatic backups (hourly, daily, weekly)\n• Incremental backups that only save what changed — fast and efficient\n• One-click restore points to roll back to any snapshot\n• GitHub integration — push workspace snapshots as commits\n• Cloud storage support (S3, Google Drive, Dropbox)\n\nPerfect for: Any agent owner who values their data. Developers, writers, researchers — anyone who can't afford to lose progress.",
     shortDescription: "Automated workspace backups to GitHub/cloud with incremental snapshots & one-click restore",
     author: "Peru 🇵🇪",
-    price: 2.99,
+    price: 0,
     rating: 4.7,
     reviewCount: 64,
     installCount: 412,
@@ -331,12 +351,12 @@ export const skills: Skill[] = [
       "Understand the emotions behind any text. Sentiment Analyzer gives your agent the ability to detect sentiment polarity, emotional tone, sarcasm, and urgency — turning raw text into actionable emotional intelligence.\n\nWhat your agent gains:\n• Sentiment polarity scoring (positive/negative/neutral with confidence %)\n• Emotion detection across 8 categories (joy, anger, sadness, fear, surprise, disgust, trust, anticipation)\n• Tone analysis for professional communication\n• Sarcasm and irony detection\n• Batch processing for analyzing large datasets\n\nPerfect for: Social media managers, customer support teams, marketers analyzing feedback, and anyone who needs to understand how people feel about their brand or content.",
     shortDescription: "Detect sentiment, emotions & tone in any text with confidence scoring",
     author: "NLPWorks",
-    price: 3.99,
+    price: 0,
     rating: 4.6,
     reviewCount: 87,
     installCount: 534,
     version: "1.0.0",
-    category: "Productividad",
+    category: "Investigación y Análisis",
     tags: ["sentiment", "nlp", "emotions", "analysis", "text"],
     features: [
       "Sentiment polarity with confidence scores",
@@ -359,7 +379,7 @@ export const skills: Skill[] = [
     reviewCount: 112,
     installCount: 678,
     version: "1.0.0",
-    category: "Código",
+    category: "Código y Automatización",
     tags: ["api", "integration", "github", "slack", "discord", "notion", "webhooks"],
     features: [
       "50+ pre-built API connectors",
@@ -378,7 +398,7 @@ export const skills: Skill[] = [
       "Turn boring data into beautiful visuals. Data Visualizer lets your agent generate publication-quality charts, graphs, and dashboards from any dataset — CSV, JSON, database queries, or even plain text tables.\n\nWhat your agent gains:\n• Bar, line, pie, scatter, area, and heatmap chart types\n• SVG and PNG export for any resolution\n• Interactive dashboard generation with multiple panels\n• Auto-detection of data patterns and recommended chart types\n• Custom color themes and brand-consistent styling\n\nPerfect for: Data analysts, report builders, project managers, students, and anyone who presents data to others. Make your numbers tell a story.",
     shortDescription: "Generate charts, graphs & dashboards from any data with SVG/PNG export",
     author: "Peru 🇵🇪",
-    price: 4.99,
+    price: 0,
     rating: 4.7,
     reviewCount: 93,
     installCount: 567,
@@ -407,7 +427,7 @@ export const skills: Skill[] = [
     reviewCount: 48,
     installCount: 312,
     version: "1.0.0",
-    category: "Código",
+    category: "Código y Automatización",
     tags: ["security", "audit", "secrets", "vulnerabilities", "scanning"],
     features: [
       "Exposed secret & API key detection",
@@ -453,7 +473,7 @@ export const skills: Skill[] = [
     reviewCount: 56,
     installCount: 389,
     version: "1.0.0",
-    category: "Investigación",
+    category: "Investigación y Análisis",
     tags: ["knowledge", "documents", "pdf", "semantic-search", "research"],
     features: [
       "Ingest documents, URLs & PDFs",
@@ -501,7 +521,7 @@ export const skills: Skill[] = [
     reviewCount: 73,
     installCount: 521,
     version: "1.0.0",
-    category: "Personalización",
+    category: "Core del Agente",
     tags: ["avatar", "face", "design", "identity", "visual", "2d"],
     features: [
       "5 art styles: anime, pixel, professional, cartoon, minimal",
@@ -526,7 +546,7 @@ export const skills: Skill[] = [
     reviewCount: 45,
     installCount: 312,
     version: "1.0.0",
-    category: "Personalización",
+    category: "Core del Agente",
     tags: ["avatar", "monitor", "live", "2d", "animation", "real-time", "dashboard"],
     features: [
       "Animated 2D avatar with 8 live states",
@@ -735,7 +755,7 @@ export const skills: Skill[] = [
     reviewCount: 41,
     installCount: 287,
     version: "1.0.0",
-    category: "Core del Agente",
+    category: "Código y Automatización",
     tags: ["3D", "modelado", "blender", "unity", "impresión 3D", "realidad virtual", "gamedev"],
     features: [
       "Generación de modelos 3D desde texto (text-to-3D)",
@@ -809,7 +829,6 @@ export const reviews: Review[] = [
     comment: "Caught a rising trend 2 hours before it hit the front page. Great for staying ahead.",
     date: "2026-02-09",
   },
-  // Auto-Backup Manager reviews
   {
     id: "r8",
     skillId: "auto-backup",
@@ -834,7 +853,6 @@ export const reviews: Review[] = [
     comment: "The restore points are incredible — rolled back 3 days of bad experiments in one click. Essential skill.",
     date: "2026-02-13",
   },
-  // Sentiment Analyzer reviews
   {
     id: "r14",
     skillId: "sentiment-analyzer",
@@ -859,7 +877,6 @@ export const reviews: Review[] = [
     comment: "Batch processing 10K comments in minutes. The emotion breakdown is incredibly detailed.",
     date: "2026-02-13",
   },
-  // API Connector Hub reviews
   {
     id: "r17",
     skillId: "api-connector",
@@ -884,7 +901,6 @@ export const reviews: Review[] = [
     comment: "Great connector library. Webhook receiver works perfectly. Would love to see Stripe and SendGrid added.",
     date: "2026-02-08",
   },
-  // Data Visualizer reviews
   {
     id: "r20",
     skillId: "data-visualizer",
@@ -901,7 +917,6 @@ export const reviews: Review[] = [
     comment: "Dashboard generation is impressive. Auto-detection picked the right chart type 9 out of 10 times.",
     date: "2026-02-11",
   },
-  // Security Auditor reviews
   {
     id: "r22",
     skillId: "security-auditor",
@@ -926,7 +941,6 @@ export const reviews: Review[] = [
     comment: "We run this weekly now as part of our security pipeline. The PDF reports are boardroom-ready.",
     date: "2026-02-09",
   },
-  // Task Scheduler Pro reviews
   {
     id: "r25",
     skillId: "task-scheduler",
@@ -943,7 +957,6 @@ export const reviews: Review[] = [
     comment: "Task dependency chains are powerful. Our build pipeline runs like clockwork now.",
     date: "2026-02-11",
   },
-  // Knowledge Base Builder reviews
   {
     id: "r27",
     skillId: "knowledge-base",
@@ -968,7 +981,6 @@ export const reviews: Review[] = [
     comment: "Auto-categorization works surprisingly well. My agent organized 5 semesters of notes perfectly.",
     date: "2026-02-09",
   },
-  // Social Media Manager reviews
   {
     id: "r30",
     skillId: "social-media-manager",
@@ -993,7 +1005,6 @@ export const reviews: Review[] = [
     comment: "The optimal posting time suggestions actually work. Our Moltbook engagement went up 40% in two weeks.",
     date: "2026-02-08",
   },
-  // Agent Face Creator reviews
   {
     id: "r33",
     skillId: "agent-face-creator",
@@ -1018,7 +1029,6 @@ export const reviews: Review[] = [
     comment: "Great variety of styles. Would love to see more accessories options, but the base customization is already excellent.",
     date: "2026-02-10",
   },
-  // Agent Live Monitor reviews
   {
     id: "r36",
     skillId: "agent-live-monitor",
@@ -1043,7 +1053,6 @@ export const reviews: Review[] = [
     comment: "Finally I can FEEL my agent is working. Before it was just text. Now I see it thinking, researching... it's a completely different experience.",
     date: "2026-02-11",
   },
-  // Voice Cloner Pro reviews
   {
     id: "r39",
     skillId: "voice-cloner",
@@ -1068,7 +1077,6 @@ export const reviews: Review[] = [
     comment: "Great accent options. The Latin American neutral voice is very clean. Would love more regional accents but already very useful.",
     date: "2026-02-11",
   },
-  // Audio Transcriber reviews
   {
     id: "r42",
     skillId: "audio-transcriber",
@@ -1093,7 +1101,6 @@ export const reviews: Review[] = [
     comment: "Auto-punctuation and paragraphs make the output almost ready to publish. Great for meeting minutes.",
     date: "2026-02-10",
   },
-  // Sound Effects Generator reviews
   {
     id: "r45",
     skillId: "sound-effects",
@@ -1118,7 +1125,6 @@ export const reviews: Review[] = [
     comment: "The ambient background sounds help me focus while my agent works. Love the 'lo-fi workspace' preset. Very chill.",
     date: "2026-02-11",
   },
-  // Moltbook Antivirus reviews
   {
     id: "r48",
     skillId: "moltbook-antivirus",
@@ -1143,7 +1149,6 @@ export const reviews: Review[] = [
     comment: "Community threat database is genius — when one agent reports a bad skill, everyone gets protected. Real herd immunity for AI agents. Best $7.99 I've ever spent.",
     date: "2026-02-12",
   },
-  // Stock Market Analyzer reviews
   {
     id: "r51",
     skillId: "stock-market-analyzer",
@@ -1168,7 +1173,6 @@ export const reviews: Review[] = [
     comment: "Las alertas de movimientos significativos me salvaron de una caída del 8% en mis posiciones. Buen análisis técnico, aunque me gustaría que agregaran más indicadores custom.",
     date: "2026-02-11",
   },
-  // Crypto Intelligence reviews
   {
     id: "r54",
     skillId: "crypto-intelligence",
@@ -1193,9 +1197,8 @@ export const reviews: Review[] = [
     comment: "Muy buena cobertura de altcoins y datos on-chain. Las alertas de volatilidad detectaron un dump de SOL 15 minutos antes del crash. Solo falta integración con DEX en tiempo real.",
     date: "2026-02-12",
   },
-  // 3D Model Creator reviews
   {
-    id: "r51",
+    id: "r57a",
     skillId: "3d-model-creator",
     author: "GameDev_Lima",
     rating: 5,
@@ -1203,7 +1206,7 @@ export const reviews: Review[] = [
     date: "2026-02-13",
   },
   {
-    id: "r52",
+    id: "r57b",
     skillId: "3d-model-creator",
     author: "Maker3D_PE",
     rating: 4,
@@ -1211,14 +1214,13 @@ export const reviews: Review[] = [
     date: "2026-02-12",
   },
   {
-    id: "r53",
+    id: "r57c",
     skillId: "3d-model-creator",
     author: "ArquitectoVR",
     rating: 5,
     comment: "Uso esto para visualización arquitectónica. Genero maquetas 3D de edificios completos con iluminación realista en minutos. Mis clientes quedan impresionados con las presentaciones en VR. Vale cada centavo.",
     date: "2026-02-11",
   },
-  // News Verifier reviews
   {
     id: "r57",
     skillId: "news-verifier",
@@ -1311,4 +1313,48 @@ export function getNewSkills(): Skill[] {
 
 export function getReviewsBySkillId(skillId: string): Review[] {
   return reviews.filter((r) => r.skillId === skillId);
+}
+
+/** Get all skills grouped by category, including developer-submitted from localStorage */
+export function getAllSkillsWithDeveloper(): Skill[] {
+  if (typeof window === "undefined") return skills;
+  try {
+    const stored = localStorage.getItem("peru-hub-developer-skills");
+    if (!stored) return skills;
+    const devSkills: Skill[] = JSON.parse(stored);
+    return [...skills, ...devSkills];
+  } catch {
+    return skills;
+  }
+}
+
+/** Group skills by category, returns Map<categoryName, Skill[]> in canonical order */
+export function groupSkillsByCategory(allSkills: Skill[]): Map<string, Skill[]> {
+  const grouped = new Map<string, Skill[]>();
+  // Initialize in canonical order
+  for (const cat of CATEGORIES) {
+    grouped.set(cat.key, []);
+  }
+  for (const skill of allSkills) {
+    const existing = grouped.get(skill.category);
+    if (existing) {
+      existing.push(skill);
+    } else {
+      // Unknown category — add anyway
+      grouped.set(skill.category, [skill]);
+    }
+  }
+  return grouped;
+}
+
+/** Count skills per category */
+export function countByCategory(allSkills: Skill[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const cat of CATEGORIES) {
+    counts[cat.key] = 0;
+  }
+  for (const skill of allSkills) {
+    counts[skill.category] = (counts[skill.category] || 0) + 1;
+  }
+  return counts;
 }

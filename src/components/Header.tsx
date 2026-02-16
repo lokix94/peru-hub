@@ -248,17 +248,18 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-1 h-11">
             {[
-              { href: "/", label: t("nav.home"), icon: "" },
-              { href: "/marketplace", label: `🛒 ${t("nav.all")}`, icon: "" },
-              { href: "/marketplace#research", label: `🔍 ${t("nav.research")}`, icon: "" },
-              { href: "/marketplace#voice", label: `🎤 ${t("nav.voice")}`, icon: "" },
-              { href: "/marketplace#dev", label: `💻 ${t("nav.code")}`, icon: "" },
-              { href: "/marketplace#productivity", label: `📧 ${t("nav.productivity")}`, icon: "" },
-              { href: "/community", label: `👥 ${t("nav.community")}`, icon: "" },
-              { href: "/developers", label: "🛠️ Developers", icon: "" },
-              { href: "/sugerencias", label: `📬 ${t("nav.suggestions")}`, icon: "" },
+              { href: "/", label: t("nav.home") },
+              { href: "/marketplace", label: `🛒 ${t("nav.all")}` },
+              { href: `/marketplace?category=${encodeURIComponent("Investigación y Análisis")}`, label: `🔍 ${t("nav.research")}` },
+              { href: `/marketplace?category=${encodeURIComponent("Voz y Audio")}`, label: `🎤 ${t("nav.voice")}` },
+              { href: `/marketplace?category=${encodeURIComponent("Código y Automatización")}`, label: `💻 ${t("nav.code")}` },
+              { href: `/marketplace?category=${encodeURIComponent("Productividad")}`, label: `⚡ ${t("nav.productivity")}` },
+              { href: "/community", label: `👥 ${t("nav.community")}` },
+              { href: "/developers", label: "🛠️ Developers" },
+              { href: "/sugerencias", label: `📬 ${t("nav.suggestions")}` },
             ].map((item) => {
-              const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href.split("#")[0]) && item.href !== "/";
+              const basePath = item.href.split("?")[0];
+              const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(basePath) && item.href !== "/";
               return (
                 <Link
                   key={item.href}

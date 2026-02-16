@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import SkillCard from "@/components/SkillCard";
 import AdBanner from "@/components/AdBanner";
-import { skills, getFeaturedSkills, getNewSkills } from "@/data/skills";
+import { skills, getFeaturedSkills, getNewSkills, CATEGORIES } from "@/data/skills";
 import { useLanguage } from "@/context/LanguageContext";
 
 const banners = [
@@ -51,15 +51,25 @@ export default function HomePage() {
   const popular = [...skills].sort((a, b) => b.installCount - a.installCount);
   const free = skills.filter(s => s.price === 0);
 
+  const nameKeyMap: Record<string, string> = {
+    "Investigación y Análisis": "cat.research",
+    "Moltbook Tools": "cat.moltbook",
+    "Voz y Audio": "cat.voice",
+    "Código y Automatización": "cat.code",
+    "Productividad": "cat.productivity",
+    "Core del Agente": "cat.agent.core",
+    "Legal y Compliance": "cat.legal",
+  };
+
   const storeCategories = [
-    { nameKey: "cat.research", icon: "🔍", slug: "Investigación", color: "bg-blue-50 border-blue-200 hover:bg-blue-100", iconBg: "bg-blue-100" },
-    { nameKey: "cat.moltbook", icon: "🦞", slug: "Moltbook Tools", color: "bg-orange-50 border-orange-200 hover:bg-orange-100", iconBg: "bg-orange-100" },
-    { nameKey: "cat.voice", icon: "🎤", slug: "Voz y Audio", color: "bg-purple-50 border-purple-200 hover:bg-purple-100", iconBg: "bg-purple-100" },
-    { nameKey: "cat.legal", icon: "⚖️", slug: "Legal y Compliance", color: "bg-red-50 border-red-200 hover:bg-red-100", iconBg: "bg-red-100" },
-    { nameKey: "cat.code", icon: "💻", slug: "Código", color: "bg-emerald-50 border-emerald-200 hover:bg-emerald-100", iconBg: "bg-emerald-100" },
-    { nameKey: "cat.productivity", icon: "📧", slug: "Productividad", color: "bg-amber-50 border-amber-200 hover:bg-amber-100", iconBg: "bg-amber-100" },
-    { nameKey: "cat.agent.core", icon: "🧠", slug: "Core del Agente", color: "bg-indigo-50 border-indigo-200 hover:bg-indigo-100", iconBg: "bg-indigo-100" },
-    { nameKey: "cat.all", icon: "🛒", slug: "all", color: "bg-gray-50 border-gray-200 hover:bg-gray-100", iconBg: "bg-gray-100" },
+    ...CATEGORIES.map((cat) => ({
+      nameKey: nameKeyMap[cat.key] || cat.key,
+      icon: cat.icon,
+      categoryKey: cat.key,
+      color: cat.color,
+      iconBg: cat.iconBg,
+    })),
+    { nameKey: "cat.all", icon: "🛒", categoryKey: "all", color: "bg-gray-50 border-gray-200 hover:bg-gray-100", iconBg: "bg-gray-100" },
   ];
 
   const howSteps = [
@@ -124,7 +134,7 @@ export default function HomePage() {
           {storeCategories.map((cat) => (
             <Link
               key={cat.nameKey}
-              href={cat.slug === "all" ? "/marketplace" : `/marketplace?cat=${cat.slug}`}
+              href={cat.categoryKey === "all" ? "/marketplace" : `/marketplace?category=${encodeURIComponent(cat.categoryKey)}`}
               className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${cat.color}`}
             >
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${cat.iconBg}`}>
