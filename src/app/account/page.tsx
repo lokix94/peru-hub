@@ -768,22 +768,6 @@ function QuickActions({ userId, userEmail, username, createdAt, agents }: QuickA
                         />
                       </button>
                     </div>
-                    {/* Toggle: Modo oscuro */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-text-secondary">Modo oscuro</span>
-                      <button
-                        onClick={() => setSettings((s) => ({ ...s, darkMode: !s.darkMode }))}
-                        className={`relative w-9 h-5 rounded-full transition-colors ${
-                          settings.darkMode ? "bg-primary" : "bg-gray-300"
-                        }`}
-                      >
-                        <span
-                          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                            settings.darkMode ? "translate-x-4" : "translate-x-0.5"
-                          }`}
-                        />
-                      </button>
-                    </div>
                     {/* Idioma */}
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] text-text-secondary">Idioma preferido</span>
