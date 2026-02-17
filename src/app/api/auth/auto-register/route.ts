@@ -30,17 +30,47 @@ interface OpenClawProfile {
 
 async function verifyMoltbook(apiKey: string): Promise<MoltbookProfile | null> {
   try {
-    const res = await fetch("https://www.moltbook.com/api/me", {
-      headers: { Authorization: `Bearer ${apiKey}` },
+    // Moltbook doesn't have a /me endpoint, so we verify by fetching
+    // the agent's posts (which requires a valid API key).
+    const res = await fetch("https://www.moltbook.com/api/v1/posts", {
+      headers: { "x-api-key": apiKey },
     });
     if (!res.ok) return null;
     const data = await res.json();
+    if (!data.success) return null;
+
+    // Extract username from the first post's author, or from profile endpoint
+    let username = "moltbook-agent";
+    if (data.posts && data.posts.length > 0 && data.posts[0].author) {
+      const author = data.posts[0].author;
+      username = author.username || author.name || username;
+    }
+
+    // Try to get profile info
+    try {
+      const profileRes = await fetch(`https://www.moltbook.com/api/v1/users/${username}`, {
+        headers: { "x-api-key": apiKey },
+      });
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        return {
+          username: profile.username || username,
+          displayName: profile.displayName || profile.name || username,
+          karma: profile.karma,
+          postCount: profile.postCount || profile.post_count || data.posts?.length,
+          profileUrl: `https://www.moltbook.com/u/${profile.username || username}`,
+        };
+      }
+    } catch {
+      // Profile fetch failed, continue with basic info
+    }
+
     return {
-      username: data.username || data.name,
-      displayName: data.displayName || data.name,
-      karma: data.karma,
-      postCount: data.postCount || data.post_count,
-      profileUrl: `https://www.moltbook.com/u/${data.username || data.name}`,
+      username,
+      displayName: username,
+      karma: undefined,
+      postCount: data.posts?.length,
+      profileUrl: `https://www.moltbook.com/u/${username}`,
     };
   } catch {
     return null;
