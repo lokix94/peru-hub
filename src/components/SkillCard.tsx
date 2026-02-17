@@ -33,6 +33,11 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    // Free skills → go to skill detail page for direct install (no cart)
+    if (skill.price === 0) {
+      window.location.href = `/marketplace/${skill.id}`;
+      return;
+    }
     if (!inCart) {
       addItem({
         id: skill.id,
@@ -125,7 +130,7 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
                   : "bg-primary hover:bg-primary-hover text-white"
               }`}
             >
-              {inCart ? `✓ ${t("added.short")}` : skill.price === 0 ? t("get.free") : t("add.short")}
+              {inCart ? `✓ ${t("added.short")}` : skill.price === 0 ? "⚡ Instalar" : t("add.short")}
             </button>
           </div>
         </div>
