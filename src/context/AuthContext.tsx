@@ -77,7 +77,8 @@ interface AuthContextType {
     name: string,
     platform: string,
     apiKey?: string,
-    moltbookData?: MoltbookData
+    moltbookData?: MoltbookData,
+    verified?: boolean
   ) => Promise<{ success: boolean; error?: string }>;
   removeAgent: (id: string) => void;
   updateAgent: (id: string, updates: Partial<AuthAgent>) => void;
@@ -511,7 +512,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: string,
       platform: string,
       apiKey?: string,
-      moltbookData?: MoltbookData
+      moltbookData?: MoltbookData,
+      verified?: boolean
     ): Promise<{ success: boolean; error?: string }> => {
       if (!name.trim()) return { success: false, error: "El nombre es obligatorio" };
       if (!platform) return { success: false, error: "Selecciona una plataforma" };
@@ -520,7 +522,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name: name.trim(),
         platform,
         api_key: apiKey || undefined,
-        verified: !!moltbookData,
+        verified: verified ?? !!moltbookData,
         created_at: new Date().toISOString(),
         moltbook_data: moltbookData || undefined,
       };

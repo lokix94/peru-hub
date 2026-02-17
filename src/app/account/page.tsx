@@ -154,7 +154,8 @@ export default function AccountPage() {
       detectedAgent.name,
       agentPlatform,
       agentApiKey || undefined,
-      moltbookData
+      moltbookData,
+      true // verified — auto-detected
     );
 
     if (!result.success) {
