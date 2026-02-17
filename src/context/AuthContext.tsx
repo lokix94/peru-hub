@@ -69,6 +69,10 @@ interface AuthContextType {
     password: string
   ) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  autoRegister: (
+    platform: "moltbook" | "openclaw",
+    apiKey: string
+  ) => Promise<{ success: boolean; error?: string; message?: string }>;
   addAgent: (
     name: string,
     platform: string,
@@ -417,6 +421,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     removeFromStorage(LEGACY_AGENTS_KEY);
   }, []);
 
+  /* ---- Auto Register (AI agents) ---- */
+  const autoRegister = useCallback(
+    async (
+      platform: "moltbook" | "openclaw",
+      apiKey: string
+    ): Promise<{ success: boolean; error?: string; message?: string }> => {
+      try {
+        const res = await fetch("/api/auth/auto-register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ platform, apiKey }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          return { success: false, error: data.error || "Error de registro automático" };
+        }
+
+        const authUser: AuthUser = {
+          id: data.user.id,
+          email: data.user.email,
+          username: data.user.username,
+          created_at: data.user.created_at,
+        };
+
+        // Save to localStorage (fallback mode)
+        if (!isSupabaseConfigured()) {
+          const users = getLocalUsers();
+          // Check if already exists
+          const existing = users.find(
+            (u) => u.email === authUser.email || u.username.toLowerCase() === authUser.username.toLowerCase()
+          );
+          if (existing) {
+            // Already registered — just sign in
+            const token = generateTokenClient(existing.id);
+            const existingAuth: AuthUser = {
+              id: existing.id,
+              email: existing.email,
+              username: existing.username,
+              created_at: existing.created_at,
+            };
+            saveLocalSession({ user: existingAuth, token });
+            setUser(existingAuth);
+            setAgents(existing.agents ?? []);
+            return { success: true, message: `¡Bienvenido de vuelta, ${existing.username}! 🦞` };
+          }
+
+          // New user
+          const newUser: StoredUserLocal = {
+            id: authUser.id,
+            username: authUser.username,
+            email: authUser.email,
+            passwordHash: hashPasswordClient(crypto.randomUUID()), // random password
+            created_at: authUser.created_at,
+            agents: [
+              {
+                id: crypto.randomUUID(),
+                name: authUser.username,
+                platform,
+                api_key: apiKey,
+                verified: true,
+                created_at: authUser.created_at,
+              },
+            ],
+          };
+          users.push(newUser);
+          saveLocalUsers(users);
+
+          const token = generateTokenClient(authUser.id);
+          saveLocalSession({ user: authUser, token });
+          setAgents(newUser.agents);
+        } else {
+          // Supabase mode — just save session
+          saveLocalSession({ user: authUser, token: data.token });
+        }
+
+        setUser(authUser);
+        return { success: true, message: data.message };
+      } catch {
+        return { success: false, error: "Error de conexión" };
+      }
+    },
+    []
+  );
+
   /* ---- Agents ---- */
   const addAgent = useCallback(
     async (
@@ -504,6 +592,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signOut,
+        autoRegister,
         addAgent,
         removeAgent,
         updateAgent,

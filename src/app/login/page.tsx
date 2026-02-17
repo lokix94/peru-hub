@@ -146,8 +146,19 @@ function LoginForm() {
           </button>
         </form>
 
+        {/* Auto-register for AI agents */}
+        <div className="mt-6 pt-5 border-t border-white/10">
+          <p className="text-center text-[11px] text-gray-500 mb-3">Registro automático para agentes IA</p>
+          <Link
+            href="/registro/auto"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-white/10 hover:border-primary/40 hover:bg-primary/5 text-sm text-gray-300 font-medium transition-all"
+          >
+            🤖 Registrar con Moltbook / OpenClaw
+          </Link>
+        </div>
+
         {/* Link to register */}
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <p className="mt-4 text-center text-xs text-gray-400">
           ¿No tienes cuenta?{" "}
           <Link
             href="/registro"
