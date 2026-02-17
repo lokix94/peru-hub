@@ -7,29 +7,17 @@ import RechargeModal from "@/components/RechargeModal";
 import AdBanner from "@/components/AdBanner";
 import { useAuth, type MoltbookData } from "@/context/AuthContext";
 
-const transactions = [
-  { id: "tx-1", type: "deposit", description: "Recarga de saldo", amount: 20.00, date: "2026-02-12", status: "completed" },
-  { id: "tx-2", type: "purchase", description: "Code Review Assistant", amount: -9.99, date: "2026-02-11", status: "completed" },
-  { id: "tx-3", type: "purchase", description: "Web Research Pro", amount: -4.99, date: "2026-02-10", status: "completed" },
-  { id: "tx-4", type: "earning", description: "Venta: Peruvian Legal Research", amount: 0.00, date: "2026-02-09", status: "completed" },
-  { id: "tx-5", type: "purchase", description: "Email Composer Pro", amount: -3.99, date: "2026-02-08", status: "completed" },
-  { id: "tx-6", type: "deposit", description: "Depósito inicial", amount: 10.00, date: "2026-02-01", status: "completed" },
-];
-
-const installedSkills = [
-  { name: "Peruvian Legal Research", icon: "⚖️", version: "1.0.0", status: "active" },
-  { name: "Voice: Camila Neural", icon: "🎙️", version: "2.1.0", status: "active" },
-  { name: "Web Research Pro", icon: "🌐", version: "3.2.1", status: "active" },
-  { name: "Code Review Assistant", icon: "💻", version: "1.5.0", status: "active" },
-  { name: "Memory Curator", icon: "🧠", version: "1.1.1", status: "active" },
-  { name: "Self Reflection", icon: "🪞", version: "1.1.1", status: "paused" },
-];
+// Transactions and skills are now dynamic — loaded from user state
+// New users start with empty arrays; data populates as they acquire skills
 
 export default function AccountPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading, agents, addAgent, removeAgent, updateAgent, signOut } = useAuth();
 
-  const balance = 9.46;
+  // Dynamic user data — starts empty for new users
+  const [transactions] = useState<{id: string; type: string; description: string; amount: number; date: string; status: string}[]>([]);
+  const [installedSkills] = useState<{name: string; icon: string; version: string; status: string}[]>([]);
+  const balance = 0.00;
   const totalSpent = transactions
     .filter((t) => t.amount < 0)
     .reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -441,33 +429,41 @@ export default function AccountPage() {
           {/* Mis Compras — placeholder */}
           <div className="bg-white rounded-xl border border-border p-5">
             <h2 className="text-base font-bold text-text-primary mb-4">🛒 Mis Compras</h2>
-            <div className="space-y-0">
-              {transactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between py-3 border-b border-border last:border-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      tx.type === "deposit" ? "bg-green-100 text-green-600" :
-                      tx.type === "earning" ? "bg-amber-100 text-amber-600" :
-                      "bg-primary-light text-primary"
+            {transactions.length === 0 ? (
+              <div className="text-center py-8 text-text-muted">
+                <div className="text-3xl mb-2">🛒</div>
+                <p className="text-xs">Aún no tienes compras</p>
+                <p className="text-[10px] mt-1">Explora el <Link href="/marketplace" className="text-primary hover:underline">marketplace</Link> para encontrar skills para tu agente</p>
+              </div>
+            ) : (
+              <div className="space-y-0">
+                {transactions.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="flex items-center justify-between py-3 border-b border-border last:border-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        tx.type === "deposit" ? "bg-green-100 text-green-600" :
+                        tx.type === "earning" ? "bg-amber-100 text-amber-600" :
+                        "bg-primary-light text-primary"
+                      }`}>
+                        {tx.type === "deposit" ? "↑" : tx.type === "earning" ? "★" : "↓"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-text-primary">{tx.description}</p>
+                        <p className="text-[11px] text-text-muted">{tx.date}</p>
+                      </div>
+                    </div>
+                    <span className={`text-sm font-bold ${
+                      tx.amount >= 0 ? "text-green-600" : "text-text-primary"
                     }`}>
-                      {tx.type === "deposit" ? "↑" : tx.type === "earning" ? "★" : "↓"}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">{tx.description}</p>
-                      <p className="text-[11px] text-text-muted">{tx.date}</p>
-                    </div>
+                      {tx.amount >= 0 ? "+" : ""}{tx.amount === 0 ? "Gratis" : `$${tx.amount.toFixed(2)}`}
+                    </span>
                   </div>
-                  <span className={`text-sm font-bold ${
-                    tx.amount >= 0 ? "text-green-600" : "text-text-primary"
-                  }`}>
-                    {tx.amount >= 0 ? "+" : ""}{tx.amount === 0 ? "Gratis" : `$${tx.amount.toFixed(2)}`}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Mis Skills — placeholder */}
@@ -478,26 +474,34 @@ export default function AccountPage() {
                 Administrar →
               </Link>
             </div>
-            <div className="space-y-2.5">
-              {installedSkills.map((skill) => (
-                <div key={skill.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{skill.icon}</span>
-                    <div>
-                      <p className="text-xs font-medium text-text-primary">{skill.name}</p>
-                      <p className="text-[10px] text-text-muted">v{skill.version}</p>
+            {installedSkills.length === 0 ? (
+              <div className="text-center py-8 text-text-muted">
+                <div className="text-3xl mb-2">🧩</div>
+                <p className="text-xs">No tienes skills instalados</p>
+                <p className="text-[10px] mt-1">Adquiere skills en el <Link href="/marketplace" className="text-primary hover:underline">marketplace</Link> y aparecerán aquí</p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {installedSkills.map((skill) => (
+                  <div key={skill.name} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{skill.icon}</span>
+                      <div>
+                        <p className="text-xs font-medium text-text-primary">{skill.name}</p>
+                        <p className="text-[10px] text-text-muted">v{skill.version}</p>
+                      </div>
                     </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                      skill.status === "active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}>
+                      {skill.status === "active" ? "ACTIVO" : "PAUSADO"}
+                    </span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                    skill.status === "active"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-amber-100 text-amber-700"
-                  }`}>
-                    {skill.status === "active" ? "ACTIVO" : "PAUSADO"}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
