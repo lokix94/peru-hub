@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import AdBanner from "@/components/AdBanner";
 import TransactionStatus from "@/components/TransactionStatus";
 
@@ -24,6 +25,7 @@ const installSteps = [
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, totalItems } = useCart();
+  const { agents, isAuthenticated, user } = useAuth();
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [txId, setTxId] = useState("");
@@ -33,11 +35,9 @@ export default function CartPage() {
 
   /* ── Checkout flow state ── */
   const [step, setStep] = useState<CheckoutStep>("cart");
+  const [selectedAgentId, setSelectedAgentId] = useState<string>("");
   const [agentName, setAgentName] = useState("");
-  const [agentApiKey, setAgentApiKey] = useState("");
   const [agentVerified, setAgentVerified] = useState(false);
-  const [agentVerifying, setAgentVerifying] = useState(false);
-  const [agentError, setAgentError] = useState("");
   const [installIndex, setInstallIndex] = useState(0);
   const [installProgress, setInstallProgress] = useState(0);
   const [purchasedItems, setPurchasedItems] = useState<typeof items>([]);
@@ -136,26 +136,14 @@ export default function CartPage() {
     setTxVerifyData({});
   };
 
-  /* ── Agent verification (simulated) ── */
-  const handleVerifyAgent = () => {
-    if (!agentName.trim()) {
-      setAgentError("Ingresa el nombre de tu agente");
-      return;
+  /* ── Agent selection from linked agents ── */
+  const handleSelectAgent = (agentId: string) => {
+    const agent = agents.find((a) => a.id === agentId);
+    if (agent) {
+      setSelectedAgentId(agentId);
+      setAgentName(agent.name);
+      setAgentVerified(true);
     }
-    setAgentError("");
-    setAgentVerifying(true);
-
-    setTimeout(() => {
-      setAgentVerifying(false);
-      if (agentApiKey.trim().startsWith("moltbook_")) {
-        setAgentVerified(true);
-      } else if (agentApiKey.trim().length > 0) {
-        setAgentError("API key inválida. Debe comenzar con 'moltbook_'. También puedes continuar sin verificación.");
-      } else {
-        // No API key = continue without Moltbook verification
-        setAgentVerified(true);
-      }
-    }, 2000);
   };
 
   /* ── Installation animation ── */
@@ -241,7 +229,7 @@ export default function CartPage() {
           <div className="w-12 h-0.5 bg-primary"></div>
           <div className="flex items-center gap-1">
             <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold animate-pulse">2</div>
-            <span className="text-xs text-primary font-semibold">Verificar</span>
+            <span className="text-xs text-primary font-semibold">Agente</span>
           </div>
           <div className="w-12 h-0.5 bg-border"></div>
           <div className="flex items-center gap-1">
@@ -259,61 +247,90 @@ export default function CartPage() {
           {/* Header */}
           <div className="bg-gradient-to-r from-violet-600 to-purple-700 px-6 py-5 text-center">
             <div className="text-4xl mb-2">🤖</div>
-            <h2 className="text-xl font-bold text-white">Verifica tu Agente IA</h2>
-            <p className="text-sm text-white/70 mt-1">Para instalar los skills, necesitamos saber a qué agente enviarlos</p>
+            <h2 className="text-xl font-bold text-white">Selecciona tu Agente IA</h2>
+            <p className="text-sm text-white/70 mt-1">¿A qué agente quieres instalarle los skills?</p>
           </div>
 
           <div className="p-6 space-y-5">
-            {/* Info box */}
-            <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
-              <div className="flex gap-3">
-                <span className="text-xl">ℹ️</span>
-                <div>
-                  <p className="text-sm font-semibold text-blue-800 mb-1">¿Por qué verificar?</p>
-                  <p className="text-xs text-blue-700 leading-relaxed">
-                    La verificación asegura que los skills se instalen correctamente en tu agente.
-                    Los agentes verificados con Moltbook obtienen un <strong>5% de descuento</strong> en futuras compras.
-                  </p>
+            {/* No agents linked */}
+            {(!isAuthenticated || agents.length === 0) && (
+              <div className="text-center py-6">
+                <div className="text-5xl mb-4">🔗</div>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">
+                  {!isAuthenticated ? "Inicia sesión para continuar" : "No tienes agentes vinculados"}
+                </h3>
+                <p className="text-sm text-gray-500 mb-5">
+                  {!isAuthenticated
+                    ? "Necesitas una cuenta para instalar skills en tu agente IA."
+                    : "Primero vincula tu agente IA desde tu cuenta para poder instalarle skills."}
+                </p>
+                <Link
+                  href={!isAuthenticated ? "/login" : "/account"}
+                  className="inline-block px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-sm transition-all"
+                >
+                  {!isAuthenticated ? "Iniciar sesión →" : "Vincular agente →"}
+                </Link>
+              </div>
+            )}
+
+            {/* Agent selection */}
+            {isAuthenticated && agents.length > 0 && (
+              <>
+                <div className="space-y-2">
+                  {agents.map((agent) => {
+                    const isMoltbook = agent.platform === "Moltbook" && agent.moltbook_data;
+                    const isSelected = selectedAgentId === agent.id;
+                    return (
+                      <button
+                        key={agent.id}
+                        onClick={() => handleSelectAgent(agent.id)}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                          isSelected
+                            ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                            : "border-gray-200 hover:border-primary/30 hover:bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
+                            isMoltbook ? "bg-orange-100" : "bg-emerald-100"
+                          }`}>
+                            {isMoltbook ? "🦞" : "🤖"}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-gray-800">{agent.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {agent.platform}
+                              {agent.verified && " • ✅ Verificado"}
+                            </p>
+                            {isMoltbook && agent.moltbook_data && (
+                              <p className="text-[10px] text-gray-400 mt-0.5">
+                                {agent.moltbook_data.post_count} posts · {agent.moltbook_data.karma} karma
+                              </p>
+                            )}
+                          </div>
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                            isSelected ? "border-primary bg-primary" : "border-gray-300"
+                          }`}>
+                            {isSelected && (
+                              <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
-            </div>
 
-            {/* Agent Name */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Nombre de tu agente <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Ej: ResearchBot, Clawd, Mi Asistente..."
-                value={agentName}
-                onChange={(e) => { setAgentName(e.target.value); setAgentError(""); }}
-                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all"
-              />
-            </div>
-
-            {/* Moltbook API Key (optional) */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                API Key de Moltbook <span className="text-xs text-gray-400 font-normal">(opcional — para verificación premium)</span>
-              </label>
-              <input
-                type="password"
-                placeholder="moltbook_sk_..."
-                value={agentApiKey}
-                onChange={(e) => { setAgentApiKey(e.target.value); setAgentError(""); }}
-                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 text-sm placeholder:text-gray-400 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all font-mono"
-              />
-              <p className="text-[11px] text-gray-400 mt-1">
-                Los agentes de Moltbook reciben badge verificado ✅ y 5% de descuento
-              </p>
-            </div>
-
-            {/* Error */}
-            {agentError && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200">
-                <p className="text-xs text-red-600 font-medium">⚠️ {agentError}</p>
-              </div>
+                {/* Link to add more agents */}
+                <Link
+                  href="/account"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-dashed border-gray-300 text-xs text-gray-500 hover:border-primary/40 hover:text-primary transition-all"
+                >
+                  + Vincular otro agente
+                </Link>
+              </>
             )}
 
             {/* Skills to install */}
@@ -333,37 +350,15 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Buttons */}
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={handleVerifyAgent}
-                disabled={agentVerifying}
-                className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800 text-white font-bold text-sm transition-all duration-300 shadow-lg shadow-violet-500/25 disabled:opacity-60 disabled:cursor-wait"
-              >
-                {agentVerifying ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Verificando agente...
-                  </span>
-                ) : agentVerified ? (
-                  "✅ Agente verificado — Continuar"
-                ) : (
-                  "🔍 Verificar y continuar"
-                )}
-              </button>
-            </div>
-
+            {/* Install button */}
             {agentVerified && (
               <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-center">
                 <p className="text-sm text-green-700 font-semibold">
-                  ✅ Agente &quot;{agentName}&quot; {agentApiKey.startsWith("moltbook_") ? "verificado con Moltbook" : "registrado"}
+                  ✅ Instalando en: <strong>{agentName}</strong>
                 </p>
                 <button
                   onClick={handleStartInstall}
-                  className="mt-3 px-8 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition-all shadow-lg shadow-green-500/25"
+                  className="mt-3 w-full py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm transition-all shadow-lg shadow-green-500/25"
                 >
                   📦 Iniciar Instalación
                 </button>
@@ -523,7 +518,7 @@ export default function CartPage() {
                 <div>
                   <p className="text-sm font-bold text-green-800">Agente: {agentName}</p>
                   <p className="text-xs text-green-600">
-                    {agentApiKey.startsWith("moltbook_") ? "✅ Verificado con Moltbook" : "Registrado en Langosta Hub"}
+                    {agents.find(a => a.id === selectedAgentId)?.verified ? "✅ Verificado" : "Registrado en Langosta Hub"}
                   </p>
                 </div>
               </div>
