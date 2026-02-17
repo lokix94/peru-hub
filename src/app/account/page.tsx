@@ -26,16 +26,22 @@ export default function AccountPage() {
 
   // Agent form state
   const [showAgentForm, setShowAgentForm] = useState(false);
-  const [agentName, setAgentName] = useState("");
   const [agentPlatform, setAgentPlatform] = useState("");
   const [agentApiKey, setAgentApiKey] = useState("");
   const [agentError, setAgentError] = useState("");
+  const [agentLoading, setAgentLoading] = useState(false);
 
-  // Moltbook verification state
-  const [moltbookVerifying, setMoltbookVerifying] = useState(false);
-  const [moltbookVerified, setMoltbookVerified] = useState(false);
-  const [moltbookData, setMoltbookData] = useState<MoltbookData | null>(null);
-  const [moltbookError, setMoltbookError] = useState("");
+  // Auto-detected agent info
+  const [detectedAgent, setDetectedAgent] = useState<{
+    name: string;
+    displayName?: string;
+    postCount?: number;
+    karma?: number;
+    lastActive?: string;
+    profileUrl?: string;
+    description?: string;
+  } | null>(null);
+
   const [refreshingAgentId, setRefreshingAgentId] = useState<string | null>(null);
 
   // Redirect to login if not authenticated
@@ -66,43 +72,101 @@ export default function AccountPage() {
     day: "numeric",
   });
 
-  async function verifyMoltbook() {
-    if (!agentName.trim()) {
-      setMoltbookError("Ingresa un nombre de usuario");
+  // Auto-detect agent from API key
+  async function detectAgent() {
+    if (!agentApiKey.trim()) {
+      setAgentError("Ingresa la API key o token de tu agente");
       return;
     }
-    setMoltbookVerifying(true);
-    setMoltbookError("");
-    setMoltbookVerified(false);
-    setMoltbookData(null);
+    if (!agentPlatform) {
+      setAgentError("Selecciona una plataforma");
+      return;
+    }
+
+    setAgentError("");
+    setAgentLoading(true);
+    setDetectedAgent(null);
 
     try {
-      const res = await fetch("/api/verify-moltbook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: agentName.trim(), apiKey: agentApiKey || undefined }),
-      });
-      const data = await res.json();
-
-      if (data.verified && data.agent) {
-        const md: MoltbookData = {
-          moltbook_id: data.agent.id,
-          moltbook_name: data.agent.name,
-          post_count: data.agent.postCount,
-          karma: data.agent.karma,
-          last_active: data.agent.lastActive,
-          profile_url: `https://moltbook.com/u/${data.agent.name}`,
-        };
-        setMoltbookData(md);
-        setMoltbookVerified(true);
+      if (agentPlatform === "Moltbook") {
+        const res = await fetch("/api/verify-moltbook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ apiKey: agentApiKey.trim() }),
+        });
+        const data = await res.json();
+        if (data.verified && data.agent) {
+          setDetectedAgent({
+            name: data.agent.name,
+            displayName: data.agent.displayName,
+            postCount: data.agent.postCount,
+            karma: data.agent.karma,
+            lastActive: data.agent.lastActive,
+            profileUrl: data.agent.profileUrl,
+            description: data.agent.description,
+          });
+        } else {
+          setAgentError(data.error || "No se pudo verificar el agente");
+        }
+      } else if (agentPlatform === "OpenClaw") {
+        // For OpenClaw, try to decode the token
+        try {
+          const decoded = JSON.parse(atob(agentApiKey.trim()));
+          setDetectedAgent({
+            name: decoded.name || decoded.agentId || decoded.id || "openclaw-agent",
+            description: `Agent ID: ${decoded.agentId || decoded.id || "unknown"}`,
+          });
+        } catch {
+          // Treat key as agent ID
+          setDetectedAgent({
+            name: `openclaw-${agentApiKey.trim().slice(0, 8)}`,
+            description: "Agente OpenClaw detectado",
+          });
+        }
       } else {
-        setMoltbookError(data.error || "Agente no encontrado en Moltbook");
+        setAgentError("Plataforma no soportada para detección automática");
       }
     } catch {
-      setMoltbookError("Error de conexión al verificar");
+      setAgentError("Error de conexión al verificar");
     } finally {
-      setMoltbookVerifying(false);
+      setAgentLoading(false);
     }
+  }
+
+  // Confirm and add the detected agent
+  async function handleConfirmAgent() {
+    if (!detectedAgent) return;
+    setAgentError("");
+
+    const moltbookData: MoltbookData | undefined =
+      agentPlatform === "Moltbook"
+        ? {
+            moltbook_id: detectedAgent.name,
+            moltbook_name: detectedAgent.name,
+            post_count: detectedAgent.postCount ?? 0,
+            karma: detectedAgent.karma ?? 0,
+            last_active: detectedAgent.lastActive || new Date().toISOString(),
+            profile_url: detectedAgent.profileUrl || `https://www.moltbook.com/u/${detectedAgent.name}`,
+          }
+        : undefined;
+
+    const result = await addAgent(
+      detectedAgent.name,
+      agentPlatform,
+      agentApiKey || undefined,
+      moltbookData
+    );
+
+    if (!result.success) {
+      setAgentError(result.error ?? "Error al agregar agente");
+      return;
+    }
+
+    // Reset form
+    setAgentPlatform("");
+    setAgentApiKey("");
+    setDetectedAgent(null);
+    setShowAgentForm(false);
   }
 
   async function refreshMoltbookAgent(agentId: string, agentNameToVerify: string) {
@@ -123,7 +187,7 @@ export default function AccountPage() {
             post_count: data.agent.postCount,
             karma: data.agent.karma,
             last_active: data.agent.lastActive,
-            profile_url: `https://moltbook.com/u/${data.agent.name}`,
+            profile_url: data.agent.profileUrl || `https://www.moltbook.com/u/${data.agent.name}`,
           },
         });
       }
@@ -132,35 +196,6 @@ export default function AccountPage() {
     } finally {
       setRefreshingAgentId(null);
     }
-  }
-
-  async function handleAddAgent(e: React.FormEvent) {
-    e.preventDefault();
-    setAgentError("");
-
-    // For Moltbook platform, require verification first
-    if (agentPlatform === "Moltbook" && !moltbookVerified) {
-      setAgentError("Primero verifica tu agente en Moltbook");
-      return;
-    }
-
-    const result = await addAgent(
-      agentName,
-      agentPlatform,
-      agentApiKey || undefined,
-      agentPlatform === "Moltbook" && moltbookData ? moltbookData : undefined
-    );
-    if (!result.success) {
-      setAgentError(result.error ?? "Error al agregar agente");
-      return;
-    }
-    setAgentName("");
-    setAgentPlatform("");
-    setAgentApiKey("");
-    setMoltbookVerified(false);
-    setMoltbookData(null);
-    setMoltbookError("");
-    setShowAgentForm(false);
   }
 
   return (
@@ -216,120 +251,138 @@ export default function AccountPage() {
               </button>
             </div>
 
-            {/* Agent form */}
+            {/* Agent form — simplified auto-detect */}
             {showAgentForm && (
-              <form onSubmit={handleAddAgent} className="mb-4 p-4 rounded-xl bg-gray-50 border border-border space-y-3">
+              <div className="mb-4 p-4 rounded-xl bg-gray-50 border border-border space-y-3">
+                {/* Step 1: Platform */}
                 <div>
-                  <label className="block text-[11px] text-text-muted mb-1 font-medium">Plataforma</label>
-                  <select
-                    value={agentPlatform}
-                    onChange={(e) => {
-                      setAgentPlatform(e.target.value);
-                      setMoltbookVerified(false);
-                      setMoltbookData(null);
-                      setMoltbookError("");
-                      setAgentError("");
-                    }}
-                    className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs focus:outline-none focus:border-primary/50"
-                  >
-                    <option value="">Seleccionar plataforma...</option>
-                    <option value="OpenClaw">OpenClaw</option>
-                    <option value="Moltbook">Moltbook</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[11px] text-text-muted mb-1 font-medium">
-                    {agentPlatform === "Moltbook" ? "Nombre de usuario en Moltbook" : "Nombre del agente"}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={agentPlatform === "Moltbook" ? "ej: Peru, eudaemon_0..." : "Mi Agente IA"}
-                    value={agentName}
-                    onChange={(e) => {
-                      setAgentName(e.target.value);
-                      if (agentPlatform === "Moltbook") {
-                        setMoltbookVerified(false);
-                        setMoltbookData(null);
-                        setMoltbookError("");
-                      }
-                    }}
-                    className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs placeholder:text-text-muted focus:outline-none focus:border-primary/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] text-text-muted mb-1 font-medium">
-                    API Key (opcional)
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="sk-..."
-                    value={agentApiKey}
-                    onChange={(e) => setAgentApiKey(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
-                  />
+                  <label className="block text-[11px] text-text-muted mb-1 font-medium">1. Selecciona la plataforma de tu agente</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: "Moltbook", icon: "🦞", label: "Moltbook" },
+                      { id: "OpenClaw", icon: "🤖", label: "OpenClaw" },
+                    ].map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => {
+                          setAgentPlatform(p.id);
+                          setDetectedAgent(null);
+                          setAgentError("");
+                        }}
+                        className={`flex items-center justify-center gap-2 py-3 rounded-lg border text-xs font-semibold transition-all ${
+                          agentPlatform === p.id
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-white text-text-secondary hover:bg-gray-100"
+                        }`}
+                      >
+                        <span className="text-lg">{p.icon}</span>
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Moltbook verify button */}
-                {agentPlatform === "Moltbook" && !moltbookVerified && (
+                {/* Step 2: API Key */}
+                {agentPlatform && (
+                  <div>
+                    <label className="block text-[11px] text-text-muted mb-1 font-medium">
+                      2. Ingresa la API Key de tu agente
+                    </label>
+                    <input
+                      type="password"
+                      placeholder={agentPlatform === "Moltbook" ? "moltbook_sk_..." : "Token o Agent ID..."}
+                      value={agentApiKey}
+                      onChange={(e) => {
+                        setAgentApiKey(e.target.value);
+                        setDetectedAgent(null);
+                        setAgentError("");
+                      }}
+                      className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs font-mono placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                    />
+                    <p className="mt-1 text-[10px] text-text-muted">
+                      {agentPlatform === "Moltbook"
+                        ? "💡 Tu agente la tiene en su configuración de Moltbook"
+                        : "💡 Ejecuta 'openclaw status' en tu agente para obtener el token"}
+                    </p>
+                  </div>
+                )}
+
+                {/* Detect button */}
+                {agentPlatform && agentApiKey.trim() && !detectedAgent && (
                   <button
                     type="button"
-                    onClick={verifyMoltbook}
-                    disabled={moltbookVerifying || !agentName.trim()}
-                    className="w-full py-2 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+                    onClick={detectAgent}
+                    disabled={agentLoading}
+                    className="w-full py-2.5 rounded-lg bg-primary hover:bg-primary-hover disabled:bg-primary/50 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                   >
-                    {moltbookVerifying ? (
+                    {agentLoading ? (
                       <>
                         <span className="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Verificando en Moltbook...
+                        Detectando agente...
                       </>
                     ) : (
-                      "Verificar en Moltbook 🦞"
+                      <>🔍 Detectar agente automáticamente</>
                     )}
                   </button>
                 )}
 
-                {/* Moltbook verification error */}
-                {moltbookError && (
-                  <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-                    <p className="text-[11px] text-red-600 font-medium">❌ {moltbookError}</p>
-                  </div>
-                )}
-
-                {/* Moltbook verification success */}
-                {moltbookVerified && moltbookData && (
-                  <div className="p-3 rounded-lg bg-green-50 border border-green-200 space-y-1.5">
-                    <p className="text-[11px] text-green-700 font-bold flex items-center gap-1">
-                      ✅ Agente verificado en Moltbook
-                    </p>
-                    <div className="grid grid-cols-2 gap-1 text-[10px] text-green-800">
-                      <span>🦞 Nombre: <strong>{moltbookData.moltbook_name}</strong></span>
-                      <span>📝 Posts: <strong>{moltbookData.post_count}</strong></span>
-                      <span>⬆️ Karma: <strong>{moltbookData.karma}</strong></span>
-                      <span>🕐 Último: <strong>{new Date(moltbookData.last_active).toLocaleDateString("es-PE")}</strong></span>
-                    </div>
-                    <a
-                      href={moltbookData.profile_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block text-[10px] text-green-600 hover:text-green-800 underline"
-                    >
-                      Ver perfil en Moltbook →
-                    </a>
-                  </div>
-                )}
-
+                {/* Error */}
                 {agentError && (
-                  <p className="text-[11px] text-red-500">{agentError}</p>
+                  <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                    <p className="text-[11px] text-red-600 font-medium">❌ {agentError}</p>
+                  </div>
                 )}
-                <button
-                  type="submit"
-                  disabled={agentPlatform === "Moltbook" && !moltbookVerified}
-                  className="w-full py-2 rounded-lg bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
-                >
-                  {agentPlatform === "Moltbook" ? "Registrar Agente Moltbook 🦞" : "Registrar Agente"}
-                </button>
-              </form>
+
+                {/* Detected agent — confirm */}
+                {detectedAgent && (
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-lg bg-green-50 border border-green-200 space-y-2">
+                      <p className="text-[11px] text-green-700 font-bold flex items-center gap-1">
+                        ✅ ¡Agente detectado!
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-xl">
+                          {agentPlatform === "Moltbook" ? "🦞" : "🤖"}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-green-900">{detectedAgent.displayName || detectedAgent.name}</p>
+                          {detectedAgent.description && (
+                            <p className="text-[10px] text-green-700 mt-0.5">{detectedAgent.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      {agentPlatform === "Moltbook" && (
+                        <div className="grid grid-cols-2 gap-1 text-[10px] text-green-800 pt-1">
+                          <span>📝 Posts: <strong>{detectedAgent.postCount ?? 0}</strong></span>
+                          <span>⬆️ Karma: <strong>{detectedAgent.karma ?? 0}</strong></span>
+                          {detectedAgent.lastActive && (
+                            <span>🕐 Activo: <strong>{new Date(detectedAgent.lastActive).toLocaleDateString("es-PE")}</strong></span>
+                          )}
+                          {detectedAgent.profileUrl && (
+                            <a
+                              href={detectedAgent.profileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-green-600 hover:text-green-800 underline"
+                            >
+                              Ver perfil →
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleConfirmAgent}
+                      className="w-full py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-bold transition-colors"
+                    >
+                      ✓ Confirmar y vincular agente
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Agent list */}
