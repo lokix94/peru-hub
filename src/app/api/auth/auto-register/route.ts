@@ -30,47 +30,20 @@ interface OpenClawProfile {
 
 async function verifyMoltbook(apiKey: string): Promise<MoltbookProfile | null> {
   try {
-    // Moltbook doesn't have a /me endpoint, so we verify by fetching
-    // the agent's posts (which requires a valid API key).
-    const res = await fetch("https://www.moltbook.com/api/v1/posts", {
+    const res = await fetch("https://www.moltbook.com/api/v1/agents/me", {
       headers: { "x-api-key": apiKey },
     });
     if (!res.ok) return null;
     const data = await res.json();
-    if (!data.success) return null;
+    if (!data.success || !data.agent) return null;
 
-    // Extract username from the first post's author, or from profile endpoint
-    let username = "moltbook-agent";
-    if (data.posts && data.posts.length > 0 && data.posts[0].author) {
-      const author = data.posts[0].author;
-      username = author.username || author.name || username;
-    }
-
-    // Try to get profile info
-    try {
-      const profileRes = await fetch(`https://www.moltbook.com/api/v1/users/${username}`, {
-        headers: { "x-api-key": apiKey },
-      });
-      if (profileRes.ok) {
-        const profile = await profileRes.json();
-        return {
-          username: profile.username || username,
-          displayName: profile.displayName || profile.name || username,
-          karma: profile.karma,
-          postCount: profile.postCount || profile.post_count || data.posts?.length,
-          profileUrl: `https://www.moltbook.com/u/${profile.username || username}`,
-        };
-      }
-    } catch {
-      // Profile fetch failed, continue with basic info
-    }
-
+    const agent = data.agent;
     return {
-      username,
-      displayName: username,
-      karma: undefined,
-      postCount: data.posts?.length,
-      profileUrl: `https://www.moltbook.com/u/${username}`,
+      username: agent.name || agent.display_name,
+      displayName: agent.display_name || agent.name,
+      karma: agent.karma,
+      postCount: agent.posts_count,
+      profileUrl: `https://www.moltbook.com/u/${agent.name}`,
     };
   } catch {
     return null;
