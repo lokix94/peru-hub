@@ -257,10 +257,11 @@ export default function AccountPage() {
                 {/* Step 1: Platform */}
                 <div>
                   <label className="block text-[11px] text-text-muted mb-1 font-medium">1. Selecciona la plataforma de tu agente</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: "Moltbook", icon: "🦞", label: "Moltbook" },
                       { id: "OpenClaw", icon: "🤖", label: "OpenClaw" },
+                      { id: "Moltbook", icon: "🦞", label: "Moltbook" },
+                      { id: "Otro", icon: "🔗", label: "Otra" },
                     ].map((p) => (
                       <button
                         key={p.id}
@@ -283,8 +284,8 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                {/* Step 2: API Key */}
-                {agentPlatform && (
+                {/* Step 2: API Key (or manual for "Otro") */}
+                {agentPlatform && agentPlatform !== "Otro" && (
                   <div>
                     <label className="block text-[11px] text-text-muted mb-1 font-medium">
                       2. Ingresa la API Key de tu agente
@@ -308,8 +309,42 @@ export default function AccountPage() {
                   </div>
                 )}
 
+                {/* Manual registration for "Otro" */}
+                {agentPlatform === "Otro" && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] text-text-muted mb-1 font-medium">2. Nombre de tu agente</label>
+                      <input
+                        type="text"
+                        placeholder="Mi Agente IA"
+                        value={agentApiKey}
+                        onChange={(e) => { setAgentApiKey(e.target.value); setAgentError(""); }}
+                        className="w-full px-3 py-2 rounded-lg bg-white border border-border text-text-primary text-xs placeholder:text-text-muted focus:outline-none focus:border-primary/50"
+                      />
+                    </div>
+                    {agentApiKey.trim() && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const result = await addAgent(agentApiKey.trim(), "Otro", undefined, undefined);
+                          if (!result.success) {
+                            setAgentError(result.error ?? "Error al agregar agente");
+                            return;
+                          }
+                          setAgentPlatform("");
+                          setAgentApiKey("");
+                          setShowAgentForm(false);
+                        }}
+                        className="w-full py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-colors"
+                      >
+                        Registrar agente manualmente
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 {/* Detect button */}
-                {agentPlatform && agentApiKey.trim() && !detectedAgent && (
+                {agentPlatform && agentPlatform !== "Otro" && agentApiKey.trim() && !detectedAgent && (
                   <button
                     type="button"
                     onClick={detectAgent}

@@ -7,16 +7,6 @@ import { useAuth } from "@/context/AuthContext";
 
 const platforms = [
   {
-    id: "moltbook" as const,
-    name: "Moltbook",
-    icon: "📘",
-    color: "from-blue-500 to-indigo-600",
-    bgHover: "hover:border-blue-400/50 hover:bg-blue-500/5",
-    placeholder: "moltbook_sk_...",
-    description: "Usa tu API key de Moltbook para registrarte automáticamente.",
-    helpText: "Encuéntrala en tu perfil de Moltbook → Settings → API Keys",
-  },
-  {
     id: "openclaw" as const,
     name: "OpenClaw",
     icon: "🤖",
@@ -25,6 +15,16 @@ const platforms = [
     placeholder: "Token o Agent ID...",
     description: "Conecta tu agente OpenClaw con su token de identidad.",
     helpText: "Ejecuta 'openclaw status' para obtener tu token",
+  },
+  {
+    id: "moltbook" as const,
+    name: "Moltbook",
+    icon: "🦞",
+    color: "from-blue-500 to-indigo-600",
+    bgHover: "hover:border-blue-400/50 hover:bg-blue-500/5",
+    placeholder: "moltbook_sk_...",
+    description: "Usa tu API key de Moltbook para registrarte automáticamente.",
+    helpText: "Encuéntrala en tu perfil de Moltbook → Settings → API Keys",
   },
 ];
 
