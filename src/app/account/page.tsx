@@ -653,6 +653,144 @@ export default function AccountPage() {
         </button>
       </div>
 
+      {/* ===== REGISTRO DE ACTIVIDAD ===== */}
+      <div className="mt-6 bg-white rounded-xl border border-border p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-bold text-text-primary">📋 Registro de Actividad</h2>
+          <span className="text-[10px] text-text-muted bg-gray-100 px-2 py-0.5 rounded-full">
+            {agents.length + transactions.length + installedSkills.length} eventos
+          </span>
+        </div>
+
+        {/* Activity log */}
+        {(() => {
+          // Build unified timeline from agents, skills, and transactions
+          type LogEntry = {
+            id: string;
+            icon: string;
+            title: string;
+            subtitle: string;
+            date: string;
+            type: "agent" | "skill" | "transaction" | "account";
+            color: string;
+          };
+
+          const log: LogEntry[] = [];
+
+          // Account creation
+          log.push({
+            id: "account-created",
+            icon: "👤",
+            title: "Cuenta creada",
+            subtitle: `${user.username} se registró en Langosta Hub`,
+            date: user.created_at,
+            type: "account",
+            color: "bg-blue-100 text-blue-700",
+          });
+
+          // Agent registrations
+          agents.forEach((agent) => {
+            const isMoltbook = agent.platform === "Moltbook";
+            log.push({
+              id: `agent-${agent.id}`,
+              icon: isMoltbook ? "🦞" : "🤖",
+              title: `Agente vinculado: ${agent.name}`,
+              subtitle: `Plataforma: ${agent.platform} ${agent.verified ? "• ✅ Verificado" : "• ⏳ Pendiente"}`,
+              date: agent.created_at,
+              type: "agent",
+              color: isMoltbook ? "bg-orange-100 text-orange-700" : "bg-emerald-100 text-emerald-700",
+            });
+          });
+
+          // Skill installations
+          installedSkills.forEach((skill) => {
+            const targetAgent = agents.find((a) => a.id === (skill as any).agent_id);
+            log.push({
+              id: `skill-${skill.name}-${skill.version}`,
+              icon: skill.icon,
+              title: `Skill instalado: ${skill.name}`,
+              subtitle: targetAgent
+                ? `Instalado en ${targetAgent.name} (${targetAgent.platform})`
+                : `Estado: ${skill.status === "active" ? "✅ Activo" : "⏸️ Pausado"}`,
+              date: (skill as any).installed_at || user.created_at,
+              type: "skill",
+              color: "bg-violet-100 text-violet-700",
+            });
+          });
+
+          // Transactions
+          transactions.forEach((tx) => {
+            log.push({
+              id: `tx-${tx.id}`,
+              icon: tx.type === "deposit" ? "💰" : tx.type === "earning" ? "⭐" : "🛒",
+              title: tx.description,
+              subtitle: `${tx.amount >= 0 ? "+" : ""}${tx.amount === 0 ? "Gratis" : `$${Math.abs(tx.amount).toFixed(2)}`} • ${tx.status === "completed" ? "✅ Completado" : "⏳ Pendiente"}`,
+              date: tx.date || user.created_at,
+              type: "transaction",
+              color: tx.amount >= 0 ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700",
+            });
+          });
+
+          // Sort by date (newest first)
+          log.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+          if (log.length === 0) {
+            return (
+              <div className="text-center py-8 text-text-muted">
+                <div className="text-3xl mb-2">📋</div>
+                <p className="text-xs">Aún no hay actividad registrada</p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-gray-200" />
+
+              <div className="space-y-0">
+                {log.map((entry, i) => (
+                  <div key={entry.id} className="relative flex items-start gap-3 py-3 group">
+                    {/* Timeline dot */}
+                    <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 ${entry.color} transition-transform group-hover:scale-110`}>
+                      {entry.icon}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-text-primary leading-tight">{entry.title}</p>
+                      <p className="text-[11px] text-text-muted mt-0.5">{entry.subtitle}</p>
+                    </div>
+
+                    {/* Timestamp */}
+                    <div className="text-right shrink-0">
+                      <p className="text-[10px] text-text-muted">
+                        {new Date(entry.date).toLocaleDateString("es-PE", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p className="text-[9px] text-text-muted">
+                        {new Date(entry.date).toLocaleTimeString("es-PE", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+
+                    {/* Separator */}
+                    {i < log.length - 1 && (
+                      <div className="absolute bottom-0 left-12 right-0 h-px bg-gray-100" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
       {/* Ad Banner */}
       <AdBanner variant="light" className="mt-6 mb-4" />
 
