@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import AdBanner from "@/components/AdBanner";
+
 import TransactionStatus from "@/components/TransactionStatus";
 
 type CheckoutStep = "cart" | "payment" | "verify-agent" | "installing" | "complete";
@@ -970,8 +970,6 @@ export default function CartPage() {
         </div>
       </div>
 
-      {/* Ad Banner */}
-      <AdBanner variant="light" className="mt-8 mb-4" />
     </div>
   );
 }

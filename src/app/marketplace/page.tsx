@@ -4,7 +4,6 @@ import { Suspense, useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import SkillCard from "@/components/SkillCard";
-import AdBanner from "@/components/AdBanner";
 import {
   skills as builtInSkills,
   CATEGORIES,
@@ -230,11 +229,6 @@ function MarketplaceContent() {
           </div>
         </section>
       )}
-
-      {/* ===== AD BANNER — Marketplace ===== */}
-      <div className="mb-6">
-        <AdBanner variant="light" />
-      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar filters */}

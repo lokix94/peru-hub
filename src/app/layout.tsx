@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import AdSidebar from "@/components/AdSidebar";
 import InstallPrompt from "@/components/InstallPrompt";
 import LiveChat from "@/components/LiveChat";
 import { CartProvider } from "@/context/CartContext";
@@ -129,12 +128,9 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               <Header />
-              <div className="flex flex-1">
-                <AdSidebar />
-                <main className="flex-1 min-w-0">
-                  {children}
-                </main>
-              </div>
+              <main className="flex-1 min-w-0">
+                {children}
+              </main>
               <Footer />
               <InstallPrompt />
               <LiveChat />

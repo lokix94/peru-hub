@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, FormEvent } from "react";
 import SkillTester from "./SkillTester";
-import AdBanner from "@/components/AdBanner";
+
 import SkillReviewQueue from "./SkillReviewQueue";
 
 /* ───────────────────────────── Types ───────────────────────────── */
@@ -493,9 +493,6 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             </div>
           </div>
         </div>
-
-        {/* Ad Banner */}
-        <AdBanner variant="dark" className="mt-4" />
 
         {/* Footer */}
         <div className="text-center py-4">

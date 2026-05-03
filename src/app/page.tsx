@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import SkillCard from "@/components/SkillCard";
-import AdBanner from "@/components/AdBanner";
-import AdSidebar from "@/components/AdSidebar";
 import { skills, getFeaturedSkills, getNewSkills, CATEGORIES } from "@/data/skills";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -81,12 +79,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="flex max-w-[1440px] mx-auto">
-        {/* ===== AD SIDEBAR — Left ===== */}
-        <AdSidebar className="sticky top-24 self-start pt-6 pl-2" />
-
-        {/* ===== MAIN CONTENT ===== */}
-        <div className="flex-1 min-w-0">
       {/* ===== BANNER CAROUSEL ===== */}
       <section className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8 pt-2 md:pt-6 pb-2 md:pb-4">
         <div className="relative">
@@ -191,11 +183,6 @@ export default function HomePage() {
             <SkillCard key={skill.id} skill={skill} />
           ))}
         </div>
-      </section>
-
-      {/* ===== AD BANNER — Landing Page ===== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <AdBanner variant="light" />
       </section>
 
       {/* ===== FREE SKILLS BANNER ===== */}
@@ -311,8 +298,6 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
-        </div>{/* end main content */}
-      </div>{/* end flex wrapper */}
     </div>
   );
 }
