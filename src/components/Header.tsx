@@ -200,12 +200,6 @@ export default function Header() {
               ) : (
                 <div className="flex items-center gap-1">
                   <Link
-                    href="/registro"
-                    className="px-3 py-2 rounded-lg text-sm text-header-muted hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    Registrarse
-                  </Link>
-                  <Link
                     href="/login"
                     className="px-3 py-2 rounded-lg text-sm bg-primary hover:bg-primary-hover text-white font-medium transition-colors"
                   >
@@ -335,7 +329,6 @@ export default function Header() {
                 ? [{ href: "/account", label: `👤 ${user?.username ?? t("account.label")}` }]
                 : [
                     { href: "/login", label: "🔑 Iniciar sesión" },
-                    { href: "/registro", label: "✏️ Registrarse" },
                   ]),
               { href: "/community", label: `👥 ${t("nav.community")}` },
               { href: "/developers", label: "🛠️ Developers" },
