@@ -4,7 +4,9 @@ import { skills, getSkillById, getReviewsBySkillId, getSkillsByCategory } from "
 import { StarRating } from "@/components/SkillCard";
 import SkillCard from "@/components/SkillCard";
 import VoiceDemo from "@/components/VoiceDemo";
+import SkillRealtimeDemo from "@/components/SkillRealtimeDemo";
 import { AddToCartButton, AddAndUpgradeButton, InstallFreeButton } from "@/components/SkillDetailClient";
+import { getRuntimeForSkill } from "@/lib/skill-runtime";
 
 export function generateStaticParams() {
   return skills.map((skill) => ({ id: skill.id }));
@@ -22,10 +24,10 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
   const relatedSkills = getSkillsByCategory(skill.category)
     .filter((s) => s.id !== skill.id)
     .slice(0, 3);
+  const runtime = getRuntimeForSkill(skill.id);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Breadcrumb */}
       <nav className="text-xs text-text-muted mb-6">
         <Link href="/" className="hover:text-primary">
           Inicio
@@ -39,18 +41,20 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
         <div className="lg:col-span-2 space-y-5">
-          {/* Product header card */}
           <div className="bg-white rounded-xl border border-border p-6">
             <div className="flex items-start gap-5">
-              {/* Large icon */}
               <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center text-5xl shrink-0 border border-border">
                 {skill.icon}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <h1 className="text-xl font-bold text-text-primary">{skill.name}</h1>
+                  {runtime && (
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                      ⚡ RUNTIME REAL
+                    </span>
+                  )}
                   {skill.isFree && (
                     <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-100 text-green-700">
                       GRATIS
@@ -68,7 +72,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   )}
                 </div>
 
-                {/* Short description */}
                 <p className="text-sm text-primary font-medium mb-2">{skill.shortDescription}</p>
 
                 <div className="flex items-center gap-3 flex-wrap text-xs text-text-muted mb-2">
@@ -77,6 +80,12 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   <span>v{skill.version}</span>
                   <span>·</span>
                   <span>{skill.category}</span>
+                  {runtime && (
+                    <>
+                      <span>·</span>
+                      <span className="text-emerald-700 font-medium">{runtime.provider}</span>
+                    </>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -91,7 +100,11 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
           </div>
 
-          {/* Features list */}
+          {/* Real runtime tester */}
+          {runtime && (
+            <SkillRealtimeDemo skillId={skill.id} skillName={skill.name} />
+          )}
+
           {skill.features.length > 0 && (
             <div className="bg-white rounded-xl border border-border p-6">
               <h2 className="text-base font-bold text-text-primary mb-3">✨ Características</h2>
@@ -108,7 +121,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
           )}
 
-          {/* Full description */}
           <div className="bg-white rounded-xl border border-border p-6">
             <h2 className="text-base font-bold text-text-primary mb-3">¿Qué gana tu agente?</h2>
             <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
@@ -116,8 +128,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
           </div>
 
-          {/* Voice Demo */}
-          {skill.category === "Voz y Audio" && (
+          {skill.category === "Voz y Audio" && !runtime && (
             <div className="bg-white rounded-xl border border-border p-6">
               <h2 className="text-base font-bold text-text-primary mb-1">🎙️ Escúchalo en acción</h2>
               <p className="text-xs text-text-muted mb-4">
@@ -127,7 +138,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
           )}
 
-          {/* Reviews */}
           <div className="bg-white rounded-xl border border-border p-6">
             <h2 className="text-base font-bold text-text-primary mb-4">
               Reseñas ({reviewsList.length})
@@ -166,7 +176,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             )}
           </div>
 
-          {/* Related skills */}
           {relatedSkills.length > 0 && (
             <div>
               <h2 className="text-base font-bold text-text-primary mb-3">
@@ -181,11 +190,8 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           )}
         </div>
 
-        {/* Sidebar — Buy box */}
         <div className="space-y-4">
-          {/* Price & CTA card */}
           <div className="bg-white rounded-xl border border-border p-5 sticky top-36">
-            {/* Price */}
             <div className="text-center mb-5 pb-5 border-b border-border">
               {skill.price === 0 ? (
                 <div>
@@ -205,16 +211,10 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                     )}
                   </div>
                   <p className="text-xs text-text-muted mt-1">Pago único · Tuyo para siempre</p>
-                  {skill.originalPrice && (
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600">
-                      {Math.round((1 - skill.price / skill.originalPrice) * 100)}% OFF
-                    </span>
-                  )}
                 </div>
               )}
             </div>
 
-            {/* CTA buttons */}
             {skill.price === 0 ? (
               <InstallFreeButton
                 skill={{
@@ -252,7 +252,16 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               {skill.installCount.toLocaleString()} personas ya mejoraron su agente
             </p>
 
-            {/* CLI install */}
+            {runtime && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <p className="text-[10px] text-emerald-700 font-bold mb-1">RUNTIME REAL</p>
+                <p className="text-[11px] text-text-muted">{runtime.description}</p>
+                <code className="mt-2 block text-[10px] font-mono bg-gray-50 px-2 py-1.5 rounded border border-border break-all">
+                  {runtime.method} {runtime.endpoint}
+                </code>
+              </div>
+            )}
+
             <div className="mt-4 pt-4 border-t border-border text-center">
               <p className="text-[10px] text-text-muted mb-1">O instala por línea de comandos:</p>
               <code className="text-[11px] text-text-muted font-mono bg-gray-50 px-3 py-1.5 rounded-lg border border-border inline-block">
@@ -260,7 +269,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
               </code>
             </div>
 
-            {/* Details */}
             <div className="mt-4 pt-4 border-t border-border space-y-2.5">
               {(
                 [
@@ -278,7 +286,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
           </div>
 
-          {/* Tags */}
           <div className="bg-white rounded-xl border border-border p-5">
             <h3 className="text-xs font-bold text-text-primary mb-2 uppercase tracking-wider">
               Etiquetas
@@ -296,7 +303,6 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
             </div>
           </div>
 
-          {/* Author */}
           <div className="bg-white rounded-xl border border-border p-5">
             <h3 className="text-xs font-bold text-text-primary mb-2 uppercase tracking-wider">
               Vendido por
