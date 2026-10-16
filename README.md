@@ -1,8 +1,13 @@
-# 🪢 Peru Hub — AI Agent Skill Marketplace
+# 🦞 Langosta Hub (Peru Hub) — Upgrade Store for AI Agents
 
-> **The marketplace where humans buy improvement tools for their AI agents.**
+> **La tienda donde los agentes de IA adquieren nuevas habilidades y los humanos generan ganancias.**  
+> Sin código. Solo conectar tu agente y mejorarlo.
 
-Peru Hub is a web platform for discovering, installing, and managing skills that supercharge your AI agents. Built with Next.js, TypeScript, and Tailwind CSS.
+**Live:** [https://langosta-hub.vercel.app](https://langosta-hub.vercel.app)
+
+Langosta Hub es un marketplace amigable pensado para que **cualquier persona** (aunque no sepa programar) pueda conectar su agente de IA, comprarle habilidades nuevas y verlo mejorar. Al mismo tiempo, los creadores de skills pueden publicar y generar ingresos.
+
+Cada agente puede tener **voz**, personalidad y capacidades reales. La IA deja de sentirse técnica y aburrida: se vuelve cercana, útil y emocionante.
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
@@ -11,122 +16,100 @@ Peru Hub is a web platform for discovering, installing, and managing skills that
 
 ---
 
-## ✨ Features
+## ✨ Visión del producto
 
-- **🏪 Skill Marketplace** — Browse, search, and filter AI agent skills by category, rating, and price
-- **📋 Skill Detail Pages** — Full descriptions, reviews, install commands, and voice demos
-- **💰 Account Dashboard** — Balance display, transaction history, and installed skills overview
-- **🧩 My Skills** — Manage installed/purchased skills and track published skill analytics
-- **👥 Community** — Discussion forum with categories, pinned posts, and top contributors
-- **🎙️ Voice Demo** — Interactive TTS demo with multiple neural voice options
-- **🌙 Dark Theme** — Beautiful dark UI inspired by modern SaaS platforms
-- **📱 Responsive** — Fully responsive design for mobile, tablet, and desktop
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Framework | [Next.js 15](https://nextjs.org) (App Router) |
-| Language | [TypeScript](https://typescriptlang.org) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com) |
-| Data | Static JSON (MVP — no database) |
-| Deployment | Vercel / Any Node.js host |
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm 9+
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/lokix94/peru-hub.git
-cd peru-hub
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
-
-## 📁 Project Structure
-
-```
-peru-hub/
-├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── page.tsx            # Landing page (Home)
-│   │   ├── layout.tsx          # Root layout with Header/Footer
-│   │   ├── globals.css         # Global styles & theme
-│   │   ├── marketplace/
-│   │   │   ├── page.tsx        # Marketplace browse page
-│   │   │   └── [id]/
-│   │   │       └── page.tsx    # Skill detail page
-│   │   ├── my-skills/
-│   │   │   └── page.tsx        # My installed skills
-│   │   ├── account/
-│   │   │   └── page.tsx        # Account dashboard
-│   │   └── community/
-│   │       └── page.tsx        # Community forum
-│   ├── components/
-│   │   ├── Header.tsx          # Navigation header
-│   │   ├── Footer.tsx          # Page footer
-│   │   ├── SkillCard.tsx       # Skill card component
-│   │   └── VoiceDemo.tsx       # TTS voice demo widget
-│   └── data/
-│       └── skills.ts           # Seed data (8 sample skills)
-├── package.json
-├── tsconfig.json
-├── next.config.ts
-├── postcss.config.mjs
-└── README.md
-```
-
-## 🧩 Sample Skills Included
-
-| Skill | Category | Price | Author |
-|-------|----------|-------|--------|
-| ⚖️ Peruvian Legal Research | Research | Free | Peru-AI |
-| 🎙️ Voice: Camila Neural TTS | Voice | Free | Peru-AI |
-| 🌐 Web Research Pro | Research | $4.99 | SearchCraft |
-| 💻 Code Review Assistant | Development | $9.99 | DevTools Inc |
-| 🌤️ Weather Intelligence | Utilities | $2.99 | MeteoSkill |
-| 🧠 Memory Curator | Agent Core | Free | CogniTech |
-| 📧 Email Composer Pro | Productivity | $3.99 | WriteWell |
-| 🪞 Self Reflection | Agent Core | Free | Peru-AI |
-
-## 🗺️ Roadmap
-
-- [ ] **Backend API** — Supabase/PostgreSQL for real data persistence
-- [ ] **Authentication** — User accounts with GitHub/Google OAuth
-- [ ] **Stripe Connect** — Paid skills with revenue sharing
-- [ ] **Edge TTS Integration** — Real server-side voice synthesis
-- [ ] **Skill SDK** — CLI tools for creating and publishing skills
-- [ ] **WebRTC Voice** — Real-time voice conversations with agents
-- [ ] **Agent Profiles** — Public pages for each AI agent
-- [ ] **Reviews System** — Post-purchase reviews and ratings
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
-
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE) for details.
+- **Para humanos no técnicos**: Conectas tu agente en 2 clics. Sin terminal, sin archivos, sin configuración complicada.
+- **Para agentes IA**: Compran skills (habilidades) que les dan nuevas capacidades (investigación, voz, automatización, redes sociales, etc.).
+- **Para creadores**: Publican skills y ganan dinero con cada instalación / venta.
+- **Multi-agente**: Puedes tener varios agentes (OpenClaw, Moltbook u otros) y gestionarlos desde un solo lugar.
+- **Voz real**: Los agentes pueden hablar con voces neurales (incluyendo acento peruano).
 
 ---
 
-Built with 🪢 by [Peru-AI](https://github.com/lokix94) · Powered by [OpenClaw](https://openclaw.ai)
+## ✨ Características actuales
+
+- 🏪 **Skill Marketplace** — Explora, busca y filtra skills por categoría, rating y precio
+- 📋 **Páginas de detalle** — Descripción completa, reseñas, instalación en un clic
+- 💰 **Dashboard de cuenta** — Saldo, historial, skills instaladas y **ganancias por ventas**
+- 🤖 **Mis Agentes IA** — Conecta y gestiona múltiples agentes (OpenClaw, Moltbook, otros)
+- 🎙️ **Voz neural** — Demo de TTS y skill de síntesis de voz (Camila y más)
+- 🧩 **Skills reales** — Memory Optimizer, Smart Web Researcher, Translator Pro, Moltbook Tools, etc.
+- 🌙 **Diseño moderno** — Tema claro/oscuro, responsive, enfocado en experiencia humana
+- 🔒 **Auth + Store** — Sistema de usuarios, agentes e instalaciones (con base lista para Supabase)
+
+---
+
+## 🛠️ Tech Stack
+
+| Capa | Tecnología |
+|------|------------|
+| Framework | Next.js 15 (App Router) |
+| Lenguaje | TypeScript |
+| Estilos | Tailwind CSS 4 |
+| Auth & Datos | Store in-memory + schema Supabase listo |
+| Deploy | Vercel |
+
+---
+
+## 🚀 Cómo empezar (desarrollo)
+
+```bash
+git clone https://github.com/lokix94/peru-hub.git
+cd peru-hub
+npm install
+npm run dev
+```
+
+Abre [http://localhost:3000](http://localhost:3000).
+
+---
+
+## 🗺️ Roadmap & Progreso (6 puntos principales)
+
+| # | Punto | Estado | Notas |
+|---|-------|--------|-------|
+| 1 | **Backend API** (Supabase/PostgreSQL) | 🟡 En progreso | Schema SQL listo + store unificado. Migración completa pendiente |
+| 2 | **Autenticación** (email + OAuth) | 🟡 En progreso | Auth propia funcionando. GitHub/Google OAuth siguiente |
+| 3 | **Pagos & Earnings** (Stripe / Crypto) | 🟡 En progreso | Flujo de saldo + ganancias visible. Stripe Connect + revenue share pendiente |
+| 4 | **Voz (Edge TTS / Neural)** | 🟢 Avanzado | Skill de Voice Synthesis + demo. Integración server-side real siguiente |
+| 5 | **Skill SDK + No-code** | 🟡 En progreso | Flujo de conexión de agentes ultra-simple ya implementado. SDK de publicación pendiente |
+| 6 | **Perfiles de agentes + Multi-agente + Reviews** | 🟡 En progreso | Multi-agente ya funciona en cuenta. Perfiles públicos y reviews formales pendientes |
+
+### Próximos hitos prioritarios
+- [ ] Completar migración a Supabase real
+- [ ] OAuth (GitHub / Google)
+- [ ] Stripe Connect + reparto de ganancias para creadores
+- [ ] Publicación de skills desde la UI (sin código)
+- [ ] Perfiles públicos de agentes
+- [ ] Sistema de reviews post-compra
+
+---
+
+## 🧩 Skills incluidos (reales + demo)
+
+- 🔍 Smart Web Researcher (gratis)
+- 🧠 Agent Memory Optimizer (gratis)
+- 🌐 Multi-Language Translator Pro (gratis)
+- 📊 Moltbook Analytics / Auto-Poster / Community Manager / Trend Scanner
+- 🎤 Voice Synthesis (voz neural)
+- 💻 Code Review Assistant
+- 📧 Email Composer Pro
+- 🌤️ Weather Intelligence
+- Y más en desarrollo
+
+---
+
+## 🤝 Contribuir
+
+Las contribuciones son bienvenidas. Abre un issue o un Pull Request.
+
+---
+
+## 📄 Licencia
+
+MIT License
+
+---
+
+**Built with 🦞 by Peru-AI** · Powered by OpenClaw & the agent community  
+**La IA no tiene que ser aburrida ni técnica. Solo tiene que funcionar.**
