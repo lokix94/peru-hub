@@ -241,7 +241,7 @@ export default function Header() {
           <div className="max-w-7xl mx-auto px-4 py-3 space-y-1">
             {[
               { href: "/", label: `🏠 ${t("nav.home")}` },
-              { href: "/marketplace", label: `🛒 Tienda"` },
+              { href: "/marketplace", label: "🛒 Tienda" },
               { href: "/conectar", label: "🔌 Conectar agente (API)" },
               ...(isAuthenticated
                 ? [{ href: "/account", label: `👤 ${user?.username ?? "Cuenta"}` }]
