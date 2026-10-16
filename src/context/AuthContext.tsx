@@ -80,8 +80,8 @@ interface AuthContextType {
     moltbookData?: MoltbookData,
     verified?: boolean
   ) => Promise<{ success: boolean; error?: string }>;
-  removeAgent: (id: string) => void;
-  updateAgent: (id: string, updates: Partial<AuthAgent>) => void;
+  removeAgent: (id: string) => Promise<void>;
+  updateAgent: (id: string, updates: Partial<AuthAgent>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -128,7 +128,7 @@ function removeFromStorage(key: string) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Client-side password hashing + validation (mirrors auth-store)      */
+/*  Client-side password hashing + validation                           */
 /* ------------------------------------------------------------------ */
 
 const SALT = "langosta-hub-salt-2026";
@@ -207,6 +207,36 @@ function clearLocalSession() {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Supabase agents helpers                                            */
+/* ------------------------------------------------------------------ */
+
+async function fetchAgentsFromSupabase(userId: string): Promise<AuthAgent[]> {
+  const supabase = createBrowserClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("agents")
+    .select("id, name, platform, api_key, verified, metadata, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) {
+    console.warn("[Auth] Failed to load agents from Supabase:", error?.message);
+    return [];
+  }
+
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    platform: row.platform,
+    api_key: row.api_key ? "••••••••" : undefined,
+    verified: !!row.verified,
+    created_at: row.created_at,
+    moltbook_data: (row.metadata as MoltbookData | null) ?? undefined,
+  }));
+}
+
+/* ------------------------------------------------------------------ */
 /*  Provider                                                           */
 /* ------------------------------------------------------------------ */
 
@@ -215,7 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [agents, setAgents] = useState<AuthAgent[]>([]);
 
-  /* ---- Bootstrap: restore session ---- */
+  /* ---- Bootstrap: restore session + agents ---- */
   useEffect(() => {
     async function restore() {
       try {
@@ -230,10 +260,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: session.user.id,
                 email: session.user.email ?? "",
                 username:
-                  (session.user.user_metadata?.username as string) ?? session.user.email ?? "",
+                  (session.user.user_metadata?.username as string) ??
+                  session.user.email ??
+                  "",
                 created_at: session.user.created_at,
               };
               setUser(u);
+              const loaded = await fetchAgentsFromSupabase(u.id);
+              setAgents(loaded);
             }
           }
         } else {
@@ -264,7 +298,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restore();
   }, []);
 
-  /* ---- Sign Up (secure for humans) ---- */
+  /* ---- Sign Up ---- */
   const signUp = useCallback(
     async (
       username: string,
@@ -272,7 +306,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: string
     ): Promise<{ success: boolean; error?: string; needsVerification?: boolean }> => {
       try {
-        // Client-side validation first (same rules as server)
         const pwdError = validatePasswordStrength(password);
         if (pwdError) return { success: false, error: pwdError };
 
@@ -316,14 +349,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               created_at: data.user.created_at,
             };
             setUser(u);
+            setAgents([]);
             return { success: true };
           }
           return { success: false, error: "Error inesperado" };
         }
 
-        // --- Client-side fallback mode ---
+        // Local fallback
         const users = getLocalUsers();
-
         if (users.some((u) => u.email === normalEmail)) {
           return { success: false, error: "Ya existe una cuenta con este email" };
         }
@@ -341,7 +374,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           created_at: now,
           agents: [],
         };
-
         users.push(newUser);
         saveLocalUsers(users);
 
@@ -351,9 +383,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           username: safeUsername,
           created_at: now,
         };
-        const token = generateTokenClient(id);
-        saveLocalSession({ user: authUser, token });
-
+        saveLocalSession({ user: authUser, token: generateTokenClient(id) });
         setUser(authUser);
         setAgents([]);
         return { success: true };
@@ -384,10 +414,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               id: data.user.id,
               email: data.user.email ?? "",
               username:
-                (data.user.user_metadata?.username as string) ?? data.user.email ?? "",
+                (data.user.user_metadata?.username as string) ??
+                data.user.email ??
+                "",
               created_at: data.user.created_at,
             };
             setUser(u);
+            const loaded = await fetchAgentsFromSupabase(u.id);
+            setAgents(loaded);
             return { success: true };
           }
           return { success: false, error: "Error inesperado" };
@@ -396,11 +430,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const normalEmail = email.toLowerCase().trim();
         const users = getLocalUsers();
         const storedUser = users.find((u) => u.email === normalEmail);
-
         if (!storedUser) {
           return { success: false, error: "No existe una cuenta con este email" };
         }
-
         if (!verifyPasswordClient(password, storedUser.passwordHash)) {
           return { success: false, error: "Contraseña incorrecta" };
         }
@@ -411,9 +443,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           username: storedUser.username,
           created_at: storedUser.created_at,
         };
-        const token = generateTokenClient(storedUser.id);
-        saveLocalSession({ user: authUser, token });
-
+        saveLocalSession({
+          user: authUser,
+          token: generateTokenClient(storedUser.id),
+        });
         setUser(authUser);
         setAgents(storedUser.agents ?? []);
         return { success: true };
@@ -442,14 +475,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     removeFromStorage(LEGACY_AGENTS_KEY);
   }, []);
 
-  /* ---- Auto Register (AI agents) — secure path ---- */
+  /* ---- Auto Register (AI agents) ---- */
   const autoRegister = useCallback(
     async (
       platform: "moltbook" | "openclaw",
       apiKey: string
     ): Promise<{ success: boolean; error?: string; message?: string }> => {
       try {
-        // Never send empty keys
         if (!apiKey?.trim()) {
           return { success: false, error: "API key requerida" };
         }
@@ -489,10 +521,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             saveLocalSession({ user: existingAuth, token });
             setUser(existingAuth);
             setAgents(existing.agents ?? []);
-            return { success: true, message: `¡Bienvenido de vuelta, ${existing.username}! 🦞` };
+            return {
+              success: true,
+              message: `¡Bienvenido de vuelta, ${existing.username}! 🦞`,
+            };
           }
 
-          // New agent-backed user — store a random password hash (agent does not use password)
           const newUser: StoredUserLocal = {
             id: authUser.id,
             username: authUser.username,
@@ -504,7 +538,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: crypto.randomUUID(),
                 name: authUser.username,
                 platform,
-                // We keep the key only for the session; do not expose it later
                 api_key: undefined,
                 verified: true,
                 created_at: authUser.created_at,
@@ -513,12 +546,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
           users.push(newUser);
           saveLocalUsers(users);
-
-          const token = generateTokenClient(authUser.id);
-          saveLocalSession({ user: authUser, token });
+          saveLocalSession({
+            user: authUser,
+            token: generateTokenClient(authUser.id),
+          });
           setAgents(newUser.agents);
         } else {
-          saveLocalSession({ user: authUser, token: data.token });
+          // Supabase mode: agents may already be created by the API
+          const loaded = await fetchAgentsFromSupabase(authUser.id);
+          setAgents(loaded);
         }
 
         setUser(authUser);
@@ -542,28 +578,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!name.trim()) return { success: false, error: "El nombre es obligatorio" };
       if (!platform) return { success: false, error: "Selecciona una plataforma" };
 
-      // Security: we accept the key for verification but do not persist the raw key
-      // longer than necessary in the client store when possible.
+      if (isSupabaseConfigured()) {
+        const supabase = createBrowserClient();
+        if (!supabase) return { success: false, error: "Error de configuración" };
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session?.user) {
+          return { success: false, error: "No autenticado" };
+        }
+
+        const { data, error } = await supabase
+          .from("agents")
+          .insert({
+            user_id: session.user.id,
+            name: name.trim(),
+            platform,
+            api_key: apiKey || null,
+            verified: verified ?? !!moltbookData,
+            metadata: moltbookData || {},
+          })
+          .select("id, name, platform, api_key, verified, metadata, created_at")
+          .single();
+
+        if (error || !data) {
+          return {
+            success: false,
+            error: error?.message || "No se pudo guardar el agente",
+          };
+        }
+
+        const agent: AuthAgent = {
+          id: data.id,
+          name: data.name,
+          platform: data.platform,
+          api_key: data.api_key ? "••••••••" : undefined,
+          verified: !!data.verified,
+          created_at: data.created_at,
+          moltbook_data: (data.metadata as MoltbookData | null) ?? undefined,
+        };
+        setAgents((prev) => [agent, ...prev]);
+        return { success: true };
+      }
+
+      // Local fallback
       const agent: AuthAgent = {
         id: crypto.randomUUID(),
         name: name.trim(),
         platform,
-        api_key: apiKey ? "••••••••" : undefined, // mask immediately
+        api_key: apiKey ? "••••••••" : undefined,
         verified: verified ?? !!moltbookData,
         created_at: new Date().toISOString(),
         moltbook_data: moltbookData || undefined,
       };
       setAgents((prev) => {
         const next = [...prev, agent];
-        if (!isSupabaseConfigured()) {
-          const session = getLocalSession();
-          if (session) {
-            const users = getLocalUsers();
-            const idx = users.findIndex((u) => u.id === session.user.id);
-            if (idx >= 0) {
-              users[idx].agents = next;
-              saveLocalUsers(users);
-            }
+        const session = getLocalSession();
+        if (session) {
+          const users = getLocalUsers();
+          const idx = users.findIndex((u) => u.id === session.user.id);
+          if (idx >= 0) {
+            users[idx].agents = next;
+            saveLocalUsers(users);
           }
         }
         return next;
@@ -573,7 +650,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const removeAgent = useCallback((id: string) => {
+  const removeAgent = useCallback(async (id: string) => {
+    if (isSupabaseConfigured()) {
+      const supabase = createBrowserClient();
+      if (supabase) {
+        await supabase.from("agents").delete().eq("id", id);
+      }
+    }
+
     setAgents((prev) => {
       const next = prev.filter((a) => a.id !== id);
       if (!isSupabaseConfigured()) {
@@ -591,23 +675,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const updateAgent = useCallback((id: string, updates: Partial<AuthAgent>) => {
-    setAgents((prev) => {
-      const next = prev.map((a) => (a.id === id ? { ...a, ...updates } : a));
-      if (!isSupabaseConfigured()) {
-        const session = getLocalSession();
-        if (session) {
-          const users = getLocalUsers();
-          const idx = users.findIndex((u) => u.id === session.user.id);
-          if (idx >= 0) {
-            users[idx].agents = next;
-            saveLocalUsers(users);
+  const updateAgent = useCallback(
+    async (id: string, updates: Partial<AuthAgent>) => {
+      if (isSupabaseConfigured()) {
+        const supabase = createBrowserClient();
+        if (supabase) {
+          const payload: Record<string, unknown> = {};
+          if (updates.name !== undefined) payload.name = updates.name;
+          if (updates.platform !== undefined) payload.platform = updates.platform;
+          if (updates.verified !== undefined) payload.verified = updates.verified;
+          if (updates.moltbook_data !== undefined)
+            payload.metadata = updates.moltbook_data;
+          if (Object.keys(payload).length > 0) {
+            await supabase.from("agents").update(payload).eq("id", id);
           }
         }
       }
-      return next;
-    });
-  }, []);
+
+      setAgents((prev) => {
+        const next = prev.map((a) => (a.id === id ? { ...a, ...updates } : a));
+        if (!isSupabaseConfigured()) {
+          const session = getLocalSession();
+          if (session) {
+            const users = getLocalUsers();
+            const idx = users.findIndex((u) => u.id === session.user.id);
+            if (idx >= 0) {
+              users[idx].agents = next;
+              saveLocalUsers(users);
+            }
+          }
+        }
+        return next;
+      });
+    },
+    []
+  );
 
   return (
     <AuthContext.Provider
