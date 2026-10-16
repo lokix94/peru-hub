@@ -90,12 +90,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 /*  Keys                                                               */
 /* ------------------------------------------------------------------ */
 
-// Legacy keys (kept for cleanup)
 const LEGACY_USER_KEY = "peru-hub-auth-user";
 const LEGACY_TOKEN_KEY = "peru-hub-auth-token";
 const LEGACY_AGENTS_KEY = "peru-hub-agents";
 
-// New localStorage keys for client-side fallback auth
 const LS_USERS_KEY = "langosta-users";
 const LS_SESSION_KEY = "langosta-session";
 
@@ -130,7 +128,7 @@ function removeFromStorage(key: string) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Client-side password hashing (mirrors auth-store.ts)               */
+/*  Client-side password hashing + validation (mirrors auth-store)      */
 /* ------------------------------------------------------------------ */
 
 const SALT = "langosta-hub-salt-2026";
@@ -141,6 +139,28 @@ function hashPasswordClient(password: string): string {
 
 function verifyPasswordClient(password: string, hash: string): boolean {
   return hashPasswordClient(password) === hash;
+}
+
+function validatePasswordStrength(password: string): string | null {
+  if (!password || password.length < 8) {
+    return "La contraseña debe tener al menos 8 caracteres";
+  }
+  if (password.length > 128) {
+    return "La contraseña es demasiado larga";
+  }
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  if (!hasLetter || !hasNumber) {
+    return "La contraseña debe contener al menos una letra y un número";
+  }
+  return null;
+}
+
+function sanitizeUsername(username: string): string | null {
+  const cleaned = username.trim();
+  if (cleaned.length < 3 || cleaned.length > 32) return null;
+  if (!/^[a-zA-Z0-9_-]+$/.test(cleaned)) return null;
+  return cleaned;
 }
 
 /* ------------------------------------------------------------------ */
@@ -200,7 +220,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function restore() {
       try {
         if (isSupabaseConfigured()) {
-          // --- Supabase mode ---
           const supabase = createBrowserClient();
           if (supabase) {
             const {
@@ -218,30 +237,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           }
         } else {
-          // --- Client-side fallback mode ---
           const session = getLocalSession();
           if (session && session.token) {
             const tokenData = verifyTokenClient(session.token);
             if (tokenData) {
-              // Token valid, restore user
               setUser(session.user);
-              // Also load agents from the user record
               const users = getLocalUsers();
               const storedUser = users.find((u) => u.id === session.user.id);
               if (storedUser?.agents) {
                 setAgents(storedUser.agents);
               }
             } else {
-              // Token expired
               clearLocalSession();
             }
           }
         }
 
-        // Clean up legacy keys
         removeFromStorage(LEGACY_USER_KEY);
         removeFromStorage(LEGACY_TOKEN_KEY);
-        // Note: LEGACY_AGENTS_KEY cleaned up separately if needed
       } catch {
         /* silent fail */
       } finally {
@@ -251,7 +264,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restore();
   }, []);
 
-  /* ---- Sign Up ---- */
+  /* ---- Sign Up (secure for humans) ---- */
   const signUp = useCallback(
     async (
       username: string,
@@ -259,8 +272,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: string
     ): Promise<{ success: boolean; error?: string; needsVerification?: boolean }> => {
       try {
+        // Client-side validation first (same rules as server)
+        const pwdError = validatePasswordStrength(password);
+        if (pwdError) return { success: false, error: pwdError };
+
+        const safeUsername = sanitizeUsername(username);
+        if (!safeUsername) {
+          return {
+            success: false,
+            error: "Usuario inválido (3-32 caracteres, solo letras, números, _ o -)",
+          };
+        }
+
+        const normalEmail = email.toLowerCase().trim();
+        if (!normalEmail.includes("@") || normalEmail.length < 5) {
+          return { success: false, error: "Email inválido" };
+        }
+
         if (isSupabaseConfigured()) {
-          // --- Supabase mode ---
           const supabase = createBrowserClient();
           if (!supabase) return { success: false, error: "Error de configuración" };
           const emailRedirectTo =
@@ -268,10 +297,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               ? `${window.location.origin}/auth/confirm`
               : undefined;
           const { data, error } = await supabase.auth.signUp({
-            email,
+            email: normalEmail,
             password,
             options: {
-              data: { username },
+              data: { username: safeUsername },
               ...(emailRedirectTo ? { emailRedirectTo } : {}),
             },
           });
@@ -283,7 +312,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const u: AuthUser = {
               id: data.user.id,
               email: data.user.email ?? "",
-              username,
+              username: safeUsername,
               created_at: data.user.created_at,
             };
             setUser(u);
@@ -293,24 +322,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // --- Client-side fallback mode ---
-        const normalEmail = email.toLowerCase().trim();
-        const normalUsername = username.toLowerCase().trim();
         const users = getLocalUsers();
 
-        // Duplicate checks
         if (users.some((u) => u.email === normalEmail)) {
           return { success: false, error: "Ya existe una cuenta con este email" };
         }
-        if (users.some((u) => u.username.toLowerCase() === normalUsername)) {
+        if (users.some((u) => u.username.toLowerCase() === safeUsername.toLowerCase())) {
           return { success: false, error: "Este nombre de usuario ya está en uso" };
         }
 
-        // Create user
         const id = crypto.randomUUID();
         const now = new Date().toISOString();
         const newUser: StoredUserLocal = {
           id,
-          username: username.trim(),
+          username: safeUsername,
           email: normalEmail,
           passwordHash: hashPasswordClient(password),
           created_at: now,
@@ -320,11 +345,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         users.push(newUser);
         saveLocalUsers(users);
 
-        // Create session
         const authUser: AuthUser = {
           id,
           email: normalEmail,
-          username: username.trim(),
+          username: safeUsername,
           created_at: now,
         };
         const token = generateTokenClient(id);
@@ -348,7 +372,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ): Promise<{ success: boolean; error?: string }> => {
       try {
         if (isSupabaseConfigured()) {
-          // --- Supabase mode ---
           const supabase = createBrowserClient();
           if (!supabase) return { success: false, error: "Error de configuración" };
           const { data, error } = await supabase.auth.signInWithPassword({
@@ -370,7 +393,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { success: false, error: "Error inesperado" };
         }
 
-        // --- Client-side fallback mode ---
         const normalEmail = email.toLowerCase().trim();
         const users = getLocalUsers();
         const storedUser = users.find((u) => u.email === normalEmail);
@@ -383,7 +405,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { success: false, error: "Contraseña incorrecta" };
         }
 
-        // Create session
         const authUser: AuthUser = {
           id: storedUser.id,
           email: storedUser.email,
@@ -416,23 +437,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setAgents([]);
     clearLocalSession();
-    // Clean up legacy keys too
     removeFromStorage(LEGACY_USER_KEY);
     removeFromStorage(LEGACY_TOKEN_KEY);
     removeFromStorage(LEGACY_AGENTS_KEY);
   }, []);
 
-  /* ---- Auto Register (AI agents) ---- */
+  /* ---- Auto Register (AI agents) — secure path ---- */
   const autoRegister = useCallback(
     async (
       platform: "moltbook" | "openclaw",
       apiKey: string
     ): Promise<{ success: boolean; error?: string; message?: string }> => {
       try {
+        // Never send empty keys
+        if (!apiKey?.trim()) {
+          return { success: false, error: "API key requerida" };
+        }
+
         const res = await fetch("/api/auth/auto-register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ platform, apiKey }),
+          body: JSON.stringify({ platform, apiKey: apiKey.trim() }),
         });
         const data = await res.json();
         if (!res.ok || !data.success) {
@@ -446,15 +471,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           created_at: data.user.created_at,
         };
 
-        // Save to localStorage (fallback mode)
         if (!isSupabaseConfigured()) {
           const users = getLocalUsers();
-          // Check if already exists
           const existing = users.find(
-            (u) => u.email === authUser.email || u.username.toLowerCase() === authUser.username.toLowerCase()
+            (u) =>
+              u.email === authUser.email ||
+              u.username.toLowerCase() === authUser.username.toLowerCase()
           );
           if (existing) {
-            // Already registered — just sign in
             const token = generateTokenClient(existing.id);
             const existingAuth: AuthUser = {
               id: existing.id,
@@ -468,19 +492,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return { success: true, message: `¡Bienvenido de vuelta, ${existing.username}! 🦞` };
           }
 
-          // New user
+          // New agent-backed user — store a random password hash (agent does not use password)
           const newUser: StoredUserLocal = {
             id: authUser.id,
             username: authUser.username,
             email: authUser.email,
-            passwordHash: hashPasswordClient(crypto.randomUUID()), // random password
+            passwordHash: hashPasswordClient(crypto.randomUUID()),
             created_at: authUser.created_at,
             agents: [
               {
                 id: crypto.randomUUID(),
                 name: authUser.username,
                 platform,
-                api_key: apiKey,
+                // We keep the key only for the session; do not expose it later
+                api_key: undefined,
                 verified: true,
                 created_at: authUser.created_at,
               },
@@ -493,7 +518,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           saveLocalSession({ user: authUser, token });
           setAgents(newUser.agents);
         } else {
-          // Supabase mode — just save session
           saveLocalSession({ user: authUser, token: data.token });
         }
 
@@ -517,18 +541,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ): Promise<{ success: boolean; error?: string }> => {
       if (!name.trim()) return { success: false, error: "El nombre es obligatorio" };
       if (!platform) return { success: false, error: "Selecciona una plataforma" };
+
+      // Security: we accept the key for verification but do not persist the raw key
+      // longer than necessary in the client store when possible.
       const agent: AuthAgent = {
         id: crypto.randomUUID(),
         name: name.trim(),
         platform,
-        api_key: apiKey || undefined,
+        api_key: apiKey ? "••••••••" : undefined, // mask immediately
         verified: verified ?? !!moltbookData,
         created_at: new Date().toISOString(),
         moltbook_data: moltbookData || undefined,
       };
       setAgents((prev) => {
         const next = [...prev, agent];
-        // Also persist agents to the user record in localStorage (fallback mode)
         if (!isSupabaseConfigured()) {
           const session = getLocalSession();
           if (session) {
@@ -550,7 +576,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const removeAgent = useCallback((id: string) => {
     setAgents((prev) => {
       const next = prev.filter((a) => a.id !== id);
-      // Also persist to user record in localStorage (fallback mode)
       if (!isSupabaseConfigured()) {
         const session = getLocalSession();
         if (session) {
