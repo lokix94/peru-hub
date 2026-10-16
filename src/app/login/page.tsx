@@ -19,9 +19,13 @@ function LoginForm() {
   useEffect(() => {
     const confirmed = searchParams.get("confirmed");
     const urlError = searchParams.get("error");
+    const recovered = searchParams.get("recovered");
 
     if (confirmed === "true") {
       setSuccessMessage("✅ Email confirmado. Ya puedes iniciar sesión.");
+    }
+    if (recovered === "true") {
+      setSuccessMessage("✅ Contraseña actualizada. Inicia sesión con la nueva.");
     }
     if (urlError === "confirmation_failed") {
       setError("La confirmación de email falló. Intenta registrarte de nuevo.");
@@ -111,7 +115,15 @@ function LoginForm() {
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Contraseña</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs text-gray-400 font-medium">Contraseña</label>
+              <Link
+                href="/recuperar"
+                className="text-xs text-primary hover:underline font-medium"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             <input
               type="password"
               autoComplete="current-password"
@@ -131,12 +143,22 @@ function LoginForm() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-500 mt-6">
-          ¿No tienes cuenta?{" "}
-          <Link href="/registro" className="text-primary hover:underline font-medium">
-            Crear cuenta
+        {/* Acciones secundarias muy visibles */}
+        <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
+          <p className="text-center text-xs text-gray-400">¿Primera vez aquí?</p>
+          <Link
+            href="/registro"
+            className="block w-full py-3 rounded-xl border border-primary/50 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-bold text-center transition-colors"
+          >
+            Crear cuenta gratis
           </Link>
-        </p>
+          <Link
+            href="/recuperar"
+            className="block w-full py-2.5 rounded-xl border border-white/10 hover:bg-white/5 text-gray-300 text-sm font-medium text-center transition-colors"
+          >
+            Recuperar cuenta / cambiar contraseña
+          </Link>
+        </div>
       </div>
     </div>
   );
