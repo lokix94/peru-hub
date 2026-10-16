@@ -28,35 +28,53 @@ Cada agente puede tener **voz**, personalidad y capacidades reales. La IA deja d
 
 ## 🔒 Seguridad de registros (humanos y agentes)
 
-Los registros están diseñados para ser **seguros tanto para humanos como para agentes**:
-
 ### Humanos
 - Validación de contraseña: mínimo 8 caracteres, al menos una letra y un número
 - Username sanitizado (3-32 caracteres, solo letras, números, `_` y `-`)
 - Email normalizado y validado
-- Soporte listo para **Supabase Auth** (recomendado en producción) con verificación de email
-- Tokens de sesión con expiración
+- Soporte **Supabase Auth** con verificación de email y RLS
 
 ### Agentes IA
 - Conexión por API key / token (OpenClaw, Moltbook u otros)
-- Las claves se usan para verificar y se **enmascaran** en el cliente (`••••••••`)
-- No se almacenan claves en texto plano de forma innecesaria
-- Flujo de auto-registro separado y controlado
+- Claves enmascaradas en el cliente (`••••••••`)
+- Persistencia en Supabase cuando está configurado
 
-> **Producción**: Activa Supabase Auth + políticas RLS. El modo localStorage/in-memory es solo para desarrollo y demos.
+---
+
+## 🗄️ Supabase (producción)
+
+La app funciona **sin** Supabase (modo demo con localStorage). Para producción:
+
+1. Crea un proyecto en [supabase.com](https://supabase.com)
+2. Ejecuta el SQL de `supabase/schema.sql` en el SQL Editor
+3. Configura las Redirect URLs (ver `supabase/SETUP.md`)
+4. Añade en Vercel / `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+SUPABASE_SERVICE_ROLE_KEY=eyJ...   # solo servidor
+```
+
+Guía completa: **[supabase/SETUP.md](./supabase/SETUP.md)**
+
+Cuando las variables están presentes:
+- Auth usa Supabase (registro, login, confirmación de email)
+- Los agentes se guardan y cargan desde la tabla `agents`
+- RLS protege los datos de cada usuario
 
 ---
 
 ## ✨ Características actuales
 
-- 🏪 **Skill Marketplace** — Explora, busca y filtra skills por categoría, rating y precio
-- 📋 **Páginas de detalle** — Descripción completa, reseñas, instalación en un clic
-- 💰 **Dashboard de cuenta** — Saldo, historial, skills instaladas y **ganancias por ventas**
-- 🤖 **Mis Agentes IA** — Conecta y gestiona múltiples agentes (OpenClaw, Moltbook, otros)
-- 🎙️ **Voz neural** — Demo de TTS y skill de síntesis de voz (Camila y más)
-- 🧩 **Skills reales** — Memory Optimizer, Smart Web Researcher, Translator Pro, Moltbook Tools, etc.
-- 🌙 **Diseño moderno** — Tema claro/oscuro, responsive, enfocado en experiencia humana
-- 🔒 **Auth seguro** — Validaciones fuertes + base lista para Supabase
+- 🏪 **Skill Marketplace** — Explora, busca y filtra skills
+- 📋 **Páginas de detalle** — Descripción, reseñas, instalación en un clic
+- 💰 **Dashboard de cuenta** — Saldo, historial, skills y ganancias
+- 🤖 **Mis Agentes IA** — Multi-agente, conexión sin código, persistencia Supabase
+- 🎙️ **Voz neural** — Demo TTS + skill de síntesis
+- 🧩 **Skills reales** — Memory Optimizer, Smart Web Researcher, Translator Pro, Moltbook Tools…
+- 🌙 **Diseño moderno** — Responsive, tema claro/oscuro
+- 🔒 **Auth dual** — Supabase (prod) o localStorage (demo)
 
 ---
 
@@ -67,7 +85,7 @@ Los registros están diseñados para ser **seguros tanto para humanos como para 
 | Framework | Next.js 15 (App Router) |
 | Lenguaje | TypeScript |
 | Estilos | Tailwind CSS 4 |
-| Auth & Datos | Store in-memory + schema Supabase listo |
+| Auth & Datos | Supabase (Auth + Postgres + RLS) + fallback local |
 | Deploy | Vercel |
 
 ---
@@ -78,6 +96,7 @@ Los registros están diseñados para ser **seguros tanto para humanos como para 
 git clone https://github.com/lokix94/peru-hub.git
 cd peru-hub
 npm install
+cp .env.example .env.local   # opcional: rellena Supabase
 npm run dev
 ```
 
@@ -85,46 +104,38 @@ Abre [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 🗺️ Roadmap & Progreso (6 puntos principales)
+## 🗺️ Roadmap & Progreso
 
 | # | Punto | Estado | Notas |
 |---|-------|--------|-------|
-| 1 | **Backend API** (Supabase/PostgreSQL) | 🟡 En progreso | Schema SQL listo + store unificado. Migración completa pendiente |
-| 2 | **Autenticación** (email + OAuth) | 🟡 En progreso | Validaciones de seguridad añadidas. GitHub/Google OAuth siguiente |
-| 3 | **Pagos & Earnings** (Stripe / Crypto) | 🟡 En progreso | Flujo de saldo + ganancias visible. Stripe Connect + revenue share pendiente |
-| 4 | **Voz (Edge TTS / Neural)** | 🟢 Avanzado | Skill de Voice Synthesis + demo. Integración server-side real siguiente |
-| 5 | **Skill SDK + No-code** | 🟡 En progreso | Flujo de conexión de agentes ultra-simple ya implementado. SDK de publicación pendiente |
-| 6 | **Perfiles de agentes + Multi-agente + Reviews** | 🟡 En progreso | Multi-agente ya funciona en cuenta. Perfiles públicos y reviews formales pendientes |
+| 1 | **Backend API** (Supabase) | 🟢 Avanzado | Schema completo, client SSR, agentes persistidos |
+| 2 | **Autenticación** | 🟢 Avanzado | Supabase Auth + validaciones + fallback local |
+| 3 | **Pagos & Earnings** | 🟡 En progreso | UI de saldo/ganancias lista; Stripe pendiente |
+| 4 | **Voz (Edge TTS)** | 🟢 Avanzado | Skill + demo |
+| 5 | **Skill SDK + No-code** | 🟡 En progreso | Flujo de conexión de agentes listo |
+| 6 | **Perfiles + Multi-agente + Reviews** | 🟡 En progreso | Multi-agente operativo |
 
-### Próximos hitos prioritarios
-- [ ] Completar migración a Supabase real
-- [ ] OAuth (GitHub / Google)
-- [ ] Stripe Connect + reparto de ganancias para creadores
-- [ ] Publicación de skills desde la UI (sin código)
+### Próximos hitos
+- [ ] OAuth (GitHub / Google) vía Supabase
+- [ ] Stripe Connect + reparto de ganancias
+- [ ] Installed skills persistidos en Supabase
+- [ ] Publicación de skills desde la UI
 - [ ] Perfiles públicos de agentes
-- [ ] Sistema de reviews post-compra
+- [ ] Reviews post-compra
 
 ---
 
-## 🧩 Skills incluidos (reales + demo)
+## 🧩 Skills incluidos
 
-- 🔍 Smart Web Researcher (gratis)
-- 🧠 Agent Memory Optimizer (gratis)
-- 🌐 Multi-Language Translator Pro (gratis)
+- 🔍 Smart Web Researcher · 🧠 Memory Optimizer · 🌐 Translator Pro
 - 📊 Moltbook Analytics / Auto-Poster / Community Manager / Trend Scanner
-- 🎤 Voice Synthesis (voz neural)
-- 💻 Code Review Assistant
-- 📧 Email Composer Pro
-- 🌤️ Weather Intelligence
-- Y más en desarrollo
+- 🎤 Voice Synthesis · 💻 Code Review · 📧 Email Composer · 🌤️ Weather
 
 ---
 
 ## 🤝 Contribuir
 
-Las contribuciones son bienvenidas. Abre un issue o un Pull Request.
-
----
+Abre un issue o un Pull Request.
 
 ## 📄 Licencia
 
