@@ -36,10 +36,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Top bar — promo + language selector (hidden on mobile, visible md+) */}
       <div className="hidden md:block bg-primary text-white py-1.5 text-xs font-medium tracking-wide">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
-          {/* Language selector — left side */}
           <div className="absolute left-4 sm:left-6 lg:left-8 flex items-center gap-0.5">
             <button
               onClick={() => setLang("es")}
@@ -64,10 +62,8 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Promo text — centered */}
           <span>🚀 {t("promo.new")} — {t("promo.explore")}</span>
 
-          {/* Right side — dark mode + install */}
           <div className="absolute right-4 sm:right-6 lg:right-8 flex items-center gap-2">
             <DarkModeToggle />
             <button
@@ -88,7 +84,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile-only slim top bar — language + install */}
       <div className="md:hidden bg-primary text-white py-0.5 text-xs">
         <div className="flex items-center justify-between px-3">
           <div className="flex items-center gap-0.5">
@@ -130,11 +125,9 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main header — dark */}
       <div className="bg-header-bg border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 md:gap-4 h-12 md:h-16">
-            {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0 group">
               <Image
                 src="/lobster-black.png"
@@ -149,7 +142,6 @@ export default function Header() {
               </div>
             </Link>
 
-            {/* Search bar — the big centerpiece */}
             <div className="flex-1 max-w-2xl">
               <div className="relative">
                 <input
@@ -167,7 +159,6 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Right side — account & cart */}
             <div className="hidden md:flex items-center gap-1">
               {isAuthenticated ? (
                 <div className="flex items-center gap-1">
@@ -198,12 +189,18 @@ export default function Header() {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   <Link
                     href="/login"
-                    className="px-3 py-2 rounded-lg text-sm bg-primary hover:bg-primary-hover text-white font-medium transition-colors"
+                    className="px-3 py-2 rounded-lg text-sm text-header-muted hover:text-white hover:bg-white/5 font-medium transition-colors"
                   >
                     Iniciar sesión
+                  </Link>
+                  <Link
+                    href="/registro"
+                    className="px-3 py-2 rounded-lg text-sm bg-primary hover:bg-primary-hover text-white font-medium transition-colors"
+                  >
+                    Crear cuenta
                   </Link>
                 </div>
               )}
@@ -237,7 +234,6 @@ export default function Header() {
                 </div>
               </Link>
 
-              {/* Cart — links to /cart */}
               <Link
                 href="/cart"
                 className="flex items-center gap-2 px-3 py-2 ml-1 rounded-lg bg-accent/10 hover:bg-accent/20 transition-colors group relative"
@@ -255,7 +251,6 @@ export default function Header() {
                 <span className="text-sm font-bold text-accent">${totalPrice.toFixed(2)}</span>
               </Link>
 
-              {/* Recharge button */}
               <button
                 onClick={() => setRechargeOpen(true)}
                 className="flex items-center px-2 py-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
@@ -264,7 +259,6 @@ export default function Header() {
               </button>
             </div>
 
-            {/* Mobile hamburger */}
             <button
               className="md:hidden p-2 rounded-lg text-header-muted hover:text-white hover:bg-white/5 transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -282,7 +276,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Navigation bar — secondary (horizontal scroll on mobile) */}
       <nav className="bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-1 h-9 md:h-11 overflow-x-auto whitespace-nowrap scrollbar-hide">
@@ -317,7 +310,6 @@ export default function Header() {
         </div>
       </nav>
 
-      {/* Mobile Nav */}
       {mobileOpen && (
         <div className="md:hidden bg-header-bg border-b border-white/10 animate-fade-in">
           <div className="max-w-7xl mx-auto px-4 py-3 space-y-1">
@@ -328,6 +320,7 @@ export default function Header() {
               ...(isAuthenticated
                 ? [{ href: "/account", label: `👤 ${user?.username ?? t("account.label")}` }]
                 : [
+                    { href: "/registro", label: "✨ Crear cuenta" },
                     { href: "/login", label: "🔑 Iniciar sesión" },
                   ]),
               { href: "/community", label: `👥 ${t("nav.community")}` },
@@ -362,16 +355,19 @@ export default function Header() {
               <span className="text-sm font-bold text-accent">{t("cart.label")}: ${totalPrice.toFixed(2)}</span>
             </Link>
             <button
-              onClick={() => { setMobileOpen(false); setRechargeOpen(true); }}
-              className="w-full flex items-center gap-2 px-3 hover:bg-white/5 rounded-lg py-2.5 transition-colors"
+              onClick={() => {
+                setMobileOpen(false);
+                setRechargeOpen(true);
+              }}
+              className="w-full flex items-center gap-2 px-3 hover:bg-white/5 rounded-lg py-2.5 transition-colors text-left"
             >
-              <span className="text-[10px] text-accent/60 ml-1">+ {t("recharge.balance")}</span>
+              <span className="text-sm text-accent">+ {t("recharge")}</span>
             </button>
           </div>
         </div>
       )}
-      {/* Recharge Modal */}
-      <RechargeModal isOpen={rechargeOpen} onClose={() => setRechargeOpen(false)} />
+
+      <RechargeModal open={rechargeOpen} onClose={() => setRechargeOpen(false)} />
     </header>
   );
 }
