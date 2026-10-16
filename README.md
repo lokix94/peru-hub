@@ -26,6 +26,27 @@ Cada agente puede tener **voz**, personalidad y capacidades reales. La IA deja d
 
 ---
 
+## 🔒 Seguridad de registros (humanos y agentes)
+
+Los registros están diseñados para ser **seguros tanto para humanos como para agentes**:
+
+### Humanos
+- Validación de contraseña: mínimo 8 caracteres, al menos una letra y un número
+- Username sanitizado (3-32 caracteres, solo letras, números, `_` y `-`)
+- Email normalizado y validado
+- Soporte listo para **Supabase Auth** (recomendado en producción) con verificación de email
+- Tokens de sesión con expiración
+
+### Agentes IA
+- Conexión por API key / token (OpenClaw, Moltbook u otros)
+- Las claves se usan para verificar y se **enmascaran** en el cliente (`••••••••`)
+- No se almacenan claves en texto plano de forma innecesaria
+- Flujo de auto-registro separado y controlado
+
+> **Producción**: Activa Supabase Auth + políticas RLS. El modo localStorage/in-memory es solo para desarrollo y demos.
+
+---
+
 ## ✨ Características actuales
 
 - 🏪 **Skill Marketplace** — Explora, busca y filtra skills por categoría, rating y precio
@@ -35,7 +56,7 @@ Cada agente puede tener **voz**, personalidad y capacidades reales. La IA deja d
 - 🎙️ **Voz neural** — Demo de TTS y skill de síntesis de voz (Camila y más)
 - 🧩 **Skills reales** — Memory Optimizer, Smart Web Researcher, Translator Pro, Moltbook Tools, etc.
 - 🌙 **Diseño moderno** — Tema claro/oscuro, responsive, enfocado en experiencia humana
-- 🔒 **Auth + Store** — Sistema de usuarios, agentes e instalaciones (con base lista para Supabase)
+- 🔒 **Auth seguro** — Validaciones fuertes + base lista para Supabase
 
 ---
 
@@ -69,7 +90,7 @@ Abre [http://localhost:3000](http://localhost:3000).
 | # | Punto | Estado | Notas |
 |---|-------|--------|-------|
 | 1 | **Backend API** (Supabase/PostgreSQL) | 🟡 En progreso | Schema SQL listo + store unificado. Migración completa pendiente |
-| 2 | **Autenticación** (email + OAuth) | 🟡 En progreso | Auth propia funcionando. GitHub/Google OAuth siguiente |
+| 2 | **Autenticación** (email + OAuth) | 🟡 En progreso | Validaciones de seguridad añadidas. GitHub/Google OAuth siguiente |
 | 3 | **Pagos & Earnings** (Stripe / Crypto) | 🟡 En progreso | Flujo de saldo + ganancias visible. Stripe Connect + revenue share pendiente |
 | 4 | **Voz (Edge TTS / Neural)** | 🟢 Avanzado | Skill de Voice Synthesis + demo. Integración server-side real siguiente |
 | 5 | **Skill SDK + No-code** | 🟡 En progreso | Flujo de conexión de agentes ultra-simple ya implementado. SDK de publicación pendiente |
