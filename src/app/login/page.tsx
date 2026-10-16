@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -17,7 +16,6 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Check URL params for confirmation status
   useEffect(() => {
     const confirmed = searchParams.get("confirmed");
     const urlError = searchParams.get("error");
@@ -34,7 +32,6 @@ function LoginForm() {
     }
   }, [searchParams]);
 
-  // Redirect if already logged in
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       router.replace("/account");
@@ -67,7 +64,6 @@ function LoginForm() {
     router.push("/account");
   }
 
-  // Don't show form while checking auth state
   if (isLoading) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
@@ -76,7 +72,6 @@ function LoginForm() {
     );
   }
 
-  // Don't show form if already authenticated (will redirect via useEffect)
   if (isAuthenticated) {
     return null;
   }
@@ -84,23 +79,18 @@ function LoginForm() {
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-md bg-[#16161d] rounded-2xl border border-white/10 p-8 animate-fade-in">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="text-4xl mb-2">🦞</div>
           <h1 className="text-xl font-bold text-white">Iniciar sesión</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Accede a tu cuenta de Langosta Hub
-          </p>
+          <p className="text-sm text-gray-400 mt-1">Accede a tu cuenta de Langosta Hub</p>
         </div>
 
-        {/* Success message (e.g. email confirmed) */}
         {successMessage && (
           <div className="mb-5 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-xs text-center">
             {successMessage}
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center">
             {error}
@@ -108,13 +98,11 @@ function LoginForm() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">
-              Email
-            </label>
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Email</label>
             <input
               type="email"
+              autoComplete="email"
               placeholder="tu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -122,13 +110,11 @@ function LoginForm() {
             />
           </div>
 
-          {/* Password */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">
-              Contraseña
-            </label>
+            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Contraseña</label>
             <input
               type="password"
+              autoComplete="current-password"
               placeholder="Tu contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -136,7 +122,6 @@ function LoginForm() {
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -146,8 +131,13 @@ function LoginForm() {
           </button>
         </form>
 
+        <p className="text-center text-xs text-gray-500 mt-6">
+          ¿No tienes cuenta?{" "}
+          <Link href="/registro" className="text-primary hover:underline font-medium">
+            Crear cuenta
+          </Link>
+        </p>
       </div>
-
     </div>
   );
 }
