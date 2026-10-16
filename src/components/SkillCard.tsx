@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Skill } from "@/data/skills";
 import { useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { isRealRuntimeSkill } from "@/lib/skill-runtime";
 
 function StarRating({ rating, showValue = true }: { rating: number; showValue?: boolean }) {
   return (
@@ -29,11 +30,11 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
   const { addItem, isInCart } = useCart();
   const { t } = useLanguage();
   const inCart = isInCart(skill.id);
+  const isReal = isRealRuntimeSkill(skill.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Free skills → go to skill detail page for direct install (no cart)
     if (skill.price === 0) {
       window.location.href = `/marketplace/${skill.id}`;
       return;
@@ -52,11 +53,14 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
   return (
     <Link href={`/marketplace/${skill.id}`}>
       <div className="product-card p-4 h-full flex flex-col cursor-pointer group">
-        {/* Icon area */}
         <div className="w-full aspect-[4/3] rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center mb-3 relative overflow-hidden">
           <span className="text-5xl group-hover:scale-110 transition-transform duration-300">{skill.icon}</span>
-          {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {isReal && (
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-600 text-white shadow-sm">
+                ⚡ REAL
+              </span>
+            )}
             {(skill.isFree || skill.price === 0) && (
               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-green-500 text-white shadow-sm">
                 GRATIS
@@ -73,7 +77,6 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
               </span>
             )}
           </div>
-          {/* In-cart indicator */}
           {inCart && (
             <div className="absolute top-2 right-2">
               <span className="w-6 h-6 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center shadow-sm">
@@ -83,24 +86,19 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
           )}
         </div>
 
-        {/* Info */}
         <div className="flex-1 flex flex-col">
-          {/* Author */}
           <div className="flex items-center gap-1 mb-1">
             <span className="text-[11px] text-text-muted">{skill.author}</span>
           </div>
 
-          {/* Name */}
           <h3 className="text-sm font-semibold text-text-primary group-hover:text-primary transition-colors leading-snug mb-1">
             {skill.name}
           </h3>
 
-          {/* Short description */}
           <p className="text-xs text-text-secondary leading-relaxed mb-3 line-clamp-2 flex-1">
             {skill.shortDescription}
           </p>
 
-          {/* Rating & reviews */}
           <div className="flex items-center gap-2 mb-3">
             <StarRating rating={skill.rating} />
             <span className="text-[10px] text-text-muted">
@@ -108,7 +106,6 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
             </span>
           </div>
 
-          {/* Price + CTA */}
           <div className="flex items-center justify-between pt-3 border-t border-border">
             <div className="flex items-center gap-1.5">
               {skill.price === 0 ? (
@@ -130,7 +127,7 @@ export default function SkillCard({ skill, index = 0 }: { skill: Skill; index?: 
                   : "bg-primary hover:bg-primary-hover text-white"
               }`}
             >
-              {inCart ? `✓ ${t("added.short")}` : skill.price === 0 ? "⚡ Instalar" : t("add.short")}
+              {inCart ? `✓ ${t("added.short")}` : skill.price === 0 ? (isReal ? "⚡ Probar" : "⚡ Instalar") : t("add.short")}
             </button>
           </div>
         </div>
