@@ -9,6 +9,17 @@ import { useLanguage } from "@/context/LanguageContext";
 const banners = [
   {
     id: 1,
+    headline: { es: "Conecta tu agente. Sin código. 🦞", en: "Connect your agent. No code. 🦞" },
+    sub: {
+      es: "La tienda donde tu agente de IA adquiere nuevas habilidades y tú ganas dinero creando skills.",
+      en: "The store where your AI agent gets new skills and you earn money by creating them.",
+    },
+    cta: { es: "Empezar ahora", en: "Start now" },
+    link: "/account",
+    gradient: "from-orange-500 to-red-600",
+  },
+  {
+    id: 2,
     headline: { es: "Moltbook Tools — ¡Ya llegaron! 🦞", en: "Moltbook Tools — They're here! 🦞" },
     sub: {
       es: "Analytics, Auto-Poster, Community Manager y Trend Scanner. Todo para dominar Moltbook.",
@@ -16,18 +27,7 @@ const banners = [
     },
     cta: { es: "Ver Moltbook Tools", en: "See Moltbook Tools" },
     link: "/marketplace/moltbook-analytics",
-    gradient: "from-orange-500 to-red-600",
-  },
-  {
-    id: 2,
-    headline: { es: "Investigación inteligente 🔍", en: "Smart Research 🔍" },
-    sub: {
-      es: "Smart Web Researcher verifica en múltiples fuentes y puntúa la confiabilidad",
-      en: "Smart Web Researcher verifies across multiple sources and scores reliability",
-    },
-    cta: { es: "Obtener gratis", en: "Get free" },
-    link: "/marketplace/smart-web-researcher",
-    gradient: "from-emerald-500 to-teal-600",
+    gradient: "from-rose-500 to-orange-600",
   },
   {
     id: 3,
@@ -70,22 +70,77 @@ export default function HomePage() {
     { nameKey: "cat.all", icon: "🛒", categoryKey: "all", color: "bg-gray-50 border-gray-200 hover:bg-gray-100", iconBg: "bg-gray-100" },
   ];
 
+  // Human-friendly how-it-works (no-code focused)
   const howSteps = [
-    { step: "1", icon: "🛒", titleKey: "how.step1.title", descKey: "how.step1.desc" },
-    { step: "2", icon: "💳", titleKey: "how.step2.title", descKey: "how.step2.desc" },
-    { step: "3", icon: "⚡", titleKey: "how.step3.title", descKey: "how.step3.desc" },
-    { step: "4", icon: "🚀", titleKey: "how.step4.title", descKey: "how.step4.desc" },
+    {
+      step: "1",
+      icon: "🔗",
+      title: { es: "Conecta tu agente", en: "Connect your agent" },
+      desc: { es: "Elige OpenClaw, Moltbook u otro. Pega la API key y listo. Sin terminal ni archivos.", en: "Choose OpenClaw, Moltbook or other. Paste the API key and done. No terminal or files." },
+    },
+    {
+      step: "2",
+      icon: "🛒",
+      title: { es: "Elige habilidades", en: "Choose skills" },
+      desc: { es: "Explora la tienda. Muchas son gratis. Las premium empiezan desde $2.99.", en: "Browse the store. Many are free. Premium starts from $2.99." },
+    },
+    {
+      step: "3",
+      icon: "⚡",
+      title: { es: "Instala en un clic", en: "Install in one click" },
+      desc: { es: "Tu agente recibe la nueva habilidad al instante. Sin configuración complicada.", en: "Your agent gets the new skill instantly. No complicated setup." },
+    },
+    {
+      step: "4",
+      icon: "🚀",
+      title: { es: "Tu agente mejora", en: "Your agent levels up" },
+      desc: { es: "Habla, investiga, automatiza y gana. Tú también puedes publicar skills y generar ingresos.", en: "It talks, researches, automates and grows. You can also publish skills and earn." },
+    },
   ];
 
   return (
     <div className="min-h-screen">
+      {/* ===== VISION BANNER (new) ===== */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
+        <div className="bg-gradient-to-r from-slate-900 via-orange-900 to-red-900 rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
+          <div className="relative max-w-2xl">
+            <p className="text-orange-300 text-xs font-semibold uppercase tracking-wider mb-2">
+              {lang === "es" ? "La tienda de habilidades para agentes IA" : "The skill store for AI agents"}
+            </p>
+            <h1 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">
+              {lang === "es"
+                ? "Tu agente puede mejorar. Tú puedes ganar. Sin escribir una sola línea de código."
+                : "Your agent can improve. You can earn. Without writing a single line of code."}
+            </h1>
+            <p className="text-white/75 text-sm md:text-base mb-5 max-w-xl">
+              {lang === "es"
+                ? "Conecta uno o varios agentes, cómprales skills y míralos subir de nivel. Si creas skills, también ganas dinero."
+                : "Connect one or multiple agents, buy them skills and watch them level up. If you create skills, you also earn money."}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/account"
+                className="inline-flex items-center px-5 py-2.5 bg-white text-gray-900 font-semibold rounded-full text-sm hover:bg-gray-100 transition-colors shadow-lg"
+              >
+                {lang === "es" ? "Conectar mi agente" : "Connect my agent"} →
+              </Link>
+              <Link
+                href="/marketplace"
+                className="inline-flex items-center px-5 py-2.5 bg-white/10 border border-white/20 text-white font-semibold rounded-full text-sm hover:bg-white/20 transition-colors"
+              >
+                {lang === "es" ? "Explorar skills" : "Browse skills"}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ===== BANNER CAROUSEL ===== */}
       <section className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8 pt-2 md:pt-6 pb-2 md:pb-4">
         <div className="relative">
-          {/* Active banner */}
           <Link href={banners[activeBanner].link}>
-            <div className={`banner-slide bg-gradient-to-r ${banners[activeBanner].gradient} min-h-[35vh] md:min-h-[auto] flex items-center p-5 md:p-12 text-white relative overflow-hidden cursor-pointer group rounded-xl md:rounded-2xl`}>
-              {/* Decorative circles */}
+            <div className={`banner-slide bg-gradient-to-r ${banners[activeBanner].gradient} min-h-[32vh] md:min-h-[auto] flex items-center p-5 md:p-12 text-white relative overflow-hidden cursor-pointer group rounded-xl md:rounded-2xl`}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
               <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-white/5 rounded-full translate-y-1/2" />
 
@@ -103,7 +158,6 @@ export default function HomePage() {
             </div>
           </Link>
 
-          {/* Dots */}
           <div className="flex items-center justify-center gap-2 mt-2 md:mt-4">
             {banners.map((_, i) => (
               <button
@@ -128,7 +182,6 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Mobile: horizontal scroll / Desktop: grid */}
         <div className="flex md:grid md:grid-cols-4 lg:grid-cols-8 gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-1 md:pb-0">
           {storeCategories.map((cat) => (
             <Link
@@ -167,7 +220,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ===== POPULAR — MOST INSTALLED ===== */}
+      {/* ===== POPULAR ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -213,7 +266,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== FEATURED / STAFF PICKS ===== */}
+      {/* ===== FEATURED ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -231,12 +284,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== HOW IT WORKS ===== */}
+      {/* ===== HOW IT WORKS (no-code focused) ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="bg-white rounded-2xl border border-border p-8 md:p-10">
-          <h2 className="text-xl font-bold text-text-primary text-center mb-8">
-            {t("how.title")}
+          <h2 className="text-xl font-bold text-text-primary text-center mb-2">
+            {lang === "es" ? "¿Cómo funciona Langosta Hub?" : "How does Langosta Hub work?"}
           </h2>
+          <p className="text-center text-sm text-text-muted mb-8 max-w-lg mx-auto">
+            {lang === "es"
+              ? "Diseñado para que cualquiera pueda usarlo. Cero código."
+              : "Designed so anyone can use it. Zero code."}
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {howSteps.map((item) => (
               <div key={item.step} className="text-center">
@@ -246,8 +304,8 @@ export default function HomePage() {
                     {item.step}
                   </span>
                 </div>
-                <h3 className="text-sm font-semibold text-text-primary mb-1">{t(item.titleKey)}</h3>
-                <p className="text-xs text-text-muted leading-relaxed">{t(item.descKey)}</p>
+                <h3 className="text-sm font-semibold text-text-primary mb-1">{item.title[lang]}</h3>
+                <p className="text-xs text-text-muted leading-relaxed">{item.desc[lang]}</p>
               </div>
             ))}
           </div>
@@ -265,7 +323,7 @@ export default function HomePage() {
           ].map((item) => (
             <div key={item.author} className="bg-white border border-border rounded-xl p-5">
               <div className="flex mb-2">
-                {[1,2,3,4,5].map(s => (
+                {[1, 2, 3, 4, 5].map((s) => (
                   <svg key={s} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
@@ -285,17 +343,29 @@ export default function HomePage() {
       <section className="bg-header-bg text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
-            {t("bottom.cta.title")}
+            {lang === "es"
+              ? "Tu agente merece subir de nivel"
+              : "Your agent deserves to level up"}
           </h2>
           <p className="text-white/60 mb-6 max-w-md mx-auto">
-            {t("bottom.cta.desc")}
+            {lang === "es"
+              ? "Conecta tu agente, elige skills y empieza a ver la diferencia. Sin código."
+              : "Connect your agent, choose skills and start seeing the difference. No code."}
           </p>
-          <Link
-            href="/marketplace"
-            className="inline-block px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-semibold rounded-full text-base transition-all shadow-lg shadow-primary/30 hover:-translate-y-0.5"
-          >
-            {t("bottom.cta.button")} →
-          </Link>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link
+              href="/account"
+              className="inline-block px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-semibold rounded-full text-base transition-all shadow-lg shadow-primary/30 hover:-translate-y-0.5"
+            >
+              {lang === "es" ? "Conectar mi agente" : "Connect my agent"} →
+            </Link>
+            <Link
+              href="/marketplace"
+              className="inline-block px-8 py-3.5 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold rounded-full text-base transition-all"
+            >
+              {lang === "es" ? "Ver skills" : "Browse skills"}
+            </Link>
+          </div>
         </div>
       </section>
     </div>
