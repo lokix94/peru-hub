@@ -15,7 +15,7 @@ const banners = [
       en: "The store where your AI agent gets new skills and you earn money by creating them.",
     },
     cta: { es: "Empezar ahora", en: "Start now" },
-    link: "/account",
+    link: "/registro",
     gradient: "from-orange-500 to-red-600",
   },
   {
@@ -48,7 +48,7 @@ export default function HomePage() {
   const featured = getFeaturedSkills();
   const newSkills = getNewSkills();
   const popular = [...skills].sort((a, b) => b.installCount - a.installCount);
-  const free = skills.filter(s => s.price === 0);
+  const free = skills.filter((s) => s.price === 0);
 
   const nameKeyMap: Record<string, string> = {
     "Investigación y Análisis": "cat.research",
@@ -67,46 +67,65 @@ export default function HomePage() {
       color: cat.color,
       iconBg: cat.iconBg,
     })),
-    { nameKey: "cat.all", icon: "🛒", categoryKey: "all", color: "bg-gray-50 border-gray-200 hover:bg-gray-100", iconBg: "bg-gray-100" },
+    {
+      nameKey: "cat.all",
+      icon: "🛒",
+      categoryKey: "all",
+      color: "bg-gray-50 border-gray-200 hover:bg-gray-100",
+      iconBg: "bg-gray-100",
+    },
   ];
 
-  // Human-friendly how-it-works (no-code focused)
   const howSteps = [
     {
       step: "1",
-      icon: "🔗",
-      title: { es: "Conecta tu agente", en: "Connect your agent" },
-      desc: { es: "Elige OpenClaw, Moltbook u otro. Pega la API key y listo. Sin terminal ni archivos.", en: "Choose OpenClaw, Moltbook or other. Paste the API key and done. No terminal or files." },
+      icon: "📝",
+      title: { es: "Regístrate", en: "Sign up" },
+      desc: {
+        es: "Crea tu cuenta gratis. Luego inicia sesión cuando quieras.",
+        en: "Create a free account. Then log in anytime.",
+      },
     },
     {
       step: "2",
-      icon: "🛒",
-      title: { es: "Elige habilidades", en: "Choose skills" },
-      desc: { es: "Explora la tienda. Muchas son gratis. Las premium empiezan desde $2.99.", en: "Browse the store. Many are free. Premium starts from $2.99." },
+      icon: "🔗",
+      title: { es: "Conecta tu agente", en: "Connect your agent" },
+      desc: {
+        es: "OpenClaw, Moltbook u otro. Pega la API key y listo.",
+        en: "OpenClaw, Moltbook or other. Paste the API key and done.",
+      },
     },
     {
       step: "3",
-      icon: "⚡",
-      title: { es: "Instala en un clic", en: "Install in one click" },
-      desc: { es: "Tu agente recibe la nueva habilidad al instante. Sin configuración complicada.", en: "Your agent gets the new skill instantly. No complicated setup." },
+      icon: "🛒",
+      title: { es: "Elige habilidades", en: "Choose skills" },
+      desc: {
+        es: "Explora la tienda. Muchas son gratis. Premium desde $2.99.",
+        en: "Browse the store. Many free. Premium from $2.99.",
+      },
     },
     {
       step: "4",
       icon: "🚀",
       title: { es: "Tu agente mejora", en: "Your agent levels up" },
-      desc: { es: "Habla, investiga, automatiza y gana. Tú también puedes publicar skills y generar ingresos.", en: "It talks, researches, automates and grows. You can also publish skills and earn." },
+      desc: {
+        es: "Instala en un clic. También puedes publicar skills y ganar.",
+        en: "Install in one click. You can also publish skills and earn.",
+      },
     },
   ];
 
   return (
     <div className="min-h-screen">
-      {/* ===== VISION BANNER (new) ===== */}
+      {/* ===== VISION BANNER ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
         <div className="bg-gradient-to-r from-slate-900 via-orange-900 to-red-900 rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
           <div className="relative max-w-2xl">
             <p className="text-orange-300 text-xs font-semibold uppercase tracking-wider mb-2">
-              {lang === "es" ? "La tienda de habilidades para agentes IA" : "The skill store for AI agents"}
+              {lang === "es"
+                ? "La tienda de habilidades para agentes IA"
+                : "The skill store for AI agents"}
             </p>
             <h1 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">
               {lang === "es"
@@ -118,19 +137,36 @@ export default function HomePage() {
                 ? "Conecta uno o varios agentes, cómprales skills y míralos subir de nivel. Si creas skills, también ganas dinero."
                 : "Connect one or multiple agents, buy them skills and watch them level up. If you create skills, you also earn money."}
             </p>
+
+            {/* Dos recuadros principales */}
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/account"
-                className="inline-flex items-center px-5 py-2.5 bg-white text-gray-900 font-semibold rounded-full text-sm hover:bg-gray-100 transition-colors shadow-lg"
+                href="/login"
+                className="inline-flex items-center justify-center min-w-[160px] px-5 py-2.5 bg-white text-gray-900 font-semibold rounded-full text-sm hover:bg-gray-100 transition-colors shadow-lg"
               >
-                {lang === "es" ? "Conectar mi agente" : "Connect my agent"} →
+                {lang === "es" ? "Iniciar sesión" : "Log in"} →
               </Link>
               <Link
                 href="/marketplace"
-                className="inline-flex items-center px-5 py-2.5 bg-white/10 border border-white/20 text-white font-semibold rounded-full text-sm hover:bg-white/20 transition-colors"
+                className="inline-flex items-center justify-center min-w-[160px] px-5 py-2.5 bg-white/10 border border-white/20 text-white font-semibold rounded-full text-sm hover:bg-white/20 transition-colors"
               >
                 {lang === "es" ? "Explorar skills" : "Browse skills"}
               </Link>
+            </div>
+
+            {/* REGISTRO debajo de los dos recuadros */}
+            <div className="mt-4">
+              <Link
+                href="/registro"
+                className="inline-flex items-center justify-center w-full sm:w-auto min-w-[200px] px-6 py-3 bg-primary hover:bg-primary-hover text-white font-bold rounded-full text-sm shadow-lg shadow-primary/30 transition-all"
+              >
+                📝 {lang === "es" ? "REGISTRO — Crear cuenta gratis" : "SIGN UP — Create free account"}
+              </Link>
+              <p className="mt-2 text-[11px] text-white/50">
+                {lang === "es"
+                  ? "¿Primera vez? Regístrate. ¿Ya tienes cuenta? Usa Iniciar sesión."
+                  : "First time? Sign up. Already have an account? Use Log in."}
+              </p>
             </div>
           </div>
         </div>
@@ -140,10 +176,11 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-2 md:px-4 sm:px-6 lg:px-8 pt-2 md:pt-6 pb-2 md:pb-4">
         <div className="relative">
           <Link href={banners[activeBanner].link}>
-            <div className={`banner-slide bg-gradient-to-r ${banners[activeBanner].gradient} min-h-[32vh] md:min-h-[auto] flex items-center p-5 md:p-12 text-white relative overflow-hidden cursor-pointer group rounded-xl md:rounded-2xl`}>
+            <div
+              className={`banner-slide bg-gradient-to-r ${banners[activeBanner].gradient} min-h-[32vh] md:min-h-[auto] flex items-center p-5 md:p-12 text-white relative overflow-hidden cursor-pointer group rounded-xl md:rounded-2xl`}
+            >
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
               <div className="absolute bottom-0 left-1/2 w-48 h-48 bg-white/5 rounded-full translate-y-1/2" />
-
               <div className="relative max-w-lg">
                 <h2 className="text-2xl md:text-4xl font-extrabold mb-2 md:mb-3 leading-tight">
                   {banners[activeBanner].headline[lang]}
@@ -157,11 +194,11 @@ export default function HomePage() {
               </div>
             </div>
           </Link>
-
           <div className="flex items-center justify-center gap-2 mt-2 md:mt-4">
             {banners.map((_, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={() => setActiveBanner(i)}
                 className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all ${
                   i === activeBanner ? "bg-primary w-6 md:w-8" : "bg-gray-300 hover:bg-gray-400"
@@ -181,15 +218,20 @@ export default function HomePage() {
             {t("see.all")} →
           </Link>
         </div>
-
         <div className="flex md:grid md:grid-cols-4 lg:grid-cols-8 gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-1 md:pb-0">
           {storeCategories.map((cat) => (
             <Link
               key={cat.nameKey}
-              href={cat.categoryKey === "all" ? "/marketplace" : `/marketplace?category=${encodeURIComponent(cat.categoryKey)}`}
+              href={
+                cat.categoryKey === "all"
+                  ? "/marketplace"
+                  : `/marketplace?category=${encodeURIComponent(cat.categoryKey)}`
+              }
               className={`flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 rounded-xl border transition-all shrink-0 w-[72px] md:w-auto ${cat.color}`}
             >
-              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-xl md:text-2xl ${cat.iconBg}`}>
+              <div
+                className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-xl md:text-2xl ${cat.iconBg}`}
+              >
                 {cat.icon}
               </div>
               <span className="text-[10px] md:text-xs font-medium text-text-secondary text-center leading-tight">
@@ -200,13 +242,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== NEW SKILLS ===== */}
       {newSkills.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-text-primary">🆕 {lang === "es" ? "Recién llegados" : "Just Arrived"}</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-600 uppercase">New</span>
+              <h2 className="text-lg font-bold text-text-primary">
+                🆕 {lang === "es" ? "Recién llegados" : "Just Arrived"}
+              </h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-600 uppercase">
+                New
+              </span>
             </div>
             <Link href="/marketplace" className="text-sm text-primary hover:text-primary-hover font-medium">
               {t("see.all.excited")} →
@@ -220,12 +265,13 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ===== POPULAR ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-text-primary">🔥 {t("most.popular")}</h2>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600 uppercase">Top</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600 uppercase">
+              Top
+            </span>
           </div>
           <Link href="/marketplace" className="text-sm text-primary hover:text-primary-hover font-medium">
             {t("see.all.excited")} →
@@ -238,40 +284,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== FREE SKILLS BANNER ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 md:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="text-xl md:text-2xl font-bold mb-1">🎉 {t("free.skills.title")}</h3>
             <p className="text-white/80 text-sm">{t("free.skills.desc")}</p>
           </div>
-          <Link href="/marketplace?price=free" className="px-6 py-2.5 bg-white text-green-700 font-semibold rounded-full text-sm hover:bg-green-50 transition-colors shadow-lg whitespace-nowrap">
+          <Link
+            href="/marketplace?price=free"
+            className="px-6 py-2.5 bg-white text-green-700 font-semibold rounded-full text-sm hover:bg-green-50 transition-colors shadow-lg whitespace-nowrap"
+          >
             {t("free.skills.cta")} →
           </Link>
         </div>
       </section>
 
-      {/* ===== FREE SKILLS GRID ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-text-primary">🆓 {t("free.for.agent")}</h2>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700">FREE</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700">
+              FREE
+            </span>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {free.map((skill) => (
+          {free.slice(0, 8).map((skill) => (
             <SkillCard key={skill.id} skill={skill} />
           ))}
         </div>
       </section>
 
-      {/* ===== FEATURED ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-bold text-text-primary">⭐ {t("recommended")}</h2>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Staff Pick</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">
+              Staff Pick
+            </span>
           </div>
           <Link href="/marketplace" className="text-sm text-primary hover:text-primary-hover font-medium">
             {t("see.all.excited")} →
@@ -284,7 +334,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== HOW IT WORKS (no-code focused) ===== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="bg-white rounded-2xl border border-border p-8 md:p-10">
           <h2 className="text-xl font-bold text-text-primary text-center mb-2">
@@ -309,37 +358,17 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+          <div className="mt-8 text-center">
+            <Link
+              href="/registro"
+              className="inline-block px-8 py-3 rounded-full bg-primary hover:bg-primary-hover text-white font-bold text-sm shadow-lg"
+            >
+              📝 REGISTRO
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ===== TESTIMONIALS ===== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-10">
-        <h2 className="text-lg font-bold text-text-primary mb-4">💬 {t("testimonials.title")}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { quote: "Mi agente pasó de no saber nada de leyes a citar artículos constitucionales específicos. Increíble.", author: "LegalEagle_Lima", skill: "⚖️ Legal Research" },
-            { quote: "¡Mi agente ahora HABLA! El acento peruano suena tan natural que mi familia pensó que estaba en una llamada real.", author: "PodcasterPE", skill: "🎙️ Voz Camila" },
-            { quote: "De día y noche. Mi agente antes inventaba cosas — ahora verifica en múltiples fuentes.", author: "DataAnalyst42", skill: "🌐 Research Pro" },
-          ].map((item) => (
-            <div key={item.author} className="bg-white border border-border rounded-xl p-5">
-              <div className="flex mb-2">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <svg key={s} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-sm text-text-secondary leading-relaxed mb-3">&ldquo;{item.quote}&rdquo;</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-text-primary">{item.author}</span>
-                <span className="text-xs text-text-muted">{item.skill}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ===== BOTTOM CTA ===== */}
       <section className="bg-header-bg text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
@@ -349,21 +378,21 @@ export default function HomePage() {
           </h2>
           <p className="text-white/60 mb-6 max-w-md mx-auto">
             {lang === "es"
-              ? "Conecta tu agente, elige skills y empieza a ver la diferencia. Sin código."
-              : "Connect your agent, choose skills and start seeing the difference. No code."}
+              ? "Regístrate, inicia sesión y empieza. Sin código."
+              : "Sign up, log in and start. No code."}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              href="/account"
-              className="inline-block px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-semibold rounded-full text-base transition-all shadow-lg shadow-primary/30 hover:-translate-y-0.5"
+              href="/login"
+              className="inline-block px-8 py-3.5 bg-white text-gray-900 font-semibold rounded-full text-base hover:bg-gray-100 transition-all"
             >
-              {lang === "es" ? "Conectar mi agente" : "Connect my agent"} →
+              {lang === "es" ? "Iniciar sesión" : "Log in"}
             </Link>
             <Link
-              href="/marketplace"
-              className="inline-block px-8 py-3.5 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold rounded-full text-base transition-all"
+              href="/registro"
+              className="inline-block px-8 py-3.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-full text-base transition-all shadow-lg shadow-primary/30"
             >
-              {lang === "es" ? "Ver skills" : "Browse skills"}
+              📝 REGISTRO
             </Link>
           </div>
         </div>
