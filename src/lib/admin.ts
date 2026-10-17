@@ -6,7 +6,7 @@
 
 export const ADMIN_EMAIL = "admin@langostahub.com";
 export const ADMIN_USERNAME = "Admin";
-/** Owner-defined admin password (ñ as unicode escape for encoding safety) */
+/** Owner-defined admin password */
 export const ADMIN_PASSWORD = "Palkia\u00f194";
 
 export function isAdminEmail(email: string): boolean {
