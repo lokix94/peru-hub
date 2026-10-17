@@ -47,17 +47,25 @@ async function getEdgeToken(): Promise<{ token: string; region: string } | null>
   }
 }
 
+function escapeXml(text: string): string {
+  const amp = String.fromCharCode(38);
+  return text
+    .replace(/&/g, amp + "amp;")
+    .replace(/</g, amp + "lt;")
+    .replace(/>/g, amp + "gt;")
+    .replace(/"/g, amp + "quot;")
+    .replace(/'/g, amp + "apos;");
+}
+
 function buildSSML(text: string, voice: string, rate: string): string {
-  const escaped = text
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, """);
+  const escaped = escapeXml(text);
+  const v = escapeXml(voice);
+  const r = escapeXml(rate);
   return (
-    `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='es-PE'>` +
-    `<voice name='${voice}'>` +
-    `<prosody rate='${rate}'>${escaped}</prosody>` +
-    `</voice></speak>`
+    "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='es-PE'>" +
+    "<voice name='" + v + "'>" +
+    "<prosody rate='" + r + "'>" + escaped + "</prosody>" +
+    "</voice></speak>"
   );
 }
 
