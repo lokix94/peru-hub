@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  PAYMENT_WALLET,
+  USDT_BEP20_CONTRACT,
+  ROYALTY,
+  isValidTxHash,
+} from "@/lib/payments";
 
-const WALLET = "0xDD49337e6B62C8B0d750CD6F809A84F339a3061e";
-const USDT_CONTRACT = "0x55d398326f99059fF775485246999027B3197955";
+/**
+ * VerifyTransaction Controller
+ * POST — verify USDT BEP20 transfer to platform wallet on BSC
+ */
+
 const BSCSCAN_API = "https://api.etherscan.io/v2/api";
-const REQUIRED_CONFIRMATIONS = 3;
 
 interface VerifyRequest {
   txHash: string;
   expectedAmount: number;
-  buyerEmail: string;
+  buyerEmail?: string;
+  /** If true and no API key, accept valid-format hash for demo (local testing) */
+  allowDemo?: boolean;
 }
 
 interface VerifyResponse {
@@ -18,92 +28,109 @@ interface VerifyResponse {
   to?: string;
   confirmations?: number;
   timestamp?: string;
+  mode?: "onchain" | "demo";
   error?: string;
-}
-
-function isValidTxHash(hash: string): boolean {
-  return /^0x[a-fA-F0-9]{64}$/.test(hash);
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: VerifyRequest = await request.json();
-    const { txHash, expectedAmount, buyerEmail } = body;
+    const { txHash, expectedAmount, buyerEmail, allowDemo } = body;
 
-    // Validate input
     if (!txHash || typeof txHash !== "string") {
-      return NextResponse.json<VerifyResponse>({
-        verified: false,
-        error: "Hash de transacción requerido",
-      }, { status: 400 });
+      return NextResponse.json<VerifyResponse>(
+        { verified: false, error: "Hash de transacción requerido" },
+        { status: 400 }
+      );
     }
 
     if (!isValidTxHash(txHash)) {
-      return NextResponse.json<VerifyResponse>({
-        verified: false,
-        error: "Hash de transacción inválido. Debe ser formato 0x seguido de 64 caracteres hexadecimales",
-      }, { status: 400 });
+      return NextResponse.json<VerifyResponse>(
+        {
+          verified: false,
+          error:
+            "Hash inválido. Debe ser formato 0x + 64 caracteres hexadecimales.",
+        },
+        { status: 400 }
+      );
     }
 
-    if (typeof expectedAmount !== "number" || expectedAmount <= 0) {
-      return NextResponse.json<VerifyResponse>({
-        verified: false,
-        error: "Monto esperado inválido",
-      }, { status: 400 });
+    if (typeof expectedAmount !== "number" || expectedAmount < 0) {
+      return NextResponse.json<VerifyResponse>(
+        { verified: false, error: "Monto esperado inválido" },
+        { status: 400 }
+      );
     }
 
     const API_KEY = process.env.BSCSCAN_API_KEY;
+
+    // Demo mode when BSCScan is not configured (dev / preview)
     if (!API_KEY) {
-      return NextResponse.json<VerifyResponse>({
-        verified: false,
-        error: "Servicio de verificación no configurado. Contacta al administrador.",
-      }, { status: 503 });
+      if (allowDemo || process.env.ALLOW_PAYMENT_DEMO === "true") {
+        console.log(
+          `[TX DEMO] hash=${txHash} amount=${expectedAmount} buyer=${buyerEmail || "-"}`
+        );
+        return NextResponse.json<VerifyResponse>({
+          verified: true,
+          amount: expectedAmount,
+          from: "0xDemoBuyer000000000000000000000000000001",
+          to: PAYMENT_WALLET,
+          confirmations: ROYALTY.requiredConfirmations,
+          timestamp: new Date().toISOString(),
+          mode: "demo",
+        });
+      }
+      return NextResponse.json<VerifyResponse>(
+        {
+          verified: false,
+          error:
+            "Verificación on-chain no configurada (BSCSCAN_API_KEY). Contacta al administrador o activa ALLOW_PAYMENT_DEMO.",
+        },
+        { status: 503 }
+      );
     }
 
-    // Step 1: Get transaction receipt to check status
+    // --- On-chain verification ---
     const receiptUrl = new URL(BSCSCAN_API);
     receiptUrl.searchParams.set("chainid", "56");
     receiptUrl.searchParams.set("module", "proxy");
     receiptUrl.searchParams.set("action", "eth_getTransactionReceipt");
-    receiptUrl.searchParams.set("txhash", txHash);
+    receiptUrl.searchParams.set("txhash", txHash.trim());
     receiptUrl.searchParams.set("apikey", API_KEY);
 
     const receiptRes = await fetch(receiptUrl.toString());
     if (!receiptRes.ok) {
-      return NextResponse.json<VerifyResponse>({
-        verified: false,
-        error: "Error al conectar con BSCScan. Intenta de nuevo.",
-      }, { status: 502 });
+      return NextResponse.json<VerifyResponse>(
+        {
+          verified: false,
+          error: "Error al conectar con el explorador BSC. Intenta de nuevo.",
+        },
+        { status: 502 }
+      );
     }
 
     const receiptData = await receiptRes.json();
 
-    if (!receiptData.result || receiptData.result === null) {
+    if (!receiptData.result) {
       return NextResponse.json<VerifyResponse>({
         verified: false,
-        error: "Transacción no encontrada. Verifica el hash e intenta de nuevo.",
+        error: "Transacción no encontrada. Revisa el hash en BscScan.",
       });
     }
 
-    // Check transaction status (0x1 = success, 0x0 = failed)
-    const txStatus = receiptData.result.status;
-    if (txStatus === "0x0") {
+    if (receiptData.result.status === "0x0") {
       return NextResponse.json<VerifyResponse>({
         verified: false,
         error: "La transacción falló en la blockchain.",
       });
     }
 
-    // Step 2: Get token transfer details for this specific transaction
-    // We query token transfers by the sender address from the receipt, filtering by tx hash
-    const fromAddress = receiptData.result.from;
-
     const tokenTxUrl = new URL(BSCSCAN_API);
     tokenTxUrl.searchParams.set("chainid", "56");
     tokenTxUrl.searchParams.set("module", "account");
     tokenTxUrl.searchParams.set("action", "tokentx");
-    tokenTxUrl.searchParams.set("contractaddress", USDT_CONTRACT);
-    tokenTxUrl.searchParams.set("address", WALLET);
+    tokenTxUrl.searchParams.set("contractaddress", USDT_BEP20_CONTRACT);
+    tokenTxUrl.searchParams.set("address", PAYMENT_WALLET);
     tokenTxUrl.searchParams.set("page", "1");
     tokenTxUrl.searchParams.set("offset", "100");
     tokenTxUrl.searchParams.set("sort", "desc");
@@ -111,10 +138,13 @@ export async function POST(request: NextRequest) {
 
     const tokenRes = await fetch(tokenTxUrl.toString());
     if (!tokenRes.ok) {
-      return NextResponse.json<VerifyResponse>({
-        verified: false,
-        error: "Error al consultar transferencias de token. Intenta de nuevo.",
-      }, { status: 502 });
+      return NextResponse.json<VerifyResponse>(
+        {
+          verified: false,
+          error: "Error al consultar transferencias USDT.",
+        },
+        { status: 502 }
+      );
     }
 
     const tokenData = await tokenRes.json();
@@ -122,73 +152,73 @@ export async function POST(request: NextRequest) {
     if (tokenData.status !== "1" || !Array.isArray(tokenData.result)) {
       return NextResponse.json<VerifyResponse>({
         verified: false,
-        error: "No se encontraron transferencias de USDT asociadas a esta transacción.",
+        error: "No se encontraron transferencias USDT hacia nuestra wallet.",
       });
     }
 
-    // Find the specific transaction by hash
     const matchingTx = tokenData.result.find(
-      (tx: Record<string, string>) => tx.hash.toLowerCase() === txHash.toLowerCase()
+      (tx: Record<string, string>) =>
+        tx.hash.toLowerCase() === txHash.trim().toLowerCase()
     );
 
     if (!matchingTx) {
       return NextResponse.json<VerifyResponse>({
         verified: false,
-        error: "Esta transacción no es una transferencia de USDT BEP20 a nuestra wallet.",
+        error:
+          "Esta transacción no es una transferencia de USDT BEP20 a la wallet de Langosta Hub.",
       });
     }
 
-    // Verify destination wallet
-    if (matchingTx.to.toLowerCase() !== WALLET.toLowerCase()) {
+    if (matchingTx.to.toLowerCase() !== PAYMENT_WALLET.toLowerCase()) {
       return NextResponse.json<VerifyResponse>({
         verified: false,
-        error: "Wallet de destino incorrecta. El pago no fue enviado a la dirección correcta.",
+        error: "Wallet de destino incorrecta.",
       });
     }
 
-    // Verify token contract
-    if (matchingTx.contractAddress.toLowerCase() !== USDT_CONTRACT.toLowerCase()) {
+    if (
+      matchingTx.contractAddress.toLowerCase() !==
+      USDT_BEP20_CONTRACT.toLowerCase()
+    ) {
       return NextResponse.json<VerifyResponse>({
         verified: false,
-        error: "Token incorrecto. Solo se aceptan pagos en USDT BEP20.",
+        error: "Token incorrecto. Solo USDT BEP20.",
       });
     }
 
-    // Calculate amount
     const decimals = Number(matchingTx.tokenDecimal) || 18;
     const amount = Number(matchingTx.value) / Math.pow(10, decimals);
     const confirmations = Number(matchingTx.confirmations) || 0;
 
-    // Verify amount
-    if (amount < expectedAmount) {
+    if (amount + 1e-8 < expectedAmount) {
       return NextResponse.json<VerifyResponse>({
         verified: false,
         amount,
         from: matchingTx.from,
         to: matchingTx.to,
         confirmations,
-        error: `Monto incorrecto. Se esperaba $${expectedAmount.toFixed(2)} USDT pero se recibió $${amount.toFixed(2)} USDT.`,
+        error: `Monto insuficiente. Esperado $${expectedAmount.toFixed(2)} USDT, recibido $${amount.toFixed(2)} USDT.`,
       });
     }
 
-    // Verify confirmations
-    if (confirmations < REQUIRED_CONFIRMATIONS) {
+    if (confirmations < ROYALTY.requiredConfirmations) {
       return NextResponse.json<VerifyResponse>({
         verified: false,
         amount,
         from: matchingTx.from,
         to: matchingTx.to,
         confirmations,
-        error: `Esperando confirmaciones... (${confirmations}/${REQUIRED_CONFIRMATIONS}). Intenta de nuevo en unos segundos.`,
+        error: `Esperando confirmaciones... (${confirmations}/${ROYALTY.requiredConfirmations}). Reintenta en unos segundos.`,
       });
     }
 
-    // Build timestamp
-    const timestamp = new Date(Number(matchingTx.timeStamp) * 1000).toISOString();
+    const timestamp = new Date(
+      Number(matchingTx.timeStamp) * 1000
+    ).toISOString();
 
-    // All checks passed!
-    // Log verified transaction (buyerEmail for records)
-    console.log(`[TX VERIFIED] hash=${txHash} amount=${amount} from=${matchingTx.from} buyer=${buyerEmail}`);
+    console.log(
+      `[TX VERIFIED] hash=${txHash} amount=${amount} from=${matchingTx.from} buyer=${buyerEmail || "-"}`
+    );
 
     return NextResponse.json<VerifyResponse>({
       verified: true,
@@ -197,13 +227,32 @@ export async function POST(request: NextRequest) {
       to: matchingTx.to,
       confirmations,
       timestamp,
+      mode: "onchain",
     });
-
   } catch (err) {
-    console.error("[verify-transaction] Error:", err);
-    return NextResponse.json<VerifyResponse>({
-      verified: false,
-      error: "Error interno del servidor. Intenta de nuevo más tarde.",
-    }, { status: 500 });
+    console.error("[verify-transaction]", err);
+    return NextResponse.json<VerifyResponse>(
+      {
+        verified: false,
+        error: "Error interno. Intenta de nuevo más tarde.",
+      },
+      { status: 500 }
+    );
   }
+}
+
+export async function GET() {
+  return NextResponse.json({
+    service: "Langosta Hub Verify Transaction",
+    version: "2.0.0",
+    payment_wallet: PAYMENT_WALLET,
+    usdt_contract: USDT_BEP20_CONTRACT,
+    required_confirmations: ROYALTY.requiredConfirmations,
+    post_body: {
+      txHash: "0x...",
+      expectedAmount: 4.99,
+      buyerEmail: "opcional",
+      allowDemo: "opcional, true solo para pruebas sin BSCSCAN_API_KEY",
+    },
+  });
 }
