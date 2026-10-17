@@ -20,7 +20,7 @@ Cada agente puede tener **voz**, personalidad y capacidades reales. La IA deja d
 
 - **Para humanos no técnicos**: Conectas tu agente en 2 clics. Sin terminal, sin archivos, sin configuración complicada.
 - **Para agentes IA**: Compran skills (habilidades) que les dan nuevas capacidades (investigación, voz, automatización, redes sociales, etc.).
-- **Para creadores**: Publican skills y ganan dinero con cada instalación / venta.
+- **Para creadores**: Publican skills y ganan dinero con cada instalación / venta (97% al creador).
 - **Multi-agente**: Puedes tener varios agentes (OpenClaw, Moltbook u otros) y gestionarlos desde un solo lugar.
 - **Voz real**: Los agentes pueden hablar con voces neurales (incluyendo acento peruano).
 
@@ -39,6 +39,11 @@ Cada agente puede tener **voz**, personalidad y capacidades reales. La IA deja d
 - Claves enmascaradas en el cliente (`••••••••`)
 - Persistencia en Supabase cuando está configurado
 
+### Creadores (Developers)
+- Registro dedicado con wallet USDT BEP20
+- Declaración jurada al publicar skills
+- Revisión admin antes de publicar
+
 ---
 
 ## 🗄️ Supabase (producción)
@@ -46,7 +51,7 @@ Cada agente puede tener **voz**, personalidad y capacidades reales. La IA deja d
 La app funciona **sin** Supabase (modo demo con localStorage). Para producción:
 
 1. Crea un proyecto en [supabase.com](https://supabase.com)
-2. Ejecuta el SQL de `supabase/schema.sql` en el SQL Editor
+2. Ejecuta el SQL de `supabase/schema.sql` en el SQL Editor (incluye tablas de creadores y regalias)
 3. Configura las Redirect URLs (ver `supabase/SETUP.md`)
 4. Añade en Vercel / `.env.local`:
 
@@ -62,6 +67,7 @@ Cuando las variables están presentes:
 - Auth usa Supabase (registro, login, confirmación de email)
 - Los agentes se guardan y cargan desde la tabla `agents`
 - RLS protege los datos de cada usuario
+- Tablas de creadores listas: `developer_profiles`, `skill_submissions`, `royalties`
 
 ---
 
@@ -71,10 +77,12 @@ Cuando las variables están presentes:
 - 📋 **Páginas de detalle** — Descripción, reseñas, instalación en un clic
 - 💰 **Dashboard de cuenta** — Saldo, historial, skills y ganancias
 - 🤖 **Mis Agentes IA** — Multi-agente, conexión sin código, persistencia Supabase
+- 👨‍💻 **Sistema de Creadores** — Registro, publicación de skills, dashboard de ganancias (97%)
 - 🎙️ **Voz neural** — Demo TTS + skill de síntesis
 - 🧩 **Skills reales** — Memory Optimizer, Smart Web Researcher, Translator Pro, Moltbook Tools…
-- 🌙 **Diseño moderno** — Responsive, tema claro/oscuro
+- 🌙 **Diseño moderno** — Responsive, tema claro/oscuro, HTML semántico limpio
 - 🔒 **Auth dual** — Supabase (prod) o localStorage (demo)
+- 🔌 **API Developers** — `/api/developers` lista para perfiles y envío de skills
 
 ---
 
@@ -83,7 +91,7 @@ Cuando las variables están presentes:
 | Capa | Tecnología |
 |------|------------|
 | Framework | Next.js 15 (App Router) |
-| Lenguaje | TypeScript |
+| Lenguaje | TypeScript + HTML semántico |
 | Estilos | Tailwind CSS 4 |
 | Auth & Datos | Supabase (Auth + Postgres + RLS) + fallback local |
 | Deploy | Vercel |
@@ -108,19 +116,22 @@ Abre [http://localhost:3000](http://localhost:3000).
 
 | # | Punto | Estado | Notas |
 |---|-------|--------|-------|
-| 1 | **Backend API** (Supabase) | 🟢 Avanzado | Schema completo, client SSR, agentes persistidos |
+| 1 | **Backend API** (Supabase) | 🟢 Avanzado | Schema completo + tablas de creadores y regalias |
 | 2 | **Autenticación** | 🟢 Avanzado | Supabase Auth + validaciones + fallback local |
-| 3 | **Pagos & Earnings** | 🟡 En progreso | UI de saldo/ganancias lista; Stripe pendiente |
+| 3 | **Pagos & Earnings / Regalias** | 🟡 En progreso | UI lista + tabla `royalties` + API checkout crypto |
 | 4 | **Voz (Edge TTS)** | 🟢 Avanzado | Skill + demo |
 | 5 | **Skill SDK + No-code** | 🟡 En progreso | Flujo de conexión de agentes listo |
-| 6 | **Perfiles + Multi-agente + Reviews** | 🟡 En progreso | Multi-agente operativo |
+| 6 | **Sistema de Creadores** | 🟢 Avanzado | Registro, nueva-skill, dashboard, `/api/developers` |
+| 7 | **Perfiles + Multi-agente + Reviews** | 🟡 En progreso | Multi-agente operativo |
 
 ### Próximos hitos
+- [x] Tablas `developer_profiles`, `skill_submissions`, `royalties` en schema
+- [x] Endpoint `/api/developers` para perfiles y skills
+- [ ] Conectar formularios de creadores a Supabase (quitar localStorage)
 - [ ] OAuth (GitHub / Google) vía Supabase
-- [ ] Stripe Connect + reparto de ganancias
+- [ ] Flujo admin de pago de regalias (marcar paid + tx hash)
 - [ ] Installed skills persistidos en Supabase
-- [ ] Publicación de skills desde la UI
-- [ ] Perfiles públicos de agentes
+- [ ] Perfiles públicos de agentes y creadores
 - [ ] Reviews post-compra
 
 ---
