@@ -5,6 +5,14 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+function friendlyAuthError(raw?: string): string {
+  if (!raw) return "Credenciales incorrectas";
+  if (/failed to fetch|network|load failed|cors|error de conexión/i.test(raw)) {
+    return "No se pudo conectar. Revisa tu internet o inténtalo de nuevo en unos segundos.";
+  }
+  return raw;
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -57,15 +65,22 @@ function LoginForm() {
     }
 
     setLoading(true);
-    const result = await signIn(email.trim(), password);
-    setLoading(false);
+    try {
+      const result = await signIn(email.trim(), password);
+      setLoading(false);
 
-    if (!result.success) {
-      setError(result.error ?? "Credenciales incorrectas");
-      return;
+      if (!result.success) {
+        setError(friendlyAuthError(result.error));
+        return;
+      }
+
+      router.push("/account");
+    } catch {
+      setLoading(false);
+      setError(
+        "No se pudo conectar. Revisa tu internet o inténtalo de nuevo en unos segundos."
+      );
     }
-
-    router.push("/account");
   }
 
   if (isLoading) {
@@ -83,11 +98,15 @@ function LoginForm() {
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-md bg-[#16161d] rounded-2xl border border-white/10 p-8 animate-fade-in">
-        <div className="text-center mb-8">
-          <div className="text-4xl mb-2">🦞</div>
+        <header className="text-center mb-8">
+          <div className="text-4xl mb-2" aria-hidden="true">
+            🦞
+          </div>
           <h1 className="text-xl font-bold text-white">Iniciar sesión</h1>
-          <p className="text-sm text-gray-400 mt-1">Accede a tu cuenta de Langosta Hub</p>
-        </div>
+          <p className="text-sm text-gray-400 mt-1">
+            Accede a tu cuenta de Langosta Hub
+          </p>
+        </header>
 
         {successMessage && (
           <div className="mb-5 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-xs text-center">
@@ -96,15 +115,24 @@ function LoginForm() {
         )}
 
         {error && (
-          <div className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center">
+          <div
+            role="alert"
+            className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center"
+          >
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Email</label>
+            <label
+              htmlFor="email"
+              className="block text-xs text-gray-400 mb-1.5 font-medium"
+            >
+              Email
+            </label>
             <input
+              id="email"
               type="email"
               autoComplete="email"
               placeholder="tu@email.com"
@@ -116,7 +144,12 @@ function LoginForm() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs text-gray-400 font-medium">Contraseña</label>
+              <label
+                htmlFor="password"
+                className="block text-xs text-gray-400 font-medium"
+              >
+                Contraseña
+              </label>
               <Link
                 href="/recuperar"
                 className="text-xs text-primary hover:underline font-medium"
@@ -125,6 +158,7 @@ function LoginForm() {
               </Link>
             </div>
             <input
+              id="password"
               type="password"
               autoComplete="current-password"
               placeholder="Tu contraseña"
@@ -143,12 +177,12 @@ function LoginForm() {
           </button>
         </form>
 
-        {/* Acciones secundarias muy visibles */}
+        {/* Botón de registro bien visible */}
         <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
           <p className="text-center text-xs text-gray-400">¿Primera vez aquí?</p>
           <Link
             href="/registro"
-            className="block w-full py-3 rounded-xl border border-primary/50 bg-primary/10 hover:bg-primary/20 text-primary text-sm font-bold text-center transition-colors"
+            className="block w-full py-3 rounded-xl bg-white text-[#16161d] hover:bg-gray-100 text-sm font-bold text-center transition-colors"
           >
             Crear cuenta gratis
           </Link>
