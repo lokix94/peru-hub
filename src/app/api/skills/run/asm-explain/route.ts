@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     const lines = code.split("\n").slice(0, 40);
-    const explained = lines.map((line, i) => {
+    const explained = lines.map((line: string, i: number) => {
       const tokens = tokenizeLine(line);
       const mnemonic = tokens[0] || "";
       const meaning =
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     });
 
     const known = explained.filter(
-      (e) => e.mnemonic && dict[e.mnemonic]
+      (e: { mnemonic: string | null }) => e.mnemonic && dict[e.mnemonic]
     ).length;
 
     return NextResponse.json({

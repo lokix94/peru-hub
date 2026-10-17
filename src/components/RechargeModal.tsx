@@ -5,14 +5,14 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface RechargeModalProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
 }
 
 const WALLET_ADDRESS = "0xDD49337e6B62C8B0d750CD6F809A84F339a3061e";
 const PRESET_AMOUNTS = [5, 10, 25, 50];
 
-export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
+export default function RechargeModal({ open, onClose }: RechargeModalProps) {
   const [amount, setAmount] = useState("");
   const [txHash, setTxHash] = useState("");
   const [copied, setCopied] = useState(false);
@@ -22,16 +22,16 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
 
   // Animate in
   useEffect(() => {
-    if (isOpen) {
+    if (open) {
       requestAnimationFrame(() => setVisible(true));
     } else {
       setVisible(false);
     }
-  }, [isOpen]);
+  }, [open]);
 
   // Reset state when modal closes
   useEffect(() => {
-    if (!isOpen) {
+    if (!open) {
       const timer = setTimeout(() => {
         setAmount("");
         setTxHash("");
@@ -40,16 +40,16 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
       }, 200);
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [open]);
 
   // Escape key to close
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-    if (isOpen) window.addEventListener("keydown", handleEsc);
+    if (open) window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isOpen, onClose]);
+  }, [open, onClose]);
 
   const copyAddress = useCallback(async () => {
     try {
@@ -73,7 +73,7 @@ export default function RechargeModal({ isOpen, onClose }: RechargeModalProps) {
     setSubmitted(true);
   };
 
-  if (!isOpen) return null;
+  if (!open) return null;
 
   return (
     <div
