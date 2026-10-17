@@ -1,64 +1,122 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  PAYMENT_WALLET,
+  NETWORK,
+  ROYALTY,
+  isValidTxHash,
+  calculateRoyalties,
+} from "@/lib/payments";
 
-interface CheckoutRequest {
+/**
+ * Checkout Controller (Java-style)
+ * POST — register a payment intent / order after user sent USDT
+ * GET  — schema + payment wallet info
+ */
+
+interface CheckoutBody {
   wallet?: string;
   amount?: number;
   currency?: string;
   network?: string;
-  items?: string[];
+  items?: string[] | { skillId: string; skillName?: string; price?: number; quantity?: number }[];
   agent_id?: string;
   tx_hash?: string;
+  buyer_email?: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body: CheckoutRequest = await request.json();
+    const body: CheckoutBody = await request.json();
 
-    // Validate required fields
-    const missingFields: string[] = [];
-    if (body.amount == null || typeof body.amount !== "number") missingFields.push("amount");
-    if (!body.items || !Array.isArray(body.items) || body.items.length === 0) missingFields.push("items");
-    if (!body.tx_hash || typeof body.tx_hash !== "string" || body.tx_hash.trim() === "") missingFields.push("tx_hash");
+    const missing: string[] = [];
+    if (body.amount == null || typeof body.amount !== "number" || body.amount < 0) {
+      missing.push("amount");
+    }
+    if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
+      missing.push("items");
+    }
+    if (!body.tx_hash || typeof body.tx_hash !== "string" || !body.tx_hash.trim()) {
+      missing.push("tx_hash");
+    }
 
-    if (missingFields.length > 0) {
+    if (missing.length > 0) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields",
-          missing_fields: missingFields,
+          error: "Campos obligatorios faltantes",
+          missing_fields: missing,
           required_schema: {
-            amount: "number (required)",
-            items: "string[] (required, non-empty)",
-            tx_hash: "string (required)",
-            wallet: "string (optional)",
-            currency: "string (optional, default: USDT)",
-            network: "string (optional, default: BEP20)",
-            agent_id: "string (optional, Moltbook username)",
+            amount: "number (USDT total)",
+            items: "string[] skill ids o objetos { skillId, price, quantity }",
+            tx_hash: "string (hash BSC 0x...)",
+            wallet: "string (opcional, wallet del comprador)",
+            agent_id: "string (opcional)",
+            buyer_email: "string (opcional)",
           },
         },
         { status: 400 }
       );
     }
 
-    // Generate order ID (UUID v4)
-    const orderId = crypto.randomUUID();
-
     const txHash = body.tx_hash!.trim();
-    const bscscanUrl = `https://bscscan.com/tx/${txHash}`;
+    if (!isValidTxHash(txHash)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Hash de transacción inválido. Debe ser 0x seguido de 64 caracteres hexadecimales.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const orderId = crypto.randomUUID();
+    const amount = Number(body.amount);
+    const { developerShare, platformFee } = calculateRoyalties(amount);
+
+    // Normalize items for response
+    const normalizedItems = body.items!.map((it) => {
+      if (typeof it === "string") {
+        return { skillId: it, quantity: 1 };
+      }
+      return {
+        skillId: it.skillId,
+        skillName: it.skillName,
+        price: it.price,
+        quantity: it.quantity ?? 1,
+      };
+    });
 
     return NextResponse.json(
       {
         success: true,
         order_id: orderId,
-        amount: body.amount,
-        currency: body.currency || "USDT",
-        network: body.network || "BEP20",
-        items: body.items,
+        amount,
+        currency: body.currency || NETWORK.currency,
+        network: body.network || NETWORK.tokenStandard,
+        items: normalizedItems,
         agent_id: body.agent_id || null,
+        buyer_email: body.buyer_email || null,
         tx_hash: txHash,
-        bscscan_url: bscscanUrl,
+        bscscan_url: NETWORK.explorerTx(txHash),
+        payment_wallet: PAYMENT_WALLET,
+        royalties: {
+          developer_share: developerShare,
+          platform_fee: platformFee,
+          split: `${ROYALTY.developerShare * 100}/${ROYALTY.platformShare * 100}`,
+        },
         status: "pending_verification",
-        message: "Payment received. Transaction is being verified on-chain.",
+        message:
+          "Pago registrado. Verifica el hash en /api/verify-transaction para confirmar on-chain.",
+        next_step: {
+          method: "POST",
+          url: "/api/verify-transaction",
+          body: {
+            txHash,
+            expectedAmount: amount,
+            buyerEmail: body.buyer_email || "",
+          },
+        },
         timestamp: new Date().toISOString(),
       },
       { status: 201 }
@@ -67,7 +125,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Invalid request body. Expected JSON with checkout data.",
+        error: "JSON inválido. Envía amount, items y tx_hash.",
       },
       { status: 400 }
     );
@@ -77,18 +135,30 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     service: "Langosta Hub Checkout API",
-    version: "1.0.0",
-    methods: ["POST"],
-    schema: {
-      wallet: "string (your wallet address)",
-      amount: "number (total in USDT)",
-      currency: "string (default: USDT)",
-      network: "string (default: BEP20)",
-      items: "string[] (skill IDs to purchase)",
-      agent_id: "string (your Moltbook username)",
-      tx_hash: "string (BSC transaction hash)",
+    version: "2.0.0",
+    methods: ["GET", "POST"],
+    payment: {
+      wallet: PAYMENT_WALLET,
+      currency: NETWORK.currency,
+      network: NETWORK.tokenStandard,
+      chainId: NETWORK.chainId,
+      usdt_contract: "0x55d398326f99059fF775485246999027B3197955",
+      explorer: NETWORK.explorerAddress(PAYMENT_WALLET),
     },
-    payment_wallet: "0xDD49337e6B62C8B0d750CD6F809A84F339a3061e",
-    documentation: "Send USDT (BEP20) to the payment wallet, then POST tx_hash here.",
+    royalties: {
+      developer: `${ROYALTY.developerShare * 100}%`,
+      platform: `${ROYALTY.platformShare * 100}%`,
+      min_withdraw_usdt: ROYALTY.minWithdrawUsdt,
+    },
+    schema: {
+      amount: "number (total USDT)",
+      items: "string[] o { skillId, price?, quantity? }[]",
+      tx_hash: "string (BSC tx hash)",
+      wallet: "string (opcional)",
+      agent_id: "string (opcional)",
+      buyer_email: "string (opcional)",
+    },
+    documentation:
+      "1) Envía USDT BEP20 a la wallet. 2) POST aquí con tx_hash. 3) POST /api/verify-transaction.",
   });
 }
