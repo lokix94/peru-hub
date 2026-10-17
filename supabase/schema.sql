@@ -1,6 +1,7 @@
 -- Langosta Hub — Database Schema
 -- Run this in Supabase SQL Editor after creating the project
 -- Dashboard → SQL Editor → New query → Paste → Run
+-- Structured like a clean Java package layout for clarity
 
 -- ============================================================
 -- 1. PROFILES (extends auth.users)
@@ -10,12 +11,12 @@ CREATE TABLE IF NOT EXISTS profiles (
   username TEXT UNIQUE NOT NULL,
   email TEXT NOT NULL,
   balance DECIMAL(12,2) NOT NULL DEFAULT 0,
-  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin', 'developer')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- If table already exists, add role column safely
+-- If table already exists, add role column safely + extend allowed values
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -24,7 +25,12 @@ BEGIN
   ) THEN
     ALTER TABLE profiles
       ADD COLUMN role TEXT NOT NULL DEFAULT 'user'
-      CHECK (role IN ('user', 'admin'));
+      CHECK (role IN ('user', 'admin', 'developer'));
+  ELSE
+    -- Drop old constraint if exists and recreate with developer role
+    ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
+    ALTER TABLE profiles ADD CONSTRAINT profiles_role_check
+      CHECK (role IN ('user', 'admin', 'developer'));
   END IF;
 END $$;
 
@@ -207,7 +213,168 @@ CREATE POLICY "Admins can view all purchases"
   );
 
 -- ============================================================
--- 5. HELPER: update updated_at
+-- 5. DEVELOPER PROFILES (creators system) — HTML form ready
+-- ============================================================
+CREATE TABLE IF NOT EXISTS developer_profiles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL UNIQUE,
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  wallet_bep20 TEXT NOT NULL,
+  moltbook_profile TEXT,
+  bio TEXT,
+  website TEXT,
+  total_earned DECIMAL(12,2) NOT NULL DEFAULT 0,
+  pending_payout DECIMAL(12,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_developer_profiles_user ON developer_profiles(user_id);
+
+ALTER TABLE developer_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Developers can view own profile" ON developer_profiles;
+CREATE POLICY "Developers can view own profile"
+  ON developer_profiles FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Developers can insert own profile" ON developer_profiles;
+CREATE POLICY "Developers can insert own profile"
+  ON developer_profiles FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Developers can update own profile" ON developer_profiles;
+CREATE POLICY "Developers can update own profile"
+  ON developer_profiles FOR UPDATE
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Admins can view all developer profiles" ON developer_profiles;
+CREATE POLICY "Admins can view all developer profiles"
+  ON developer_profiles FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+-- ============================================================
+-- 6. SKILL SUBMISSIONS (tools published by creators)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS skill_submissions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  developer_id UUID REFERENCES developer_profiles(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  skill_name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  category TEXT NOT NULL,
+  price DECIMAL(10,2) NOT NULL CHECK (price >= 0.99),
+  repo_url TEXT NOT NULL,
+  source_code TEXT,
+  documentation TEXT,
+  tags TEXT[],
+  emoji TEXT DEFAULT '🔧',
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'archived')),
+  rejection_reason TEXT,
+  is_real BOOLEAN DEFAULT FALSE, -- has live runtime
+  runtime_endpoint TEXT,
+  installs_count INTEGER DEFAULT 0,
+  sales_count INTEGER DEFAULT 0,
+  total_revenue DECIMAL(12,2) DEFAULT 0,
+  submitted_at TIMESTAMPTZ DEFAULT NOW(),
+  reviewed_at TIMESTAMPTZ,
+  reviewed_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_skill_submissions_developer ON skill_submissions(developer_id);
+CREATE INDEX IF NOT EXISTS idx_skill_submissions_user ON skill_submissions(user_id);
+CREATE INDEX IF NOT EXISTS idx_skill_submissions_status ON skill_submissions(status);
+CREATE INDEX IF NOT EXISTS idx_skill_submissions_category ON skill_submissions(category);
+
+ALTER TABLE skill_submissions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Developers can view own submissions" ON skill_submissions;
+CREATE POLICY "Developers can view own submissions"
+  ON skill_submissions FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Developers can insert own submissions" ON skill_submissions;
+CREATE POLICY "Developers can insert own submissions"
+  ON skill_submissions FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Developers can update own pending submissions" ON skill_submissions;
+CREATE POLICY "Developers can update own pending submissions"
+  ON skill_submissions FOR UPDATE
+  USING (auth.uid() = user_id AND status = 'pending');
+
+-- Public can view approved skills
+DROP POLICY IF EXISTS "Anyone can view approved skills" ON skill_submissions;
+CREATE POLICY "Anyone can view approved skills"
+  ON skill_submissions FOR SELECT
+  USING (status = 'approved');
+
+DROP POLICY IF EXISTS "Admins can manage all submissions" ON skill_submissions;
+CREATE POLICY "Admins can manage all submissions"
+  ON skill_submissions FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+-- ============================================================
+-- 7. ROYALTIES / PAYOUTS (pagos de regalias a creadores)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS royalties (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  developer_id UUID REFERENCES developer_profiles(id) ON DELETE CASCADE NOT NULL,
+  skill_submission_id UUID REFERENCES skill_submissions(id) ON DELETE SET NULL,
+  purchase_id UUID REFERENCES purchases(id) ON DELETE SET NULL,
+  buyer_user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  amount_total DECIMAL(10,2) NOT NULL,          -- precio total de la venta
+  platform_fee DECIMAL(10,2) NOT NULL,         -- 3%
+  developer_share DECIMAL(10,2) NOT NULL,      -- 97%
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'failed', 'cancelled')),
+  payout_tx_hash TEXT,                         -- hash de la tx USDT al wallet del creador
+  payout_wallet TEXT,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  paid_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_royalties_developer ON royalties(developer_id);
+CREATE INDEX IF NOT EXISTS idx_royalties_status ON royalties(status);
+CREATE INDEX IF NOT EXISTS idx_royalties_skill ON royalties(skill_submission_id);
+
+ALTER TABLE royalties ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Developers can view own royalties" ON royalties;
+CREATE POLICY "Developers can view own royalties"
+  ON royalties FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM developer_profiles dp
+      WHERE dp.id = royalties.developer_id AND dp.user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "Admins can manage all royalties" ON royalties;
+CREATE POLICY "Admins can manage all royalties"
+  ON royalties FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+-- ============================================================
+-- 8. HELPER: update updated_at
 -- ============================================================
 CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS TRIGGER AS $$
@@ -227,12 +394,23 @@ CREATE TRIGGER agents_updated_at
   BEFORE UPDATE ON agents
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS developer_profiles_updated_at ON developer_profiles;
+CREATE TRIGGER developer_profiles_updated_at
+  BEFORE UPDATE ON developer_profiles
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS skill_submissions_updated_at ON skill_submissions;
+CREATE TRIGGER skill_submissions_updated_at
+  BEFORE UPDATE ON skill_submissions
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
 -- ============================================================
--- 6. PROMOTE FIRST ADMIN (run manually after signup)
+-- 9. PROMOTE FIRST ADMIN (run manually after signup)
 -- ============================================================
 -- UPDATE profiles SET role = 'admin' WHERE email = 'tu-email@ejemplo.com';
 
 -- ============================================================
 -- DONE
+-- El proyecto ahora tiene estructura sólida para creadores, regalias y HTML forms
 -- See supabase/SETUP.md for full instructions
 -- ============================================================
