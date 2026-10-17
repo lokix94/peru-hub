@@ -40,6 +40,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center relative">
           <div className="absolute left-4 sm:left-6 lg:left-8 flex items-center gap-0.5">
             <button
+              type="button"
               onClick={() => setLang("es")}
               className={`px-1.5 py-0.5 rounded text-[11px] font-semibold transition-all ${
                 lang === "es"
@@ -51,6 +52,7 @@ export default function Header() {
             </button>
             <span className="text-white/30 mx-0.5">|</span>
             <button
+              type="button"
               onClick={() => setLang("en")}
               className={`px-1.5 py-0.5 rounded text-[11px] font-semibold transition-all ${
                 lang === "en"
@@ -67,6 +69,7 @@ export default function Header() {
           <div className="absolute right-4 sm:right-6 lg:right-8 flex items-center gap-2">
             <DarkModeToggle />
             <button
+              type="button"
               onClick={async () => {
                 if (installPrompt) {
                   await installPrompt.prompt();
@@ -119,7 +122,10 @@ export default function Header() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-3 pr-10 py-1.5 md:pl-4 md:pr-12 md:py-2.5 rounded-full bg-white text-text-primary placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
-                <button className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 md:w-9 md:h-9 rounded-full bg-primary hover:bg-primary-hover flex items-center justify-center transition-colors">
+                <button
+                  type="button"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 md:w-9 md:h-9 rounded-full bg-primary hover:bg-primary-hover flex items-center justify-center transition-colors"
+                >
                   <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
@@ -150,6 +156,7 @@ export default function Header() {
                     + Agente
                   </Link>
                   <button
+                    type="button"
                     onClick={() => signOut()}
                     className="px-2 py-2 rounded-lg text-header-muted hover:text-red-400 hover:bg-white/5 transition-colors text-xs"
                     title="Desconectar"
@@ -159,6 +166,18 @@ export default function Header() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
+                  <Link
+                    href="/login"
+                    className="px-3 py-2 rounded-lg text-sm text-header-muted hover:text-white hover:bg-white/5 font-medium transition-colors"
+                  >
+                    Iniciar sesión
+                  </Link>
+                  <Link
+                    href="/registro"
+                    className="px-3 py-2 rounded-lg text-sm bg-white text-[#0f0f14] hover:bg-gray-100 font-bold transition-colors"
+                  >
+                    Registrarse
+                  </Link>
                   <Link
                     href="/conectar"
                     className="px-3 py-2 rounded-lg text-sm bg-primary hover:bg-primary-hover text-white font-medium transition-colors"
@@ -187,6 +206,7 @@ export default function Header() {
             </div>
 
             <button
+              type="button"
               className="md:hidden p-2 rounded-lg text-header-muted hover:text-white hover:bg-white/5 transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Menú"
@@ -209,6 +229,8 @@ export default function Header() {
             {[
               { href: "/", label: t("nav.home") },
               { href: "/marketplace", label: `🛒 ${t("nav.all")}` },
+              { href: "/registro", label: "📝 Registrarse" },
+              { href: "/login", label: "🔑 Entrar" },
               { href: "/conectar", label: "🔌 Conectar agente" },
               { href: "/community", label: `👥 ${t("nav.community")}` },
               { href: "/developers", label: "🛠️ Developers" },
@@ -242,12 +264,16 @@ export default function Header() {
             {[
               { href: "/", label: `🏠 ${t("nav.home")}` },
               { href: "/marketplace", label: "🛒 Tienda" },
+              ...(!isAuthenticated
+                ? [
+                    { href: "/registro", label: "📝 Registrarse" },
+                    { href: "/login", label: "🔑 Iniciar sesión" },
+                  ]
+                : [{ href: "/account", label: `👤 ${user?.username ?? "Cuenta"}` }]),
               { href: "/conectar", label: "🔌 Conectar agente (API)" },
-              ...(isAuthenticated
-                ? [{ href: "/account", label: `👤 ${user?.username ?? "Cuenta"}` }]
-                : []),
               { href: "/cart", label: `🛒 Carrito (${totalPrice.toFixed(2)} USDT)` },
               { href: "/community", label: "👥 Comunidad" },
+              { href: "/developers", label: "🛠️ Developers" },
             ].map((item) => (
               <Link
                 key={item.href}
