@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 export default function RegistroPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextUrl = searchParams.get("next") || "/account";
   const { signUp, isAuthenticated, isLoading } = useAuth();
 
   const [username, setUsername] = useState("");
@@ -19,9 +21,9 @@ export default function RegistroPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace("/account");
+      router.replace(nextUrl.startsWith("/") ? nextUrl : "/account");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, nextUrl]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -35,26 +37,49 @@ export default function RegistroPage() {
       setError("El email es obligatorio");
       return;
     }
+    if (password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres");
+      return;
+    }
     if (password !== confirm) {
       setError("Las contraseñas no coinciden");
       return;
     }
 
     setLoading(true);
-    const result = await signUp(username.trim(), email.trim(), password);
-    setLoading(false);
+    try {
+      const result = await signUp(username.trim(), email.trim(), password);
 
-    if (!result.success) {
-      setError(result.error ?? "No se pudo crear la cuenta");
-      return;
+      if (!result.success) {
+        const msg = result.error || "No se pudo crear la cuenta";
+        // Never show raw network errors
+        if (
+          /failed to fetch|network|load failed|cors/i.test(msg) ||
+          msg === "Error de conexión"
+        ) {
+          setError(
+            "No se pudo conectar. Revisa tu internet o inténtalo de nuevo en unos segundos."
+          );
+        } else {
+          setError(msg);
+        }
+        setLoading(false);
+        return;
+      }
+
+      if (result.needsVerification) {
+        setNeedsVerification(true);
+        setLoading(false);
+        return;
+      }
+
+      router.push(nextUrl.startsWith("/") ? nextUrl : "/account");
+    } catch {
+      setError(
+        "No se pudo conectar. Revisa tu internet o inténtalo de nuevo en unos segundos."
+      );
+      setLoading(false);
     }
-
-    if (result.needsVerification) {
-      setNeedsVerification(true);
-      return;
-    }
-
-    router.push("/account");
   }
 
   if (isLoading) {
@@ -74,8 +99,9 @@ export default function RegistroPage() {
           <div className="text-4xl mb-3">📧</div>
           <h1 className="text-xl font-bold text-white mb-2">Revisa tu email</h1>
           <p className="text-sm text-gray-400 mb-6">
-            Te enviamos un enlace de confirmación a <strong className="text-white">{email}</strong>.
-            Confirma y luego inicia sesión.
+            Te enviamos un enlace de confirmación a{" "}
+            <strong className="text-white">{email}</strong>. Confirma y luego
+            inicia sesión.
           </p>
           <Link
             href="/login"
@@ -95,20 +121,29 @@ export default function RegistroPage() {
           <div className="text-4xl mb-2">🦞</div>
           <h1 className="text-xl font-bold text-white">Crear cuenta</h1>
           <p className="text-sm text-gray-400 mt-1">
-            Regístrate para conectar agentes y skills · Sin código
+            Un solo registro para usuarios · Luego puedes ser desarrollador
           </p>
         </div>
 
         {error && (
-          <div className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center">
+          <div
+            role="alert"
+            className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center"
+          >
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Usuario</label>
+            <label
+              htmlFor="username"
+              className="block text-xs text-gray-400 mb-1.5 font-medium"
+            >
+              Usuario
+            </label>
             <input
+              id="username"
               type="text"
               autoComplete="username"
               placeholder="tu_usuario"
@@ -116,12 +151,20 @@ export default function RegistroPage() {
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
-            <p className="mt-1 text-[10px] text-gray-500">3–32 caracteres · letras, números, _ o -</p>
+            <p className="mt-1 text-[10px] text-gray-500">
+              3–32 caracteres · letras, números, _ o -
+            </p>
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Email</label>
+            <label
+              htmlFor="email"
+              className="block text-xs text-gray-400 mb-1.5 font-medium"
+            >
+              Email
+            </label>
             <input
+              id="email"
               type="email"
               autoComplete="email"
               placeholder="tu@email.com"
@@ -132,8 +175,14 @@ export default function RegistroPage() {
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Contraseña</label>
+            <label
+              htmlFor="password"
+              className="block text-xs text-gray-400 mb-1.5 font-medium"
+            >
+              Contraseña
+            </label>
             <input
+              id="password"
               type="password"
               autoComplete="new-password"
               placeholder="Mínimo 8 caracteres"
@@ -141,12 +190,20 @@ export default function RegistroPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
-            <p className="mt-1 text-[10px] text-gray-500">Mín. 8 caracteres · al menos 1 letra y 1 número</p>
+            <p className="mt-1 text-[10px] text-gray-500">
+              Mín. 8 caracteres · al menos 1 letra y 1 número
+            </p>
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">Confirmar contraseña</label>
+            <label
+              htmlFor="confirm"
+              className="block text-xs text-gray-400 mb-1.5 font-medium"
+            >
+              Confirmar contraseña
+            </label>
             <input
+              id="confirm"
               type="password"
               autoComplete="new-password"
               placeholder="Repite la contraseña"
@@ -173,7 +230,8 @@ export default function RegistroPage() {
         </p>
 
         <p className="text-center text-[10px] text-gray-600 mt-4">
-          Al registrarte aceptas conectar agentes de forma segura. Tus datos no se venden.
+          Un solo registro. Si quieres vender skills, después activas el perfil de
+          desarrollador desde tu cuenta.
         </p>
       </div>
     </div>
