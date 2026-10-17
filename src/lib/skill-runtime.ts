@@ -120,6 +120,17 @@ export const REAL_SKILL_RUNTIMES: SkillRuntime[] = [
       "curl -X POST https://langosta-hub.vercel.app/api/skills/run/public-ip -H 'Content-Type: application/json' -d '{\"ip\":\"8.8.8.8\"}'",
   },
   {
+    skillId: "github-skill-scout",
+    endpoint: "/api/skills/run/github-scout",
+    method: "POST",
+    description: "Ficha o búsqueda de repos y skills en GitHub (API pública)",
+    provider: "GitHub REST",
+    license: "API pública sin token",
+    sourceUrl: "https://docs.github.com/en/rest",
+    installCommand:
+      "curl -X POST https://langosta-hub.vercel.app/api/skills/run/github-scout -H 'Content-Type: application/json' -d '{\"repo\":\"microsoft/SkillOpt\"}'",
+  },
+  {
     skillId: "asm-explainer",
     endpoint: "/api/skills/run/asm-explain",
     method: "POST",

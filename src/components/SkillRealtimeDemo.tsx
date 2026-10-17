@@ -17,6 +17,7 @@ export default function SkillRealtimeDemo({ skillId, skillName }: Props) {
   const [ttsText, setTtsText] = useState("Hola, soy tu agente con voz real desde Langosta Hub.");
   const [voice, setVoice] = useState("camila");
   const [city, setCity] = useState("Lima");
+  const [githubRepo, setGithubRepo] = useState("microsoft/SkillOpt");
 
   if (!runtime) return null;
 
@@ -60,6 +61,19 @@ export default function SkillRealtimeDemo({ skillId, skillName }: Props) {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || "Error clima");
+        setResult(data);
+      } else if (skillId === "github-skill-scout") {
+        const res = await fetch("/api/skills/run/github-scout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            githubRepo.includes("/") || githubRepo.includes("github.com")
+              ? { repo: githubRepo }
+              : { q: githubRepo }
+          ),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || "Error GitHub");
         setResult(data);
       } else if (skillId.startsWith("moltbook")) {
         const res = await fetch("/api/skills/run/moltbook");
@@ -144,6 +158,20 @@ export default function SkillRealtimeDemo({ skillId, skillName }: Props) {
             onChange={(e) => setCity(e.target.value)}
             className="w-full px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:border-primary/50"
             placeholder="Lima"
+          />
+        </div>
+      )}
+
+      {skillId === "github-skill-scout" && (
+        <div className="mb-3">
+          <label className="block text-[11px] text-text-muted mb-1 font-medium">
+            Repo (owner/name) o búsqueda
+          </label>
+          <input
+            value={githubRepo}
+            onChange={(e) => setGithubRepo(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border border-border text-sm focus:outline-none focus:border-primary/50"
+            placeholder="microsoft/SkillOpt o agent skills"
           />
         </div>
       )}

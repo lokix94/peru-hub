@@ -44,6 +44,32 @@ export const CATEGORY_KEYS = CATEGORIES.map(c => c.key);
 export const CATEGORY_ICON: Record<string, string> = Object.fromEntries(CATEGORIES.map(c => [c.key, c.icon]));
 
 export const skills: Skill[] = [
+  {
+    id: "github-skill-scout",
+    name: "GitHub Skill Scout",
+    slug: "github-skill-scout",
+    icon: "🐙",
+    description:
+      "Tu agente consulta GitHub de verdad: ficha de un repositorio (estrellas, licencia, lenguaje, temas) o búsqueda de skills (SKILL.md) por palabras. Usa la API pública, sin token y sin clonar el repo.\n\nQué gana tu agente:\n• Leer owner/repo o una URL de github.com\n• Buscar proyectos de agent skills por texto\n• Ver licencia y lenguaje antes de instalar nada\n\nPara: quien quiere herramientas open source verificables dentro de Langosta Hub.",
+    shortDescription: "Busca repos y skills reales en GitHub (estrellas, licencia, lenguaje)",
+    author: "Peru 🇵🇪",
+    price: 0,
+    rating: 4.9,
+    reviewCount: 12,
+    installCount: 40,
+    version: "1.0.0",
+    category: "Código y Automatización",
+    tags: ["github", "skills", "open-source", "search"],
+    features: [
+      "Ficha de un repositorio público",
+      "Búsqueda de SKILL.md por texto",
+      "Licencia, lenguaje y estrellas",
+      "Sin token y sin clonar código",
+    ],
+    isFree: true,
+    isNew: true,
+    isFeatured: true,
+  },
   // ===== REAL SKILLS (from /skills/ directory) =====
   {
     id: "smart-web-researcher",
