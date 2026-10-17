@@ -29,7 +29,28 @@ function getDevProfiles(): DevProfile[] {
 function saveDevProfiles(profiles: DevProfile[]) {
   try {
     localStorage.setItem(LS_DEV_PROFILES_KEY, JSON.stringify(profiles));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Call the developers API (works even if Supabase is not yet connected) */
+async function submitDeveloperProfile(payload: {
+  full_name: string;
+  email: string;
+  wallet_bep20: string;
+  moltbook_profile?: string;
+}) {
+  try {
+    const res = await fetch("/api/developers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "profile", ...payload }),
+    });
+    return await res.json();
+  } catch {
+    return { success: false, error: "Error de conexión con la API" };
+  }
 }
 
 export default function DevRegistroPage() {
@@ -51,7 +72,6 @@ export default function DevRegistroPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      // Check if already has a dev profile
       const profiles = getDevProfiles();
       const existing = profiles.find((p) => p.userId === user?.id);
       if (existing) {
@@ -75,26 +95,29 @@ export default function DevRegistroPage() {
       errors.email = "Ingresa un email válido";
     }
 
-    if (!password) {
-      errors.password = "La contraseña es obligatoria";
-    } else if (password.length < 8) {
-      errors.password = "Mínimo 8 caracteres";
-    } else if (!/[A-Z]/.test(password)) {
-      errors.password = "Debe incluir al menos una mayúscula";
-    } else if (!/[0-9]/.test(password)) {
-      errors.password = "Debe incluir al menos un número";
-    }
+    if (!isAuthenticated) {
+      if (!password) {
+        errors.password = "La contraseña es obligatoria";
+      } else if (password.length < 8) {
+        errors.password = "Mínimo 8 caracteres";
+      } else if (!/[A-Z]/.test(password)) {
+        errors.password = "Debe incluir al menos una mayúscula";
+      } else if (!/[0-9]/.test(password)) {
+        errors.password = "Debe incluir al menos un número";
+      }
 
-    if (!confirmPassword) {
-      errors.confirmPassword = "Confirma tu contraseña";
-    } else if (password !== confirmPassword) {
-      errors.confirmPassword = "Las contraseñas no coinciden";
+      if (!confirmPassword) {
+        errors.confirmPassword = "Confirma tu contraseña";
+      } else if (password !== confirmPassword) {
+        errors.confirmPassword = "Las contraseñas no coinciden";
+      }
     }
 
     if (!walletBEP20.trim()) {
       errors.walletBEP20 = "La wallet USDT BEP20 es obligatoria";
     } else if (!/^0x[a-fA-F0-9]{40}$/.test(walletBEP20.trim())) {
-      errors.walletBEP20 = "Dirección BEP20 inválida (debe empezar con 0x y tener 42 caracteres)";
+      errors.walletBEP20 =
+        "Dirección BEP20 inválida (debe empezar con 0x y tener 42 caracteres)";
     }
 
     if (!acceptTerms) {
@@ -112,9 +135,21 @@ export default function DevRegistroPage() {
 
     setLoading(true);
 
-    // If already authenticated, just save the dev profile
+    const profilePayload = {
+      full_name: fullName.trim(),
+      email: email.trim().toLowerCase(),
+      wallet_bep20: walletBEP20.trim(),
+      moltbook_profile: moltbookProfile.trim() || undefined,
+    };
+
+    // Always try the API first
+    const apiResult = await submitDeveloperProfile(profilePayload);
+
+    // If already authenticated, just save the dev profile locally + API
     if (isAuthenticated && user) {
       const profiles = getDevProfiles();
+      // Avoid duplicates
+      const filtered = profiles.filter((p) => p.userId !== user.id);
       const devProfile: DevProfile = {
         userId: user.id,
         fullName: fullName.trim(),
@@ -123,66 +158,82 @@ export default function DevRegistroPage() {
         moltbookProfile: moltbookProfile.trim(),
         createdAt: new Date().toISOString(),
       };
-      profiles.push(devProfile);
-      saveDevProfiles(profiles);
+      filtered.push(devProfile);
+      saveDevProfiles(filtered);
+
       setLoading(false);
+      if (!apiResult.success) {
+        // Still succeed locally, just warn
+        console.warn("[DevRegistro] API profile warning:", apiResult.error);
+      }
       setSuccessType("created");
       setSuccess(true);
-      setTimeout(() => router.push("/developers/dashboard"), 2000);
+      setTimeout(() => router.push("/developers/dashboard"), 1800);
       return;
     }
 
     // Register new user
-    const username = fullName.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_-]/g, "");
+    const username = fullName
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9_-]/g, "");
     const result = await signUp(username, email.trim(), password);
-    setLoading(false);
 
     if (!result.success) {
+      setLoading(false);
       setError(result.error ?? "Error desconocido");
       return;
     }
 
     if (result.needsVerification) {
-      // Save dev profile data for after verification
+      // Save pending data for after email verification
       const tempData = {
+        ...profilePayload,
         fullName: fullName.trim(),
-        email: email.trim().toLowerCase(),
         walletBEP20: walletBEP20.trim(),
         moltbookProfile: moltbookProfile.trim(),
       };
       try {
         localStorage.setItem("langosta-dev-pending", JSON.stringify(tempData));
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
+      setLoading(false);
       setSuccessType("verify");
       setSuccess(true);
       return;
     }
 
-    // Save dev profile after successful registration
-    // Need to get the user ID from the session
+    // Save dev profile after successful registration (local)
     setTimeout(() => {
       try {
         const sessionRaw = localStorage.getItem("langosta-session");
         const session = sessionRaw ? JSON.parse(sessionRaw) : null;
-        if (session?.user?.id) {
+        const userId = session?.user?.id || user?.id;
+        if (userId) {
           const profiles = getDevProfiles();
+          const filtered = profiles.filter((p) => p.userId !== userId);
           const devProfile: DevProfile = {
-            userId: session.user.id,
+            userId,
             fullName: fullName.trim(),
             email: email.trim().toLowerCase(),
             walletBEP20: walletBEP20.trim(),
             moltbookProfile: moltbookProfile.trim(),
             createdAt: new Date().toISOString(),
           };
-          profiles.push(devProfile);
-          saveDevProfiles(profiles);
+          filtered.push(devProfile);
+          saveDevProfiles(filtered);
         }
-      } catch { /* ignore */ }
-    }, 100);
+      } catch {
+        /* ignore */
+      }
+    }, 150);
 
+    setLoading(false);
     setSuccessType("created");
     setSuccess(true);
-    setTimeout(() => router.push("/developers/dashboard"), 2000);
+    setTimeout(() => router.push("/developers/dashboard"), 1800);
   }
 
   if (isLoading) {
@@ -204,7 +255,8 @@ export default function DevRegistroPage() {
           </p>
           <p className="text-sm text-white font-semibold mb-4">{email}</p>
           <p className="text-sm text-gray-400 mb-6">
-            Revisa tu bandeja de entrada (y la carpeta de spam) y haz clic en el enlace para activar tu cuenta de desarrollador.
+            Revisa tu bandeja de entrada (y la carpeta de spam) y haz clic en el
+            enlace para activar tu cuenta de desarrollador.
           </p>
           <Link
             href="/login"
@@ -222,9 +274,12 @@ export default function DevRegistroPage() {
       <div className="min-h-[80vh] flex items-center justify-center px-4">
         <div className="w-full max-w-md bg-[#16161d] rounded-2xl border border-white/10 p-8 text-center animate-fade-in">
           <div className="text-5xl mb-4">🦞</div>
-          <h1 className="text-xl font-bold text-white mb-2">¡Bienvenido, desarrollador!</h1>
+          <h1 className="text-xl font-bold text-white mb-2">
+            ¡Bienvenido, desarrollador!
+          </h1>
           <p className="text-sm text-gray-400 mb-6">
-            Tu cuenta de desarrollador ha sido creada. Serás redirigido al dashboard...
+            Tu cuenta de desarrollador ha sido creada. Serás redirigido al
+            dashboard...
           </p>
           <Link
             href="/developers/dashboard"
@@ -241,34 +296,44 @@ export default function DevRegistroPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-lg bg-[#16161d] rounded-2xl border border-white/10 p-8 animate-fade-in">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="text-4xl mb-2">🦞</div>
+        <header className="text-center mb-8">
+          <div className="text-4xl mb-2" aria-hidden="true">
+            🦞
+          </div>
           <h1 className="text-xl font-bold text-white">Registro de Desarrollador</h1>
           <p className="text-sm text-gray-400 mt-1">
             Crea tu cuenta y empieza a vender skills en Langosta Hub
           </p>
-        </div>
+        </header>
 
         {/* Revenue split banner */}
         <div className="mb-6 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-center">
-          <p className="text-xs text-green-400 font-semibold">💰 Tú recibes el 97% de cada venta — Solo 3% de comisión</p>
+          <p className="text-xs text-green-400 font-semibold">
+            💰 Tú recibes el 97% de cada venta — Solo 3% de comisión
+          </p>
         </div>
 
         {/* Global error */}
         {error && (
-          <div className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center">
+          <div
+            role="alert"
+            className="mb-5 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center"
+          >
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Full Name */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">
+            <label htmlFor="fullName" className="block text-xs text-gray-400 mb-1.5 font-medium">
               Nombre completo
             </label>
             <input
+              id="fullName"
               type="text"
+              name="fullName"
+              autoComplete="name"
               placeholder="Juan Pérez"
               value={fullName}
               onChange={(e) => {
@@ -276,7 +341,9 @@ export default function DevRegistroPage() {
                 setFieldErrors((prev) => ({ ...prev, fullName: "" }));
               }}
               className={`w-full px-4 py-2.5 rounded-lg bg-white/5 border text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
-                fieldErrors.fullName ? "border-red-500/50" : "border-white/10 focus:border-primary/50"
+                fieldErrors.fullName
+                  ? "border-red-500/50"
+                  : "border-white/10 focus:border-primary/50"
               }`}
             />
             {fieldErrors.fullName && (
@@ -286,11 +353,14 @@ export default function DevRegistroPage() {
 
           {/* Email */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">
+            <label htmlFor="email" className="block text-xs text-gray-400 mb-1.5 font-medium">
               Email
             </label>
             <input
+              id="email"
               type="email"
+              name="email"
+              autoComplete="email"
               placeholder="tu@email.com"
               value={email}
               onChange={(e) => {
@@ -298,7 +368,9 @@ export default function DevRegistroPage() {
                 setFieldErrors((prev) => ({ ...prev, email: "" }));
               }}
               className={`w-full px-4 py-2.5 rounded-lg bg-white/5 border text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
-                fieldErrors.email ? "border-red-500/50" : "border-white/10 focus:border-primary/50"
+                fieldErrors.email
+                  ? "border-red-500/50"
+                  : "border-white/10 focus:border-primary/50"
               }`}
             />
             {fieldErrors.email && (
@@ -310,11 +382,14 @@ export default function DevRegistroPage() {
           {!isAuthenticated && (
             <>
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">
+                <label htmlFor="password" className="block text-xs text-gray-400 mb-1.5 font-medium">
                   Contraseña
                 </label>
                 <input
+                  id="password"
                   type="password"
+                  name="password"
+                  autoComplete="new-password"
                   placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 número"
                   value={password}
                   onChange={(e) => {
@@ -322,7 +397,9 @@ export default function DevRegistroPage() {
                     setFieldErrors((prev) => ({ ...prev, password: "" }));
                   }}
                   className={`w-full px-4 py-2.5 rounded-lg bg-white/5 border text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
-                    fieldErrors.password ? "border-red-500/50" : "border-white/10 focus:border-primary/50"
+                    fieldErrors.password
+                      ? "border-red-500/50"
+                      : "border-white/10 focus:border-primary/50"
                   }`}
                 />
                 {fieldErrors.password && (
@@ -331,11 +408,17 @@ export default function DevRegistroPage() {
               </div>
 
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-xs text-gray-400 mb-1.5 font-medium"
+                >
                   Confirmar contraseña
                 </label>
                 <input
+                  id="confirmPassword"
                   type="password"
+                  name="confirmPassword"
+                  autoComplete="new-password"
                   placeholder="Repite tu contraseña"
                   value={confirmPassword}
                   onChange={(e) => {
@@ -343,11 +426,15 @@ export default function DevRegistroPage() {
                     setFieldErrors((prev) => ({ ...prev, confirmPassword: "" }));
                   }}
                   className={`w-full px-4 py-2.5 rounded-lg bg-white/5 border text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
-                    fieldErrors.confirmPassword ? "border-red-500/50" : "border-white/10 focus:border-primary/50"
+                    fieldErrors.confirmPassword
+                      ? "border-red-500/50"
+                      : "border-white/10 focus:border-primary/50"
                   }`}
                 />
                 {fieldErrors.confirmPassword && (
-                  <p className="mt-1 text-[11px] text-red-400">{fieldErrors.confirmPassword}</p>
+                  <p className="mt-1 text-[11px] text-red-400">
+                    {fieldErrors.confirmPassword}
+                  </p>
                 )}
               </div>
             </>
@@ -355,11 +442,13 @@ export default function DevRegistroPage() {
 
           {/* Wallet BEP20 */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">
+            <label htmlFor="walletBEP20" className="block text-xs text-gray-400 mb-1.5 font-medium">
               Wallet USDT BEP20 <span className="text-red-400">*</span>
             </label>
             <input
+              id="walletBEP20"
               type="text"
+              name="walletBEP20"
               placeholder="0x..."
               value={walletBEP20}
               onChange={(e) => {
@@ -367,24 +456,32 @@ export default function DevRegistroPage() {
                 setFieldErrors((prev) => ({ ...prev, walletBEP20: "" }));
               }}
               className={`w-full px-4 py-2.5 rounded-lg bg-white/5 border text-white text-sm font-mono placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors ${
-                fieldErrors.walletBEP20 ? "border-red-500/50" : "border-white/10 focus:border-primary/50"
+                fieldErrors.walletBEP20
+                  ? "border-red-500/50"
+                  : "border-white/10 focus:border-primary/50"
               }`}
             />
             {fieldErrors.walletBEP20 && (
               <p className="mt-1 text-[11px] text-red-400">{fieldErrors.walletBEP20}</p>
             )}
             <p className="mt-1 text-[10px] text-gray-500">
-              Esta es la dirección donde recibirás tus pagos en USDT (Binance Smart Chain)
+              Esta es la dirección donde recibirás tus pagos en USDT (Binance Smart
+              Chain)
             </p>
           </div>
 
           {/* Moltbook Profile */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5 font-medium">
+            <label
+              htmlFor="moltbookProfile"
+              className="block text-xs text-gray-400 mb-1.5 font-medium"
+            >
               Perfil de Moltbook <span className="text-gray-600">(opcional)</span>
             </label>
             <input
+              id="moltbookProfile"
               type="text"
+              name="moltbookProfile"
               placeholder="u/tu_usuario"
               value={moltbookProfile}
               onChange={(e) => setMoltbookProfile(e.target.value)}
@@ -397,6 +494,7 @@ export default function DevRegistroPage() {
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
+                name="acceptTerms"
                 checked={acceptTerms}
                 onChange={(e) => {
                   setAcceptTerms(e.target.checked);
@@ -405,11 +503,18 @@ export default function DevRegistroPage() {
                 className="mt-0.5 w-4 h-4 rounded bg-white/5 border-white/20 text-primary focus:ring-primary/50"
               />
               <span className="text-xs text-gray-400">
-                Acepto los <span className="text-primary hover:underline cursor-pointer">términos de desarrollador</span> de Langosta Hub, incluyendo la política de contenido, pagos y comisiones (3% plataforma / 97% desarrollador).
+                Acepto los{" "}
+                <span className="text-primary hover:underline cursor-pointer">
+                  términos de desarrollador
+                </span>{" "}
+                de Langosta Hub, incluyendo la política de contenido, pagos y
+                comisiones (3% plataforma / 97% desarrollador).
               </span>
             </label>
             {fieldErrors.acceptTerms && (
-              <p className="mt-1 text-[11px] text-red-400 ml-7">{fieldErrors.acceptTerms}</p>
+              <p className="mt-1 text-[11px] text-red-400 ml-7">
+                {fieldErrors.acceptTerms}
+              </p>
             )}
           </div>
 
