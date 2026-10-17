@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-export default function RegistroPage() {
+function RegistroForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next") || "/account";
@@ -52,7 +52,6 @@ export default function RegistroPage() {
 
       if (!result.success) {
         const msg = result.error || "No se pudo crear la cuenta";
-        // Never show raw network errors
         if (
           /failed to fetch|network|load failed|cors/i.test(msg) ||
           msg === "Error de conexión"
@@ -235,5 +234,19 @@ export default function RegistroPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegistroPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[80vh] flex items-center justify-center">
+          <div className="text-gray-400 text-sm">Cargando...</div>
+        </div>
+      }
+    >
+      <RegistroForm />
+    </Suspense>
   );
 }
